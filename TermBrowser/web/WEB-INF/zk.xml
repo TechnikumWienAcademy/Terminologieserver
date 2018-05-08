@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : zk.xml
+    Created on : 20. Oktober 2010, 10:34
+    Author     : Robert Mützner
+    Description:
+        Purpose of the document follows.
+-->
+
+<zk>
+    <!--<system-config>
+       <ui-factory-class>org.zkoss.spring.bean.ZkSpringUiFactory</ui-factory-class>
+    </system-config>-->
+    <system-config>
+        <disable-event-thread>false</disable-event-thread>
+        <max-upload-size>500000000</max-upload-size><!-- Matthias -->
+        <id-generator-class>zk.impl.TermServerIdGenerator</id-generator-class>
+    </system-config>
+
+    <language-config>
+        <addon-uri>/WEB-INF/lang-addon.xml</addon-uri>
+    </language-config>
+
+    <session-config>
+        <session-timeout>3600</session-timeout><!-- 3600(1h) -->
+        <device-type>ajax</device-type>
+        <timeout-message>Ihre Sitzung ist aus Sicherheitsgründen abgelaufen. Bitte laden Sie die Seite erneut.</timeout-message>
+    </session-config>
+</zk>

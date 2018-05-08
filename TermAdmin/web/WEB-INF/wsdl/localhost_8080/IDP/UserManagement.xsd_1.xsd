@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.2-hudson-740-. --><xs:schema xmlns:tns="http://userManagement.idp.ws.terminologie.fhdo.de/" xmlns:ns1="de.fhdo.termserver.idp.types" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://userManagement.idp.ws.terminologie.fhdo.de/">
+
+<xs:import namespace="de.fhdo.termserver.idp.types" schemaLocation="http://localhost:8080/IDP/UserManagement?xsd=2" />
+
+<xs:element name="collaborationuser" type="ns1:collaborationuser" />
+
+<xs:element name="deleteUser" type="tns:deleteUser" />
+
+<xs:element name="deleteUserResponse" type="tns:deleteUserResponse" />
+
+<xs:element name="getCollaborationUserList" type="tns:getCollaborationUserList" />
+
+<xs:element name="getCollaborationUserListResponse" type="tns:getCollaborationUserListResponse" />
+
+<xs:element name="getCollaborationUserResponseType">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+<xs:element name="userList" type="ns1:collaborationuser" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:element name="getTermUserResponseType">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+<xs:element name="userList" type="ns1:termUser" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:element name="getUserList" type="tns:getUserList" />
+
+<xs:element name="getUserListResponse" type="tns:getUserListResponse" />
+
+<xs:element name="organisation" type="ns1:organisation" />
+
+<xs:element name="role" type="ns1:role" />
+
+<xs:element name="saveCollaborationUser" type="tns:saveCollaborationUser" />
+
+<xs:element name="saveCollaborationUserResponse" type="tns:saveCollaborationUserResponse" />
+
+<xs:element name="saveTermUser" type="tns:saveTermUser" />
+
+<xs:element name="saveTermUserResponse" type="tns:saveTermUserResponse" />
+
+<xs:element name="termUser" type="ns1:termUser" />
+
+<xs:complexType name="saveTermUser">
+<xs:sequence>
+<xs:element name="parameter" type="tns:saveTermUserRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="saveTermUserRequestType">
+<xs:sequence>
+<xs:element name="loginType" type="tns:loginType" minOccurs="0" />
+<xs:element name="newEntry" type="xs:boolean" />
+<xs:element name="termUser" type="ns1:termUser" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="loginType">
+<xs:sequence>
+<xs:element name="ip" type="xs:string" minOccurs="0" />
+<xs:element name="password" type="xs:string" minOccurs="0" />
+<xs:element name="sessionID" type="xs:string" minOccurs="0" />
+<xs:element name="username" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+
+<xs:complexType name="saveTermUserResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:saveTermUserResponseType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="saveTermUserResponseType">
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="returnType">
+<xs:sequence>
+<xs:element name="count" type="xs:int" />
+<xs:element name="lastIP" type="xs:string" minOccurs="0" />
+<xs:element name="lastTimeStamp" type="xs:dateTime" minOccurs="0" />
+<xs:element name="message" type="xs:string" minOccurs="0" />
+<xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0" />
+<xs:element name="status" type="tns:status" minOccurs="0" />
+<xs:element name="termUser" type="ns1:termUser" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getCollaborationUserList">
+<xs:sequence>
+<xs:element name="parameter" type="tns:getCollaborationUserRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getCollaborationUserRequestType">
+<xs:sequence>
+<xs:element name="loginType" type="tns:loginType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getCollaborationUserListResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+<xs:element name="userList" type="ns1:collaborationuser" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+
+
+
+<xs:complexType name="getUserList">
+<xs:sequence>
+<xs:element name="parameter" type="tns:getTermUserRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getTermUserRequestType">
+<xs:sequence>
+<xs:element name="loginType" type="tns:loginType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getUserListResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+<xs:element name="userList" type="ns1:termUser" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="deleteUser">
+<xs:sequence>
+<xs:element name="parameter" type="tns:deleteUserRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="deleteUserRequestType">
+<xs:sequence>
+<xs:element name="collaborationUser" type="ns1:collaborationuser" minOccurs="0" />
+<xs:element name="loginType" type="tns:loginType" minOccurs="0" />
+<xs:element name="termuser" type="ns1:termUser" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="deleteUserResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:deleteUserResponseType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="deleteUserResponseType">
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="saveCollaborationUser">
+<xs:sequence>
+<xs:element name="parameter" type="tns:saveCollaborationUserRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="saveCollaborationUserRequestType">
+<xs:sequence>
+<xs:element name="loginType" type="tns:loginType" minOccurs="0" />
+<xs:element name="newEntry" type="xs:boolean" />
+<xs:element name="role" type="ns1:role" minOccurs="0" />
+<xs:element name="termuser" type="ns1:termUser" minOccurs="0" />
+<xs:element name="user" type="ns1:collaborationuser" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="saveCollaborationUserResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:saveCollaborationUserResponseType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="saveCollaborationUserResponseType">
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="overallErrorCategory">
+<xs:restriction base="xs:string">
+<xs:enumeration value="INFO" />
+<xs:enumeration value="WARN" />
+<xs:enumeration value="ERROR" />
+</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="status">
+<xs:restriction base="xs:string">
+<xs:enumeration value="OK" />
+<xs:enumeration value="FAILURE" />
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>

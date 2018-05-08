@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?page title="Logout" contentType="text/html;charset=UTF-8"?>
+<?link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c" ?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">        
+  <window id="winLogout" use="de.fhdo.gui.admin.Logout" border="0"
+          height="100%" width="100%" >
+      <html>
+          <body onload="winLogout.forwardLogout()">
+              
+          </body>
+      </html>
+    
+  </window>
+</zk>

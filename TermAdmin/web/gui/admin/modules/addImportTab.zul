@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul" xmlns:h="http://www.w3.org/1999/xhtml">
+  <window id="winAddImportTab" width="300px" height="200px" closable="true" sizable="false"
+          use="de.fhdo.gui.admin.modules.NewImportTab"
+          title="Neuen Importtab öffnen" border="normal">
+    <borderlayout>
+      <center border="0">
+        <div align="center" style="margin-right:0px;">
+			<h:span>Import wird durchgeführt. Dieses Fenster wird anschließend automatisch geschlossen.</h:span>
+			<h:br />
+			<h:span>Wollen Sie einen weiteren Import starten?</h:span>
+			<h:br />
+			<button label="OK" href="/gui/admin/admin.zul" target="_blank" autodisable="self"/>
+        </div>
+	  </center>
+    </borderlayout>
+  </window>
+</zk>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+  <window id="winMetadaten" border="none" width="100%" height="100%"
+   use="de.fhdo.gui.admin.modules.Terminologie">
+
+    <!--<include id="incList" src="/gui/templates/GenericList.zul"/>-->
+    <tabbox height="100%" width="100%" id="tabboxNavigation" onSelect="winMetadaten.onNavigationSelect(event)">
+      <tabs>
+        <tab visible="true" label="Weitere Attribute Code Systeme" id="tabMetaVok"/>
+        <tab visible="true" label="Weitere Attribute Value Sets" id="tabMetaVal"/>
+        <tab visible="true" label="Reporting-Terminologie" id="tabRepoTerm"/>
+        <tab visible="false" label="Benutzer Verwaltung" id="tabBenutzer"/>
+        <tab visible="false" label="Benutzer-Lizenzen" id="tabLizenzen"/>
+        <tab visible="false" label="Taxonomie-Einordnung" id="tabTaxonomie"/>
+        <tab visible="false" label="Domains" id="tabDomains"/>
+        <tab visible="false" label="System-Parameter" id="tabSysPara"/>
+        <tab visible="false" label="Datenbank" id="tabDatenbank"/>
+      </tabs>
+      <tabpanels>
+        <tabpanel> <!-- CS -->
+          <include id="incMetaVok"/><!--<include src="/gui/admin/modules/metadatenCS.zul"/>-->
+        </tabpanel>
+        <tabpanel> <!-- VS -->
+          <include id="incMetaVal"/><!--<include src="/gui/admin/modules/metadatenVS.zul"/>-->
+        </tabpanel>
+        <tabpanel>
+          <include id="incRepoTerm"/><!--<include src="/gui/admin/modules/reportingTerm.zul"/>-->
+        </tabpanel>  
+        <tabpanel>
+          <include id="incBenutzer"/><!--<include src="/gui/admin/modules/user.zul"/>-->
+        </tabpanel>
+        <tabpanel>
+          <include id="incLizenzen"/><!--<include src="/gui/admin/modules/lizenzen.zul"/>-->
+        </tabpanel>
+        <tabpanel>
+          <include id="incTaxonomie"/><!--<include src="/gui/admin/modules/codesysteme.zul"/>-->
+        </tabpanel>
+        <tabpanel>
+          <include id="incDomains"/><!--<include src="/gui/admin/modules/domain.zul"/>-->
+        </tabpanel>
+        <tabpanel>
+          <include id="incSysPara"/><!--<include src="/gui/admin/modules/sysParam.zul"/>-->
+        </tabpanel>
+        <tabpanel>
+          <include id="incDatenbank"/><!--<include src="/gui/admin/modules/datenbank.zul"/>-->
+        </tabpanel>
+      </tabpanels>
+    </tabbox>
+  </window>
+</zk>

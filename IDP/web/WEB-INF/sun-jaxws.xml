@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<endpoints version="2.0" xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime">
+  <endpoint implementation="de.fhdo.terminologie.ws.idp.authorizationIDP.AuthorizationIDP" name="AuthorizationIDP" url-pattern="/AuthorizationIDP"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.idp.authorizationIDP.AuthorizationIDP" name="AuthorizationIDP" url-pattern="/AuthorizationIDPIntern"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.idp.authorizationIDP.AuthorizationIDP" name="AuthorizationIDP" url-pattern="/AuthorizationIDP"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.idp.authorizationIDP.AuthorizationIDP" name="AuthorizationIDP" url-pattern="/AuthorizationIDP"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.idp.userManagement.UserManagement" name="UserManagement" url-pattern="/UserManagement"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.idp.userManagement.UserManagement" name="UserManagement" url-pattern="/UserManagementIntern"/>
+</endpoints>

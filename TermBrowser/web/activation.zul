@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk xmlns="http://www.zkoss.org/2005/zul">        
+  <window id="winActivation" use="de.fhdo.Activation" border="0" height="100%" width="100%" >
+      <borderlayout width="100%" height="100%">
+            <north size="300px" border="0">
+            <div align="center" height="200px">
+                <separator />
+                <separator />
+                <!--<image src="rsc/img/logo_ebpg.png"></image>-->
+                <separator />
+                <separator /> 
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <separator />
+                <div>
+                    <label id="labelVersion" value="Benutzer Aktivierung erfolgreich!" pre="true" style="font-size:32px;font-weight:bold;vertical-align:top;margin-left:8px;" />
+                </div>
+                <separator />
+                <separator />
+                <separator />
+                <label value="${labels.appdescription}" style="font-size:14px;"/>
+                <separator />
+                <separator />
+                <label value="${labels.fh_implementation}" style="font-size:14px;"/>
+
+            </div>
+
+        </north>
+            <center border="0" autoscroll="false">
+                <div align="center" height="400px">
+                    <separator />
+                    <panel title="" framable="true" width="410px" 
+                           border="normal" >
+                        <panelchildren>
+                            <grid width="400px">
+                                <columns>
+                                    <column width="400px" />
+                                    <column />
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <div align="center">
+                                            <button label="Weiter zum Terminologie-Browser" 
+                                            onClick="winActivation.backToTermBrowser()" autodisable="self"
+                                            image="/rsc/img/symbols/back_32x32.png"/>
+                                        </div>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </panelchildren>
+                    </panel>
+                    <separator />
+                    <separator />
+                    <label id="infoLabel" multiline="true"/>
+                </div>
+            </center>
+            <south height="70px" border="0">
+                <borderlayout>
+                    <west  border="none" >
+                        <hbox style="margin-top:18px;margin-left:5px">
+                            <label value="Umgesetzt von: " style="color:#808080;font-size:12px"/>
+                            <image src="/rsc/img/fhtw_logo.png" height="50px" width="144px"/>
+                            <image src="/rsc/img/fhdo_logo.png" height="40px" width="110px"/>
+                        </hbox>
+                    </west>
+                    <center border="none" >
+                    </center>
+                    <east border="none">
+                        <hbox style="margin-top:25px;">
+                            <label value="Gefördert durch: " style="color:#808080;font-size:12px"/>
+                            <image src="/rsc/img/bmgf_logo.jpg" height="40px" width="144px"/>
+                            <image src="/rsc/img/eu.jpg" height="40px" width="179px"/>
+                            <image src="/rsc/img/nrw.png" height="40px" width="144px"/>
+                            <!--<image src="/rsc/img/elga_logo.png" height="45px" width="45px"/>-->
+                            <!--<image src="/rsc/img/brz_logo_neu.png" height="45px" width="45px"/>-->
+                        </hbox>
+                    </east>
+                </borderlayout>
+            </south>
+        </borderlayout>
+  </window>
+</zk>

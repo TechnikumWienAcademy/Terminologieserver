@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="IDP_ENTITY_ID">TestIDP</entry>
+<entry key="SSO_SERVICE">http://localhost:8080/IDP/singlesignon</entry>
+</properties>

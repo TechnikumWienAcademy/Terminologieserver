@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+    <window id="winImportKBV" border="none" width="100%" height="100%"
+            use="de.fhdo.gui.admin.modules.ImportKBV" >
+        <borderlayout>
+            <center border="none" autoscroll="true">
+                <div vflex="true">
+                    <groupbox width="98%" closable="false">
+                        <caption>1. Dateiauswahl</caption>
+                        <hbox>
+                            <textbox id="textboxDateiname" readonly="true" width="400px"/>
+                            <!--<button label="XML-Datei wählen..." 
+                            onClick="winImportKBV.onDateinameSelect(event)" />-->
+                            <button label="XML-Datei wählen..." 
+                                    upload="true,maxsize=50240" 
+                                    onUpload="winImportKBV.onDateinameSelect(event)" />
+                            <!--<button label="CSV-Datei wählen..." 
+                            upload="true,maxsize=50240"
+                            onUpload="winImportKBV.onDateinameSelect(event)" />-->
+                        </hbox>
+                        <vbox>
+                            <hbox>
+                                <label value="Codesystem-Name: "/>
+                                <label id="labelCodesystem"/>
+                            </hbox>
+                            <hbox>
+                                <label value="Version: "/>
+                                <label id="labelVersion"/>
+                            </hbox>
+                            <hbox>
+                                <label value="OID: "/>
+                                <label id="labelOID"/>
+                            </hbox>
+                            <separator />
+                            <label value="Vorschau:"/>
+                            <hbox>
+                                <label value="Code: "/>
+                                <label id="labelCode1"/>
+                                <label value=" , Wert: "/>
+                                <label id="labelWert1"/>
+                            </hbox>
+                            <hbox>
+                                <label value="Code: "/>
+                                <label id="labelCode2"/>
+                                <label value=" , Wert: "/>
+                                <label id="labelWert2"/>
+                            </hbox>
+                            <hbox>
+                                <label value="Code: "/>
+                                <label id="labelCode3"/>
+                                <label value=" , Wert: "/>
+                                <label id="labelWert3"/>
+                            </hbox>
+                        </vbox>
+      
+                    </groupbox>
+                    <separator />
+    
+      
+                    <groupbox  width="98%" closable="false" >
+                        <caption>2. Import</caption>
+                        <button id="buttonImport" label="Import starten" onClick="winImportKBV.startImport()" disabled="true"/>
+                        <button id="buttonCancel" label="Abbrechen" onClick="winImportKBV.cancelImport()" visible="false"/>
+                        <separator />
+                        <progressmeter id="progress" value="0" visible="false"/>
+                        <separator />
+                        <label value="-" id="labelImportStatus"/>
+      
+      
+     
+                    </groupbox>
+                </div>
+            </center>
+        </borderlayout>
+    </window>
+</zk>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://localhost:8080/TermServer/Authorization?wsdl" uri="src/conf/xml-resources/web-service-references/Authorization/wsdl/localhost_8080/TermServer/Authorization.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=1" uri="src/conf/xml-resources/web-service-references/Authorization/wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=2" uri="src/conf/xml-resources/web-service-references/Authorization/wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_2.xsd"/>
+</catalog>

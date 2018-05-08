@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+  <?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winSysParamDetailsCol"?>
+
+  <window id="winSysParamDetailsCol" title="System-Parameter" width="800px"  height="450px" border="normal"
+          use="de.fhdo.gui.admin.modules.collaboration.SysParamDetails" closable="true"
+          sizable="true">
+    <borderlayout>
+      <center border="0">
+        <grid>
+          <columns>
+            <column width="130px" align="right" label=""/>
+            <column label=""/>
+          </columns>
+          <rows>
+            <row>
+              <label value="Name:"/>
+              <textbox width="97%" value="@{winSysParamDetailsCol.sysParam.name}" sclass="mandatory"/>
+            </row>
+              
+            <row>
+              <label value="Gültigkeitsbereich:"/>
+              <combobox id="cbValidityDomain" model="@{winSysParamDetailsCol.validityDomainList}"
+                        selectedItem="@{winSysParamDetailsCol.sysParam.domainValueByValidityDomain}" value="@{winSysParamDetailsCol.sysParam.domainValueByValidityDomain.displayText}"
+                        readonly="true" width="98%" sclass="mandatory">
+                <comboitem self="@{each=itemType2}" label="@{itemType2.displayText}" value="@{itemType2.code}" />
+              </combobox>
+            </row>
+            
+            <row>
+              <label value="Modify-Level:"/>
+              <combobox id="cbModifyLevel" model="@{winSysParamDetailsCol.modifyLevelList}"
+                        selectedItem="@{winSysParamDetailsCol.sysParam.domainValueByModifyLevel}" value="@{winSysParamDetailsCol.sysParam.domainValueByModifyLevel.displayText}"
+                        readonly="true" width="98%" sclass="mandatory">
+                <comboitem self="@{each=itemType3}" label="@{itemType3.displayText}" value="@{itemType3.code}" />
+              </combobox>
+            </row>
+            
+            
+            <row>
+              <label value="Datentyp:"/>
+              <textbox width="97%" value="@{winSysParamDetailsCol.sysParam.javaDatatype}"/>
+            </row>
+            
+            <row>
+              <label value="Wert:"/>
+              <textbox width="97%" value="@{winSysParamDetailsCol.sysParam.value}" rows="8"/>
+            </row>
+            
+            <row>
+              <label value="Beschreibung:"/>
+              <textbox width="97%" value="@{winSysParamDetailsCol.sysParam.description}" rows="6"/>
+            </row>
+          
+            
+            <!--<row>
+              <label value="Email:"/>
+              <textbox width="97%" value="@{winSysParamDetailsCol.person.email}" id="tb_Email"
+                       readonly="false" sclass="mandatory"/>
+            </row>
+            <row id="row_Aktiv">
+              <label value="Aktiv:"/>
+              <checkbox id="cb_aktiv" disabled="false"
+                   checked="@{winSysParamDetailsCol.user.enabled}"/>
+            </row>
+            <row>
+              <label value="Administrator:"/>
+              <checkbox disabled="false"
+                   checked="@{winSysParamDetailsCol.user.admin}"/>
+            </row>-->
+
+            <!--<row id="row_Email">
+              <label value="Email (Registrierung):"/>
+              <textbox width="97%" value="@{winSysParamDetailsCol.email}" id="tb_Email" 
+              constraint="/.+@.+\.[a-z]+/: Tragen Sie bitte eine Registrierungs-Emailadresse ein"
+              readonly="false" sclass="mandatory"/>
+            </row>-->
+
+
+          </rows>
+        </grid>
+      </center>
+      <south height="30px" border="0" collapsible="true">
+        <div align="right">
+          <button label="OK" onClick="winSysParamDetailsCol.onOkClicked()" autodisable="self" />
+          <button label="Abbrechen" onClick="winSysParamDetailsCol.onCancelClicked()" autodisable="self" />
+        </div>
+      </south>
+    </borderlayout>
+  </window>
+</zk>

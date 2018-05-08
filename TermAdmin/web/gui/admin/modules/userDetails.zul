@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+  <?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winUserDetails"?>
+
+  <window id="winUserDetails" title="Stammdaten" width="600px"  height="290px" border="normal"
+     use="de.fhdo.gui.admin.modules.UserDetails" closable="true"
+     sizable="true">
+    <borderlayout>
+      <center border="0">
+          <grid>
+            <columns>
+              <column width="130px" align="right" label=""/>
+              <column label=""/>
+            </columns>
+            <rows>
+              <row visible="false" id="row_patientID">
+                <label value="User-ID:"/>
+                <textbox  id="tb_userID"
+               width="97%" value="@{winUserDetails.user.id}"
+               readonly="true" />
+              </row>
+              <row id="rUsername" visible="false">
+                <label value="Benutzername:"/>
+                <textbox width="97%" value="@{winUserDetails.user.name}" id="tb_Benutzername"
+               constraint="no empty : Tragen Sie bitte einen Benutzernamen ein" readonly="true" sclass="mandatory"/>
+              </row>
+              <row id="rComboUsername" visible= "true">
+                <label value="Mögliche Benutzer:"/>
+                <combobox width="97%" id="cb_Benutzername" onSelect="winUserDetails.onSelectCombo()"
+                    constraint="no empty : Wählen sie eine Benutzer aus." readonly="true" sclass="mandatory"/>
+              </row>
+              <row>
+                <label value="Email:"/>
+                <textbox width="97%" value="@{winUserDetails.user.email}" id="tb_Email"
+                         readonly="false" sclass="mandatory"/>
+              </row>
+              <row id="row_Aktiv">
+                <label value="Aktiv:"/>
+                <checkbox id="cb_aktiv" disabled="true"
+                     checked="@{winUserDetails.user.enabled}"/>
+              </row>
+              <row id="row_MailAktiv">
+                <label value="Mail aktiviert:"/>
+                <checkbox id="cb_MailAktiv" disabled="true"
+                     checked="@{winUserDetails.user.activated}"/>
+              </row>
+              <row>
+                <label value="Erweiterte Rechte:"/>
+                <checkbox id="cb_isAdmin" disabled="true"
+                     checked="@{winUserDetails.user.isAdmin}"/>
+              </row>
+
+              <!--<row id="row_Email">
+                <label value="Email (Registrierung):"/>
+                <textbox width="97%" value="@{winUserDetails.email}" id="tb_Email" 
+                constraint="/.+@.+\.[a-z]+/: Tragen Sie bitte eine Registrierungs-Emailadresse ein"
+                readonly="false" sclass="mandatory"/>
+              </row>-->
+
+              <row>
+                <label value="Name:"/>
+                <textbox id="tb_Name" width="97%" value="@{winUserDetails.user.userName}"
+                />
+              </row>
+
+            </rows>
+          </grid>
+      </center>
+      <south height="30px" border="0" collapsible="true">
+        <div align="right">
+          <button id="b_Ok" label="OK" onClick="winUserDetails.onOkClicked()" autodisable="self" />
+          <button label="Abbrechen" onClick="winUserDetails.onCancelClicked()" autodisable="self" />
+        </div>
+      </south>
+    </borderlayout>
+  </window>
+</zk>

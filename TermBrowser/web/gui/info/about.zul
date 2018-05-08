@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">           
+  <window id="win" title="${labels.about.about}" border="normal" closable="true" width="520px" height="435px" maximizable="false" >     
+    <caption image="/rsc/img/symbols/info16_16.png" label=""/>
+    <!--<style src="/rsc/style/ophEPA.css"/>-->
+    <borderlayout>
+      <center border="none" flex="false">
+        <vbox style="margin-top: 10px;">
+          <separator bar="false" width="300px"/>
+          <label value="Terminologieserver" id="version" style="font-weight:bold;"/>
+          <hbox width="100%">
+            <vbox width="140px">
+              <label value="${labels.common.version}" />
+            </vbox>
+            <vbox>
+              <label id="labelVersion" value="-"/>
+              <zscript>
+                labelVersion.setValue(de.fhdo.Definitions.getSwVersion());
+              </zscript>
+            </vbox>
+          </hbox> 
+          <separator bar="false" width="300px" height="10px"/>
+          <label value="Projekt Terminologieserver"/>
+          <label value=""/>
+          <separator bar="true" width="300px"/>
+          <separator bar="false" width="300px"/> 
+          <hbox width="100%">
+            <vbox width="140px">
+              <label value="BMG Österreich: " />
+              <label value="ELGA GmbH: "/>
+              <label value="FH Technikum Wien: "/>
+              <label value="Bundesrechenzentrum: "/>
+            </vbox>
+            <vbox>
+              <label value="Prenner, Brosch"/>
+              <label value="Sabutsch, Seerainer"/>
+              <label value="Mense, Urbauer, Frohner, Puraner"/>
+              <label value="Zemlyak, Gruber"/>
+            </vbox>
+          </hbox>
+          <separator bar="false" width="300px"/> 
+          <separator bar="true" width="300px"/>
+          <separator bar="false" width="300px"/>
+          <label value="${labels.about.projectEBPG}"/>
+          <label value=""/>
+          <separator bar="true" width="300px"/>
+          <separator bar="false" width="300px"/> 
+          <hbox width="100%">
+            <vbox width="140px">
+              <label value="${labels.about.leadership}" />
+              <label value="${labels.about.programming}"/>
+            </vbox>
+            <vbox>
+              <label value="${labels.common.pHaas}"/>
+              <label value="${labels.common.rMuetzner}, ${labels.common.sBecker}"/>
+            </vbox>
+          </hbox>
+          <separator bar="false" width="300px"/> 
+          <separator bar="true" width="300px"/>
+          <separator bar="false" width="300px"/> 
+          <button label="${labels.common.close}" style="margin-top:5px;" onClick="win.detach();" width="100%"/>
+        </vbox>
+      </center>
+      <east size="159px" border="none" flex="false">
+        <div style="margin-top:0px; margin-right:2px;">
+          <separator height="40px" bar="false" width="100px"/>
+          <image src="/rsc/img/flags_at.png" width="159px"  height="200px"/>
+          <separator height="35px" bar="false" width="25px"/>
+          <image src="/rsc/img/fhdo_logo.png" width="159px"  height="40px"/>
+        </div>
+      </east>
+    </borderlayout>
+  </window>
+</zk>
