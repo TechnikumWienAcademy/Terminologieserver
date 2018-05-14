@@ -1,0 +1,50 @@
+﻿Changelog 3.2.7
+
+Changelog 3.2.6
+	-Bugfixes
+		.) Die Bearbeitung eines Value-Sets führte zu einem Fehler.
+		.) Nach dem Logout wurde man nicht auf die Oberfläche weiter geleitet.
+	-Tickets
+		.) EHTSOID-117: Die Einstufung von Fehlermeldungen im Log wurde verbessert, Fehlermeldungen auf der Oberfläche dementsprechend angepasst.
+		.) EHTSOID-124/126: Wird ein Code System beim Export als Claml-Datei nicht gefunden, wird ein HTTP-Status 409 zurück gegeben.
+		.) EHTSOID-125: Tritt beim Export von Code Systemen oder Value Sets ein unbestimmter Fehler auf, wird ein HTTP-Status 500 zurück gegeben.
+	-Änderungen
+		.) Logging: Der Pfad, an dem die Konfigurationsdatei gesucht wird, wird nun beim Start angegeben.
+		.) Logging: Zusätzliche Debug-Einträge bei der Freigabe eingefügt.
+	
+Changelog 3.2.5
+	-Bugfixes
+		.) EHTSOID-112: Bei Statusänderungen wird die currentVersionID des zugehörigen Code Systems angepasst. Gibt es keine aktive Version mehr,
+		wird der Wert von currentVersionID auf NULL gesetzt.
+
+Changelog 3.2.4
+	-Bugfixes
+		.) EHTSOID-111: Es konnten keine neue Versionen eines Value Sets erstellt werden.
+	-Tickets
+		.) EHTSOID-92: Überprüfung der Webservice-URLs
+	
+Changelog 3.2.3
+	-Tickets
+		.) EHTSOID-107: Kleine Änderung an der Überprüfung aus 3.2.2 um Fehler zu beheben.
+
+Changelog 3.2.2
+	-Tickets
+		.) EHTSOID-107: Eine zusätzliche Überprüfung der durch die termserver.properties Datei gesetzten Webservice-Pfade soll den Fehler bei der Freigabe beheben.
+
+Changelog 3.2.1
+	-Bugfixes
+		.) Behoben: Beim Import von Value-Sets im CSV-Format erschien die Fehlermeldung "Entity zu Code '" + code + "' nicht gefunden!".
+	-Tickets
+		.) EHTSOID-91: Der Export eines Code Systems retourniert den HTTP-Status 503, falls die maximale Anzahl an Exporten überschritten wird.
+		.) EHTSOID-91: Der Export eines Value Sets retourniert den HTTP-Status 503, falls die maximale Anzahl an Exporten überschritten wird.
+		.) EHTSOID-93: Der Export eines Code Systems retourniert den HTTP-Status 409, falls keine Konzepte exportiert wurden.
+		.) EHTSOID-93: Der Export eines Value Sets retourniert den HTTP-Status 409, falls keine Konzepte exportiert wurden.
+		.) EHTSOID-97: Für das Abfragen von Value Sets werden keine Administrationsrechte mehr benötigt.
+		.) EHTSOID-99: Der Export eines Code Systems retourniert den HTTP-Status 403, falls er ohne Administrationsrechte durchgeführt wird.
+		.) EHTSOID-99: Der Export eines Value Sets retourniert den HTTP-Status 403, falls er ohne Administrationsrechte durchgeführt wird.
+		.) EHTSOID-106: Probe-URL /checkAlive.jsp wurde hinzugefügt, überprüft ob eine Verbindung zur Datenbank besteht und meldet ob der Service verfügbar ist oder nicht.
+	-Änderungen
+		.) Entfernt: Der Parameter sw_version in der Tabelle sys_param wird nicht mehr benötigt.
+		.) Logging: Jede Applikation loggt nun beim Start ihre Versionsnummer auf dem INFO-Level.
+		.) Logging: Beim Export von Code Systemen und Value Sets wird nun auch die ID, der Name und die Version der exportierten Daten auf dem INFO-Level geloggt.
+		.) Logging: Fehler beim Export von Code Systemen und Value Sets, die HTTP-Codes senden, werden auf dem WARN-Level geloggt.
