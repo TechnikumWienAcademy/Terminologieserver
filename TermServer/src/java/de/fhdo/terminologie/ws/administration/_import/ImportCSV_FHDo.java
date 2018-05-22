@@ -129,7 +129,9 @@ public class ImportCSV_FHDo
       InputStream is = new ByteArrayInputStream(bytes);
 
       //csv = new CsvReader("C:\\Temp\\notfallrel_diagnosen.csv");
-      csv = new CsvReader(is, Charset.forName("ISO-8859-1"));
+      //DABACA
+            //csv = new CsvReader(is, Charset.forName("ISO-8859-1"));
+            csv = new CsvReader(is, Charset.forName("UTF-8"));
       csv.setDelimiter(';');
       csv.setTextQualifier('"');
       csv.setUseTextQualifier(true);

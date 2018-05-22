@@ -1,4 +1,16 @@
-﻿Changelog 3.2.7
+﻿Changelog 3.2.8
+	-Änderungen
+		.) EHTSOID-117: Die Überprüfung der Importwerte erfolgt nun dynamisch.
+		.) EHTSOID-133: Der CSV-Import erfolgt nun mit UTF-8 statt ISO-8859-1.
+
+Changelog 3.2.7
+	-Bugfixes
+		.) EHTSOID-117: Die Fehlermeldung wurde nicht korrekt auf der Oberfläche dargestellt.
+	-Änderungen
+		.) IDP: Bibliothek MySQL-Connector von Version 5.1.8 auf Version 5.1.46 geändert.
+		.) TermAdmin: Bibliothek MySQL-Connector von Version 5.1.37 auf Version 5.1.46 geändert.
+		.) TermBrowser: Bibliothek MySQL-Connector von Version 5.1.37 auf Version 5.1.46 geändert.
+		.) TermServer: Bibliothek MySQL-Connector von Version 5.1.37 auf Version 5.1.46 geändert.
 
 Changelog 3.2.6
 	-Bugfixes

@@ -21,8 +21,22 @@
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
         </group>
         <group name="Version 3.2">
-            <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/authoring/UpdateCodeSystemVersionStatus.java</file>
-            <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/authoring/DeleteValueSetConceptMetadataValue.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/db/hibernate/CodeSystemVersion.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/db/hibernate/CodeSystemEntityVersion.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ICodeSystemImport.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSSVSNew.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/logging/Logger4j.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/CodeSystemImport.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/db/hibernate/CodeSystemConcept.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ExportCodeSystemContent.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_export/ExportClaml.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/db/hibernate/CodeSystem.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/PropertiesHelper.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSV_ELGA.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSV_FHDo.java</file>
         </group>
     </open-files>
 </project-private>
