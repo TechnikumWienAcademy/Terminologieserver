@@ -1,4 +1,8 @@
-﻿Changelog 3.2.9
+﻿Changelog 3.2.10
+	-Bugfixes
+		.) EHTSOID-117: Die Werte werden nicht mehr überprüft, dafür allgemein Datenbankfehler abgefangen.
+
+Changelog 3.2.9
 	-Bugfixes
 		.) EHTSOID-117: Die Überprüfung der Werte wurde korrigiert.
 

@@ -156,8 +156,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             this.closeHibernateSession();
             throw ex;
         }
-
-        initializeCheckValues();
         
         //adding status of import to statuslist
         this._status.setImportRunning(true);
@@ -319,20 +317,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("name"))
                         {
-                            if((attribute.getValue() + versionName).length()>CHECKname){
-                                logger.info("Name + Version zu lang: " + attribute.getValue());
-                                throw new Exception("Name + Version zu lang: " + attribute.getValue());
-                            }
-                            
                             title = attribute.getValue();
                         }
                         if (attribute.getName().toString().equals("version"))
                         {
-                            if((title + attribute.getValue()).length()>CHECKname){
-                                logger.info("Name + Version zu lang: " + attribute.getValue());
-                                throw new Exception("Name + Version zu lang: " + attribute.getValue());
-                            }                            
-                            
                             versionName = attribute.getValue();                            
                         }
                         if (attribute.getName().toString().equals("date"))
@@ -356,12 +344,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
 
                     String description = event.asCharacters().getData();
-                    logger.debug("description: " + description);
-                    if(description.length() > CHECKdescription){
-                        logger.info("Description zu lang: " + description);
-                        throw new Exception("Description zu lang: " + description);
-                    }
-                    
                     this.createCodeSystem(title, uid, versionName, datum, authority, description);
                 }
                 else if (startElementName.equals("Identifier"))
@@ -373,20 +355,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("authority"))
                         {
-                            if(attribute.getValue().length()>CHECKsource){
-                                logger.info("Authority zu lang: " + attribute.getValue());
-                                throw new Exception("Authority zu lang: " + attribute.getValue());
-                            }
-                            
                             authority = attribute.getValue();
                         }
                         if (attribute.getName().toString().equals("uid"))
                         {
-                            if(attribute.getValue().length()>CHECKoid){
-                                logger.info("UID zu lang: " + attribute.getValue());
-                                throw new Exception("UID zu lang: " + attribute.getValue());
-                            }
-                            
                             uid = attribute.getValue();
                         }
                     }
@@ -403,10 +375,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("name"))
                         {
-                            if(attribute.getValue().length()>CHECKname){
-                                logger.info("Name zu lang: " + attribute.getValue());
-                                throw new Exception("Name zu lang: " + attribute.getValue());
-                            }                            
                             rk.setName(attribute.getValue());
                             rks.getRubricKind().add(rk);
                         }
@@ -424,20 +392,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("code"))
                         {
-                            if(attribute.getValue().length()>CHECKcode){
-                                logger.info("Code zu lang: " + attribute.getValue());
-                                throw new Exception("Code zu lang: " + attribute.getValue());
-                            }
-                            
                             clazz.setCode(attribute.getValue());                    
                         }
                         if (attribute.getName().toString().equals("kind"))
                         {
-                            if(attribute.getValue().length()>CHECKcodeSystemType){
-                                logger.info("Kind zu lang: " + attribute.getValue());
-                                throw new Exception("Kind zu lang: " + attribute.getValue());
-                            }
-                            
                             clazz.setKind(attribute.getValue());                                                        
                         }
                     }
@@ -454,11 +412,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("kind"))
                             {
-                                if(attribute.getValue().length()>CHECKcodeSystemType){
-                                    logger.info("Kind zu lang: " + attribute.getValue());
-                                    throw new Exception("Kind zu lang: " + attribute.getValue());
-                                }
-                                
                                 rubi.setKind(attribute.getValue());
                             }
                         }
@@ -474,11 +427,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         //if(event.isCharacters()){
                         clamlBindingXSD.Label l = new clamlBindingXSD.Label();
                         l.getContent().add(event.asCharacters().getData());
-                        
-                        if(event.asCharacters().getData().length()>100){
-                            logger.info("Label zu lang: " + event.asCharacters());
-                            throw new Exception("Label zu lang: " + event.asCharacters());
-                        }
                         
                         rubi.getLabel().add(l);
                         continue;
@@ -499,11 +447,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                                 clamlBindingXSD.Label l = new clamlBindingXSD.Label();
                                 l.getContent().add(event.asCharacters().getData());
                                 rubi.getLabel().add(l);
-                                
-                                if(event.asCharacters().getData().length()>100){
-                                    logger.info("Label zu lang: " + event.asCharacters());
-                                    throw new Exception("Label zu lang: " + event.asCharacters());
-                                }
                             }
                             else
                             {
@@ -525,11 +468,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("code"))
                             {
-                                if(attribute.getValue().length()>CHECKcode){
-                                    logger.info("Code zu lang: " + attribute.getValue());
-                                    throw new Exception("Code zu lang: " + attribute.getValue());
-                                }
-                                
                                 sc.setCode(attribute.getValue());
                             }
                         }
@@ -549,11 +487,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("code"))
                             {
-                                if(attribute.getValue().length()>CHECKcode){
-                                    logger.info("Code zu lang: " + attribute.getValue());
-                                    throw new Exception("Code zu lang: " + attribute.getValue());
-                                }
-                                
                                 sc.setCode(attribute.getValue());
                             }
                         }
@@ -573,20 +506,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("name"))
                             {
-                                if(attribute.getValue().length()>CHECKname){
-                                    logger.info("Name zu lang: " + attribute.getValue());
-                                    throw new Exception("Name zu lang: " + attribute.getValue());
-                                }
-                                
                                 meta.setName(attribute.getValue());
                             }
                             if (attribute.getName().toString().equals("value"))
                             {
-                                if(attribute.getValue().length()>CHECKterm){
-                                    logger.info("Value zu lang : " + attribute.getValue());
-                                    throw new Exception("Value zu lang: " + attribute.getValue());
-                                }
-                                
                                 meta.setValue(attribute.getValue());
                             }
                         }
@@ -605,20 +528,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
                             if (attribute.getName().toString().equals("name"))
                             {
-                                if(attribute.getValue().length()>CHECKname){
-                                    logger.info("Name zu lang: " + attribute.getValue());
-                                    throw new Exception("Name zu lang: " + attribute.getValue());
-                                }
-                                
                                 name = attribute.getValue();
                             }
                             if (attribute.getName().toString().equals("value"))
                             {
-                                if(attribute.getValue().length()>CHECKterm){
-                                    logger.info("Value zu lang: " + attribute.getValue());
-                                    throw new Exception("Value zu lang: " + attribute.getValue());
-                                }
-                                
                                 value = attribute.getValue();
                             }
                         }
@@ -725,46 +638,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
     private void createCodeSystem(String title, String uid, String versionName, Date date, String authority, String description) throws Exception
     {
-        //Validating the values of the new CodeSystem before creating it.
-        //Has to be done so that a possible data truncation can be avoided, if it is not done here, the user will not get a message
-        //that the import has failed but instead that the import has worked, even though it did not.
-        if(title!=null && versionName!=null && (title + " " + versionName).length()>CHECKname){
-            logger.info("Titel und Versionsname zu lang: " + title + " " + versionName);
-            throw new Exception("Titel und Versionsname zu lang: " + title + " " + versionName);
-        }
-        if(title!=null && title.length()>CHECKname){
-            logger.info("Titel zu lang: " + title);
-            throw new Exception("Titel zu lang: " + title);
-        }
-        if(versionName!=null && versionName.length()>CHECKname){
-            logger.info("Versionsname zu lang: " + versionName);
-            throw new Exception("Versionsname zu lang: " + versionName);
-        }
-        if(authority!=null && authority.length()>CHECKsource){
-            logger.info("Authority-Wert zu lang: " + authority);
-            throw new Exception("Authority-Wert zu lang: " + authority);
-        }
-        if(uid!=null && uid.length()>CHECKoid){
-            logger.info("UID zu lang: " + uid);
-            throw new Exception("UID zu lang: " + uid);
-        }
-        if(_clamlMetaData!=null && _clamlMetaData.get("description")!=null && _clamlMetaData.get("description").length()>CHECKdescription){
-            logger.info("Beschreibung zu lang: " + _clamlMetaData.get("description"));
-            throw new Exception("Beschreibung zu lang: " + _clamlMetaData.get("description"));
-        }
-        if(_clamlMetaData!=null && _clamlMetaData.get("version_description")!=null && _clamlMetaData.get("version_description").length()>CHECKdescription){
-            logger.info("Versions-Beschreibung zu lang: " + _clamlMetaData.get("version_description"));
-            throw new Exception("Versions-Beschreibung zu lang: " + _clamlMetaData.get("version_description"));
-        }
-        if(_clamlMetaData!=null && _clamlMetaData.get("description_eng")!=null && _clamlMetaData.get("description_eng").length()>CHECKdescriptionEng){
-            logger.info("Englische Beschreibung zu lang: " + _clamlMetaData.get("description_eng"));
-            throw new Exception("Englische Beschreibung zu lang: " + _clamlMetaData.get("description_eng"));
-        }
-        if(_clamlMetaData!=null && _clamlMetaData.get("verantw_Org")!=null && _clamlMetaData.get("verantw_Org").length()>CHECKresponsibleOrganization){
-            logger.info("Verantwortliche Organisation zu lang: " + _clamlMetaData.get("verantw_Org"));
-            throw new Exception("Verantwortliche Organisation zu lang: " + _clamlMetaData.get("verantw_Org"));
-        }
-
         // Codesystem suchen, erst anlegen, wenn nicht vorhanden
         CreateCodeSystemRequestType request = new CreateCodeSystemRequestType();
 
@@ -1318,7 +1191,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         CreateConceptAssociation cca = new CreateConceptAssociation();
         CreateConceptAssociationResponseType ccaresp = cca.CreateConceptAssociation(ccar, hb_session);
-        //System.out.println("test11");
         logger.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
         if (ccaresp.getReturnInfos().getStatus() == ReturnType.Status.OK)
         {
@@ -1329,7 +1201,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         {
             // throw new Exception();
         }
-        //System.out.println("test8");
     }
     
     private void createSuperclassAssociation(String code, clamlBindingXSD.Class clazz) throws Exception
@@ -1549,83 +1420,5 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         }
         
         return metaDataID;
-    }
-    
-    private int CHECKdescriptionEng = -1;
-    private int CHECKdescription = -1;
-    private int CHECKname = -1;
-    private int CHECKresponsibleOrganization = -1;
-    private int CHECKcodeSystemType = -1;
-    private int CHECKoid = -1;
-    private int CHECKsource = -1;
-    private int CHECKcode = -1;
-    private int CHECKterm = -1;
-    
-    public void initializeCheckValues(){
-        logger.debug("STARTED initializeCheckValues");
-        Query query;
-        List results;
-        
-        if(CHECKdescriptionEng<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system\" AND column_name = \"descriptionEng\"");
-            results = query.list();
-            CHECKdescriptionEng = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKdescription<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system\" AND column_name = \"description\"");
-            results = query.list();
-            CHECKdescription = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKname<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system\" AND column_name = \"name\"");
-            results = query.list();
-            CHECKname = Integer.valueOf("" + results.get(0));
-            
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"proposal\" AND column_name = \"vocabularyName\"");
-            results = query.list();
-            
-            if(CHECKname>Integer.valueOf("" + results.get(0)))
-                CHECKname = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKresponsibleOrganization<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system\" AND column_name = \"responsibleOrganization\"");
-            results = query.list();
-            CHECKresponsibleOrganization = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKcodeSystemType<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system\" AND column_name = \"codeSystemType\"");
-            results = query.list();
-            CHECKcodeSystemType = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKoid<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system_version\" AND column_name = \"oid\"");
-            results = query.list();
-            CHECKoid = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKsource<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system_version\" AND column_name = \"source\"");
-            results = query.list();
-            CHECKsource = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKcode<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system_concept\" AND column_name = \"code\"");
-            results = query.list();
-            CHECKcode = Integer.valueOf("" + results.get(0));
-        }
-        
-        if(CHECKterm<0){
-            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system_concept\" AND column_name = \"term\"");
-            results = query.list();
-            CHECKterm = Integer.valueOf("" + results.get(0));
-        }
-        
-        logger.debug("FINISHED initializeCheckValues");
     }
 }

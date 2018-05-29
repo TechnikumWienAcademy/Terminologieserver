@@ -772,9 +772,9 @@ public class ImportClaML extends Window implements AfterCompose, IGenericListAct
                         cs_prop.getCodeSystemVersions().get(0).setName(cs1.getName());
                     }
                 }
-
+                                
                 ReturnType ret_prop = ProposalWorkflow.getInstance().addProposal(proposal, cs_prop, false, session);
-
+                
                 if (ret_prop.isSuccess())
                 {
                     if (response.getCodeSystem().isAutoRelease() && !overrideAutoRelease)
@@ -848,6 +848,28 @@ public class ImportClaML extends Window implements AfterCompose, IGenericListAct
                         }
                     }
                 }
+                else{
+                    try
+                    {
+                        Window win = this;
+                        Executions.activate(win.getDesktop());
+                        
+                        Progressmeter progress = (Progressmeter) getFellow("progress");
+                        progress.setVisible(false);
+                        ((Button) getFellow("buttonImport")).setDisabled(false);
+                        ((Button) getFellow("buttonCancel")).setVisible(false);
+                        ((Label) getFellow("labelImportStatus")).setValue("Import fehlgeschlagen, Datenbankfehler beim Import.");
+
+                        this.closeWindow(newTabWindow);
+
+                        Executions.deactivate(win.getDesktop());
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }
             }
         }
         catch (Exception e)
@@ -855,6 +877,7 @@ public class ImportClaML extends Window implements AfterCompose, IGenericListAct
             e.printStackTrace();
             newTabWindow.setVisible(false);
             newTabWindow.detach();
+           
         }
         finally
         {

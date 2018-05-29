@@ -402,11 +402,11 @@ public class ProposalWorkflow extends Window
             }
             catch (Exception ex)
             {
-                LoggingOutput.outputException(ex, this);
-                hb_session.getTransaction().rollback();
-
+                //LoggingOutput.outputException(ex, this);
                 returnInfos.setSuccess(false);
                 returnInfos.setMessage("Fehler beim Einfügen eines Vorschlags: " + ex.getLocalizedMessage());
+                
+                hb_session.getTransaction().rollback();
             }
             finally
             {
