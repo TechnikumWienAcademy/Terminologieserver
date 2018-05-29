@@ -1582,6 +1582,12 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"code_system\" AND column_name = \"name\"");
             results = query.list();
             CHECKname = Integer.valueOf("" + results.get(0));
+            
+            query = this.hb_session.createSQLQuery("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = \"proposal\" AND column_name = \"vocabularyName\"");
+            results = query.list();
+            
+            if(CHECKname>Integer.valueOf("" + results.get(0)))
+                CHECKname = Integer.valueOf("" + results.get(0));
         }
         
         if(CHECKresponsibleOrganization<0){

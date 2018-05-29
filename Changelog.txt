@@ -1,4 +1,8 @@
-﻿Changelog 3.2.8
+﻿Changelog 3.2.9
+	-Bugfixes
+		.) EHTSOID-117: Die Überprüfung der Werte wurde korrigiert.
+
+Changelog 3.2.8
 	-Änderungen
 		.) EHTSOID-117: Die Überprüfung der Importwerte erfolgt nun dynamisch.
 		.) EHTSOID-133: Der CSV-Import erfolgt nun mit UTF-8 statt ISO-8859-1.
