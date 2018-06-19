@@ -44,21 +44,26 @@ public class TreeHelper
     doCollapseExpandAll(tree, true);
 
     Iterator<Treeitem> it = tree.getItems().iterator();
-
+    
     while (it.hasNext())
     {
       Treeitem ti = it.next();
-      Object data = ((TreeNode)ti.getValue()).getData();
-      if(data instanceof CodeSystemVersion){                   
-          String s = ((CodeSystemVersion)data).getCodeSystem().getName() + " : " + ((CodeSystemVersion)data).getName();
-          ti.setVisible(s.toLowerCase().contains(text));
-          //ti.setVisible(((CodeSystemVersion)data).getName().toLowerCase().contains(text));
+      if(ti==null || ti.getValue()==null || ((TreeNode)ti.getValue()).getData()==null){
+          if(ti!=null)
+              ti.setVisible(false);
+      }
+      else{
+        Object data = ((TreeNode)ti.getValue()).getData();
+        if(data instanceof CodeSystemVersion){                   
+            String s = ((CodeSystemVersion)data).getCodeSystem().getName() + " : " + ((CodeSystemVersion)data).getName();
+            ti.setVisible(s.toLowerCase().contains(text));
       }
       else if (data instanceof ValueSetVersion){
           String s = ((ValueSetVersion)data).getValueSet().getName() + " : " + ((ValueSetVersion)data).getVersionId();
           ti.setVisible(s.toLowerCase().contains(text));
       }
       //filterTreeitem(text, ti);  // alte Version, bei der nach namen der Versionen gefiltert wurde
+      }
     }
   }
   

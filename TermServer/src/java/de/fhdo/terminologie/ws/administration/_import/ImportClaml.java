@@ -185,16 +185,17 @@ public class ImportClaml
       this.loadClamlXML(is);
 
       _status = StaticStatusList.getStatus(_importId);
-      
-      if (_status != null && _status.cancel)
-      {
-        hb_session.getTransaction().rollback();
-      }
-			else{
-				hb_session.flush();
-        hb_session.getTransaction().commit();
-			}
-				
+    
+    //DABACA WASROLLEDBACK UND WASCOMMITTED ABFRAGEN EINGEFÜGT
+    if (_status != null && _status.cancel){
+        if(!hb_session.getTransaction().wasRolledBack())
+            hb_session.getTransaction().rollback();
+    }
+    else{
+        hb_session.flush();
+        if(!hb_session.getTransaction().wasCommitted())
+            hb_session.getTransaction().commit();
+    }				
     }
     catch (Exception ex)
     {

@@ -1,4 +1,15 @@
-﻿Changelog 3.2.10
+﻿Changelog 3.2.12
+	-Bugfixes
+		.) EHTSOID-144: Es werden nun keine falschen Ergebnisse mehr angezeigt.
+		.) EHTSOID-142: Zusätzliche Fehlerbehandlungen bei der Freigabe eingefügt.
+
+Changelog 3.2.11
+	-Bugfixes
+		.) EHTSOID-141: Es erscheint kein Fehler mehr, wenn die Suche verwendet wird.
+	-Änderungen
+		.) EHTSOID-118: Logging von Stack-Traces aktiviert.
+
+Changelog 3.2.10
 	-Bugfixes
 		.) EHTSOID-117: Die Werte werden nicht mehr überprüft, dafür allgemein Datenbankfehler abgefangen.
 

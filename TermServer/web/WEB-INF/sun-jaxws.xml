@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <endpoints version="2.0" xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime">
-  <endpoint implementation="de.fhdo.terminologie.ws.administration.Administration" name="Administration" url-pattern="/Administration"/>
   <endpoint implementation="de.fhdo.terminologie.ws.administration.Administration" name="Administration" url-pattern="/AdministrationIntern"/>
-  <endpoint implementation="de.fhdo.terminologie.ws.search.Search" name="Search" url-pattern="/Search"/>
   <endpoint implementation="de.fhdo.terminologie.ws.search.Search" name="Search" url-pattern="/SearchIntern"/>
-  <endpoint implementation="de.fhdo.terminologie.ws.conceptAssociation.ConceptAssociations" name="ConceptAssociations" url-pattern="/ConceptAssociations"/>
   <endpoint implementation="de.fhdo.terminologie.ws.conceptAssociation.ConceptAssociations" name="ConceptAssociations" url-pattern="/ConceptAssociationsIntern"/>
-  <endpoint implementation="de.fhdo.terminologie.ws.authorization.Authorization" name="Authorization" url-pattern="/Authorization"/>
   <endpoint implementation="de.fhdo.terminologie.ws.authorization.Authorization" name="Authorization" url-pattern="/AuthorizationIntern"/>
-  <endpoint implementation="de.fhdo.terminologie.ws.authoring.Authoring" name="Authoring" url-pattern="/Authoring"/>
   <endpoint implementation="de.fhdo.terminologie.ws.authoring.Authoring" name="Authoring" url-pattern="/AuthoringIntern"/>
-  <endpoint implementation="de.fhdo.terminologie.ws.sso.SSo" name="SSo" url-pattern="/SSo"/>
   <endpoint implementation="de.fhdo.terminologie.ws.sso.SSo" name="SSo" url-pattern="/SSoIntern"/>
-  <endpoint implementation="de.fhdo.terminologie.ws.objectIdentifier.ObjectIdentifier" name="ObjectIdentifier" url-pattern="/ObjectIdentifier"/>
   <endpoint implementation="de.fhdo.terminologie.ws.objectIdentifier.ObjectIdentifier" name="ObjectIdentifier" url-pattern="/ObjectIdentifierIntern"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.authoring.Authoring" name="Authoring" url-pattern="/Authoring"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.conceptAssociation.ConceptAssociations" name="ConceptAssociations" url-pattern="/ConceptAssociations"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.search.Search" name="Search" url-pattern="/Search"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.authorization.Authorization" name="Authorization" url-pattern="/Authorization"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.objectIdentifier.ObjectIdentifier" name="ObjectIdentifier" url-pattern="/ObjectIdentifier"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.administration.Administration" name="Administration" url-pattern="/Administration"/>
+  <endpoint implementation="de.fhdo.terminologie.ws.sso.SSo" name="SSo" url-pattern="/SSo"/>
 </endpoints>

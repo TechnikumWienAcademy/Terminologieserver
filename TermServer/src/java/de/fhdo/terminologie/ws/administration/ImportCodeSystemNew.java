@@ -348,6 +348,8 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
+            //DABACA
+            e.printStackTrace();
         }
         catch (ImportParameterValidationException e)
         {
@@ -433,6 +435,8 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
+            //DABACA
+            e.printStackTrace();
         }
         catch (ImportParameterValidationException ex)
         {
@@ -473,6 +477,8 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
+            //DABACA
+            e.printStackTrace();
         }
         catch (ImportParameterValidationException ex)
         {
@@ -535,6 +541,8 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
+            //DABACA
+            e.printStackTrace();
         }
         catch (ImportParameterValidationException e)
         {
