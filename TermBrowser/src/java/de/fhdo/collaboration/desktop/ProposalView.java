@@ -61,7 +61,14 @@ import org.zkoss.zul.Window;
  */
 public class ProposalView extends Window implements AfterCompose, IUpdateModal
 {
-
+private int test = 0;
+    
+public int testTimer(boolean increment){
+    if(increment)
+        test++;
+    return test;
+}
+    
   private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
   private IUpdateModal updateInterface;
   private Proposal proposal;

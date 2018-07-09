@@ -86,7 +86,7 @@ public class ProposalStatusChange extends Window implements AfterCompose
     }
     
   public void onOkClicked()
-  {
+  {      
     // Statusänderung durchführen
     String reason = ((Textbox) getFellow("tbReason")).getValue();
     Date dateFrom = ((Datebox)getFellow("dateVon")).getValue();

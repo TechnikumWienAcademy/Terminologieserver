@@ -1015,6 +1015,7 @@ public class ProposalWorkflow
                     }
                     else
                     {
+                        
                         proposal_db.setStatus((int) statusTo);
                         proposal_db.setStatusDate(new Date());
 

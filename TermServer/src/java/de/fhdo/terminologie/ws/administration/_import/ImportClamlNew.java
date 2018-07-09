@@ -82,6 +82,8 @@ import org.hibernate.metadata.ClassMetadata;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zul.Window;
 
 /**
  *
@@ -200,7 +202,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
             try
             {
-                hb_session.getTransaction().rollback();
+                //DABACA
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
                 logger.info("[ImportClaml.java] Rollback durchgeführt!");
             }
             catch (Exception exRollback)
@@ -235,7 +239,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         {
             try
             {
-                hb_session.getTransaction().rollback();
+                //DABACA
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
                 logger.info("[ImportClaml.java] Rollback durchgeführt!");
             }
             catch (Exception exRollback)
@@ -551,7 +557,17 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     //Matthias: write clazz to map to be processed later
                     this._clamlClassMap.put(clazz.getCode(), clazz);
                     logger.info("Concept reading: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
-
+                    
+                    //DABACA
+                     //This try-catch block is needed to keep the ZK-framework alive while big code-systems
+                    //are transfered to the publication-platform.
+                    try{
+                        Window testWin = (Window)Executions.createComponents("", null, null);
+                    }
+                    catch(Exception e){
+                    }
+                    finally{}
+                    
                     /*
                     // Jetzt Konzept erstellen
                     this.CreateSingleConcept(clazz);

@@ -1021,7 +1021,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                 try
                 {
-                    hb_session.getTransaction().rollback();
+                    //DABACA
+                    if(!hb_session.getTransaction().wasRolledBack())
+                        hb_session.getTransaction().rollback();
 
                     String resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
 

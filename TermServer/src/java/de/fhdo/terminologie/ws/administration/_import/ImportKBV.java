@@ -181,7 +181,9 @@ public class ImportKBV
 
       try
       {
-        hb_session.getTransaction().rollback();
+          //DABACA
+          if(!hb_session.getTransaction().wasRolledBack())
+             hb_session.getTransaction().rollback();
         logger.info("[ImportCSV.java] Rollback durchgeführt!");
       }
       catch (Exception exRollback)

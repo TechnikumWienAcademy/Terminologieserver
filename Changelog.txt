@@ -1,4 +1,16 @@
-﻿Changelog 3.2.12
+﻿Changelog 3.2.15
+	-Bugfixes
+		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+
+Changelog 3.2.14
+	-Bugfixes
+		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+
+Changelog 3.2.13
+	-Bugfixes
+		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+
+Changelog 3.2.12
 	-Bugfixes
 		.) EHTSOID-144: Es werden nun keine falschen Ergebnisse mehr angezeigt.
 		.) EHTSOID-142: Zusätzliche Fehlerbehandlungen bei der Freigabe eingefügt.
