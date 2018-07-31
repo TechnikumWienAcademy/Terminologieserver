@@ -19,146 +19,200 @@
  */
 package de.fhdo.collaboration.proposal;
 
+import de.fhdo.collaboration.db.CollaborationSession;
 import de.fhdo.collaboration.db.DBSysParam;
-import de.fhdo.collaboration.db.HibernateUtil;
-import de.fhdo.collaboration.db.classes.Collaborationuser;
 import de.fhdo.collaboration.db.classes.Proposal;
-import de.fhdo.collaboration.db.classes.Proposalobject;
-import de.fhdo.collaboration.db.classes.Proposalstatuschange;
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.helper.ProposalHelper;
+import de.fhdo.collaboration.helper.ProposalStatusChangeHelper;
 import de.fhdo.collaboration.workflow.ProposalWorkflow;
 import de.fhdo.collaboration.workflow.ReturnType;
 import de.fhdo.collaboration.workflow.TerminologyReleaseManager;
 import de.fhdo.helper.ArgumentHelper;
 import de.fhdo.helper.SessionHelper;
 import de.fhdo.interfaces.IUpdateModal;
-import java.io.IOException;
-import java.util.Date;
-import org.hibernate.Session;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.ext.AfterCompose;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Datebox;
-import org.zkoss.zul.Grid;
-import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
-import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
 /**
  *
  * @author Robert Mützner
+ * reworked july 2018 by dario bachinger
  */
-public class ProposalStatusChange extends Window implements AfterCompose
+public class ProposalStatusChange extends Window implements AfterCompose, EventListener
 {
+    private long statusToId;
+    private boolean isDiscussion;
+    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    //TS
+    private IUpdateModal updateInterface;
+    private Proposal proposal;
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-  private IUpdateModal updateInterface;
-  private Proposal proposal;
-  private long statusToId;
-  boolean isDiscussion;
-
-  public ProposalStatusChange()
-  {
-    if (logger.isDebugEnabled())
+    public ProposalStatusChange()
     {
-      logger.debug("ProposalStatusChange() - Konstruktor");
-      logger.debug("lade Parameter...");
-    }
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("ProposalStatusChange() - Konstruktor");
+            logger.debug("Lade Parameter...");
+        }
 
-    proposal = (Proposal) ArgumentHelper.getWindowArgument("proposal");
-    statusToId = ArgumentHelper.getWindowArgumentLong("status_to_id");
+        proposal = (Proposal) ArgumentHelper.getWindowArgument("proposal");
+        statusToId = ArgumentHelper.getWindowArgumentLong("status_to_id");
     
-    if (logger.isDebugEnabled())
-    {
-      logger.debug("status_to_id: " + statusToId);
-      logger.debug("proposal-ID: " + proposal.getId());
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Status-ID (neu): " + statusToId);
+            logger.debug("Vorschlags-ID: " + proposal.getId());
+        }
     }
-
-
-  }
 
     public void afterCompose()
     {
         isDiscussion = ProposalHelper.isStatusDiscussion(statusToId);
         ((Row) getFellow("rowZeitraum")).setVisible(isDiscussion);
+        if(!Executions.getCurrent().getDesktop().isServerPushEnabled())
+            Executions.getCurrent().getDesktop().enableServerPush(true);
     }
-    
-  public void onOkClicked()
-  {      
-    // Statusänderung durchführen
-    String reason = ((Textbox) getFellow("tbReason")).getValue();
-    Date dateFrom = ((Datebox)getFellow("dateVon")).getValue();
-    Date dateTo = ((Datebox)getFellow("dateBis")).getValue();
-    
-    if(dateFrom != null)
-      logger.debug("Datum von: " + dateFrom);
-    else logger.debug("Datum von: null");
-    
-    ReturnType ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, false);
-    
-    long statusFrom = proposal.getStatus();
-    Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusToId);
-    
-    if ((ret.isSuccess()) && (!rel.getStatusByStatusIdTo().getIsPublic()))
-    {
-        ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
-    }
-    
-    if ((rel.getStatusByStatusIdTo().getIsPublic())
-            && (ret.isSuccess())
-            && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
-            && (SessionHelper.getValue("pub_connection").toString().equals("connected")))
-    {
-        ReturnType transfer_success = new ReturnType();
-        transfer_success.setSuccess(false);
-        TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
-        transfer_success = releaseManager.initTransfer(proposal.getProposalobjects(), rel);
         
-        if (transfer_success.isSuccess())
+    public void onOkClicked()
+    {    
+        Clients.showBusy(this,"");
+
+        //pscHelper stores parameters which are later needed by the thread
+        //which executes the proposal status change
+        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelper.getPSCHelper();
+        pscHelper.setDesktop(Executions.getCurrent().getDesktop());
+        pscHelper.setEventListener(this);
+        pscHelper.setReason(((Textbox)getFellow("tbReason")).getValue());
+        pscHelper.setDateFrom(((Datebox)getFellow("dateVon")).getValue());
+        pscHelper.setDateTo(((Datebox)getFellow("dateBis")).getValue());
+        pscHelper.setConnectedToPub(SessionHelper.getValue("pub_connection").toString().equals("connected"));
+        pscHelper.setStatusRel(ProposalStatus.getInstance().getStatusRel(proposal.getStatus(), statusToId));
+        pscHelper.setIsUserAllowd(ProposalStatus.getInstance().isUserAllowed(pscHelper.getStatusRel(), SessionHelper.getCollaborationUserID()));
+        pscHelper.setCollaborationUserID(SessionHelper.getCollaborationUserID());
+        pscHelper.setSessionID(CollaborationSession.getInstance().getSessionID());
+        
+        if(pscHelper.getDateFrom() != null)
+            logger.debug("Datum von: " + pscHelper.getDateFrom());
+        else 
+            logger.debug("Datum von: null");
+   
+        //Change proposal status during thread execution
+        Thread pscThread = new Thread(){
+            @Override
+            public void run() {
+                continueStatusChange();
+            }
+        };
+        pscThread.start();
+    }
+    
+    public void continueStatusChange(){
+        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelper.getPSCHelper();
+        
+        pscHelper.setRetVal(ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, pscHelper.getReason(), pscHelper.getDateFrom(), pscHelper.getDateTo(), false));
+               
+        long statusFrom = proposal.getStatus();
+    
+        if ((pscHelper.getRetVal().isSuccess()) && (!pscHelper.getStatusRel().getStatusByStatusIdTo().getIsPublic()))
         {
-            logger.info(proposal.getVocabularyName()+ ": Freigabe erfolgreich.");
-            ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
-            Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+            ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, pscHelper.getReason());
         }
-        else if (!transfer_success.isSuccess())
+    
+        if ((pscHelper.getStatusRel().getStatusByStatusIdTo().getIsPublic())
+            && (pscHelper.getRetVal().isSuccess())
+            && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
+            && pscHelper.isConnectedToPub()
+        )
         {
-            logger.info(proposal.getVocabularyName()+ ": Freigabe fehlgeschlagen." +  transfer_success.getMessage());
-            Messagebox.show(transfer_success.getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
-            proposal.setStatus((int) statusToId);
-            //setting status back because transfer to public was not successful
-            ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , dateFrom, dateTo, false);
-            if(retResetStatus.isSuccess())
+            ReturnType transfer_success = new ReturnType();
+            transfer_success.setSuccess(false);
+            TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
+            transfer_success = releaseManager.initTransfer(proposal.getProposalobjects(), pscHelper.getStatusRel());
+            pscHelper.setTransVal(transfer_success);
+            
+            if (transfer_success.isSuccess())
             {
-                logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
-                Messagebox.show("Status wurde nicht geändert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
-                
-                //change ReturnType to prevent Messagebox in ProposalView.upate()
-                ret = new ReturnType();
-                ret.setSuccess(true);
-                ret.setMessage("InlinePropUpdate");
+                logger.info(proposal.getVocabularyName()+ ": Freigabe erfolgreich.");
+                ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, pscHelper.getReason());
+                Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("MSG_Success",null,""));
+            }
+            else if (!transfer_success.isSuccess())
+            {
+                logger.info(proposal.getVocabularyName()+ ": Freigabe fehlgeschlagen." +  transfer_success.getMessage());
+                Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("MSG_FailureInfo",null,""));
+                proposal.setStatus((int) statusToId);
+                //setting status back because transfer to public was not successful
+                ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , pscHelper.getDateFrom(), pscHelper.getDateTo(), false);
+                if(retResetStatus.isSuccess())
+                {
+                    logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
+                    Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("MSG_StatusUnchanged",null,""));
+                    //change ReturnType to prevent Messagebox in ProposalView.upate()
+                    pscHelper.setRetVal(new ReturnType());
+                    pscHelper.getRetVal().setSuccess(true);
+                    pscHelper.getRetVal().setMessage("InlinePropUpdate");
+                }
             }
         }
+    
+        // Fenster schließen
+        Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("finish",null,""));
     }
-
-    // Fenster schließen
-    this.setVisible(false);
-    this.detach();
-
-    // Vorschlag-Fenster aktualisieren
-    if (updateInterface != null)
+  
+    /**
+     * @param updateInterface the updateInterface to set
+     */
+    public void setUpdateInterface(IUpdateModal updateInterface)
     {
-        updateInterface.update(ret, false);
+      this.updateInterface = updateInterface;
     }
 
-  }
-
-  /**
-   * @param updateInterface the updateInterface to set
-   */
-  public void setUpdateInterface(IUpdateModal updateInterface)
-  {
-    this.updateInterface = updateInterface;
-  }
+    @Override
+    public void onEvent(Event event) throws Exception {
+        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelper.getPSCHelper();        
+        
+        if(event.getName().equals("finish")){
+            this.setVisible(false);
+            this.detach();
+            
+            //Update proposal window
+            if (updateInterface != null)
+            {
+                if(pscHelper.getStatusRel().getStatusByStatusIdTo().getIsPublic())
+                    updateInterface.update(pscHelper.getTransVal(), false);
+                else
+                    updateInterface.update(pscHelper.getRetVal(), false);
+            }
+            //Cleanup
+            Clients.clearBusy(this);
+            if(pscHelper.getDesktop().isServerPushEnabled())
+                pscHelper.getDesktop().enableServerPush(false);
+            ProposalStatusChangeHelper.resetPSCHelper();
+            return;
+        }
+        
+        if(event.getName().equals("MSG_Success")){
+            Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+            return;
+        }
+        
+        if(event.getName().equals("MSG_FailureInfo")){
+            Messagebox.show(pscHelper.getTransVal().getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+        
+        if(event.getName().equals("MSG_StatusUnchanged")){
+            Messagebox.show("Status wurde nicht geändert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+            return;
+        }
+    }
 }

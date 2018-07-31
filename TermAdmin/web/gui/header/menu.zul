@@ -9,7 +9,6 @@
 		border-right: none; border-bottom: none; }
 		
 	</style>
-	<style src="/rsc/style/patientrecord.css"/>
 
 	<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./win"?>
   

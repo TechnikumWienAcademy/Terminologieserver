@@ -558,16 +558,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     this._clamlClassMap.put(clazz.getCode(), clazz);
                     logger.info("Concept reading: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
                     
-                    //DABACA
-                     //This try-catch block is needed to keep the ZK-framework alive while big code-systems
-                    //are transfered to the publication-platform.
-                    try{
-                        Window testWin = (Window)Executions.createComponents("", null, null);
-                    }
-                    catch(Exception e){
-                    }
-                    finally{}
-                    
                     /*
                     // Jetzt Konzept erstellen
                     this.CreateSingleConcept(clazz);

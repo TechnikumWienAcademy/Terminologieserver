@@ -1,4 +1,10 @@
-﻿Changelog 3.2.15
+﻿Changelog 3.2.16
+	-Bugfixes
+		.) EHTSOID-156: patientrecord.css wird nicht mehr aufgerufen.
+		.) EHTSOID-142: Funktionen aus den Versionen 3.2.13 bis 3.2.15 wurden wieder entfernt.
+		.) EHTSOID-158: Unnötige Rollbacks werden nicht mehr durchgeführt.
+
+Changelog 3.2.15
 	-Bugfixes
 		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
 

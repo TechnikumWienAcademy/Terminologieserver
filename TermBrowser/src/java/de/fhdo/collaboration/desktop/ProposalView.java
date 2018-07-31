@@ -416,6 +416,7 @@ public int testTimer(boolean increment){
       ReturnType ret = (ReturnType) o;
       if (ret.isSuccess())
       {
+        //DABACA
         if(!(ret.getMessage().equals("InlinePropUpdate") || ret.getMessage().contains("gelöscht")))
             Messagebox.show("Status erfolgreich geändert.", "Status ändern", Messagebox.OK, Messagebox.INFORMATION);
 				
@@ -439,6 +440,7 @@ public int testTimer(boolean increment){
       }
       else
       {
+        //DABACA 
         Messagebox.show(ret.getMessage(), "Status ändern", Messagebox.OK, Messagebox.ERROR);
       }
     }

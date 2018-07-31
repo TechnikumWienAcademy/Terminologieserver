@@ -35,6 +35,7 @@ import de.fhdo.collaboration.db.classes.Rating;
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.helper.AssignTermHelper;
 import de.fhdo.collaboration.helper.CODES;
+import de.fhdo.collaboration.helper.ProposalStatusChangeHelper;
 import de.fhdo.collaboration.proposal.ProposalStatus;
 import de.fhdo.collaboration.proposal.VocInfo;
 import de.fhdo.communication.M_AUT;
@@ -891,7 +892,7 @@ public class ProposalWorkflow
             }
 
             // 2. Rechte prüfen, ob angemeldeter Benutzer die Statusänderung durchführen darf
-            if (ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID()))
+            if (ProposalStatusChangeHelper.getPSCHelper().isIsUserAllowd())
             {
                 if (logger.isDebugEnabled())
                 {
@@ -1039,7 +1040,7 @@ public class ProposalWorkflow
                         //psc.getProposal().setId(proposal.getId());
                         psc.setChangeTimestamp(new Date());
                         psc.setCollaborationuser(new Collaborationuser());
-                        psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
+                        psc.getCollaborationuser().setId(ProposalStatusChangeHelper.getPSCHelper().getCollaborationUserID());
                         psc.setProposalStatusFrom((int) statusFrom);
                         psc.setProposalStatusTo((int) statusTo);
                         psc.setReason(reason);
@@ -1192,7 +1193,8 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateCodeSystemVersionStatusRequestType request = new UpdateCodeSystemVersionStatusRequestType();
                 request.setLogin(new LoginType());
-                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                //DABACA
+                request.getLogin().setSessionID(ProposalStatusChangeHelper.getPSCHelper().getSessionID());
 
                 // Codesystem angeben
                 request.setCodeSystem(new CodeSystem());
@@ -1251,25 +1253,25 @@ public class ProposalWorkflow
                 //Wäre gut wenn wir das analog zum CS halten und den status hier auch weglassen...
 
                 /*
-         // Status des Konzepts ändern
-         UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
+                // Status des Konzepts ändern
+                UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
 
-         request.setLogin(new LoginType());
-         request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                request.setLogin(new LoginType());
+                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
 
-         // Codesystem angeben
-         ValueSet vs = new ValueSet();
-         request.setValueSet(vs);
-         vs.setId(po.getClassId());
-         vs.setStatus(newStatus);
+                // Codesystem angeben
+                ValueSet vs = new ValueSet();
+                request.setValueSet(vs);
+                vs.setId(po.getClassId());
+                vs.setStatus(newStatus);
 
-         // Webservice aufrufen
-         UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
+                // Webservice aufrufen
+                UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
 
-         logger.debug("Ergebnis updateValueSetStatus: " + ret.getReturnInfos().getMessage());
-         if (ret.getReturnInfos().getStatus() == Status.OK)
-         {
-         }*/
+                logger.debug("Ergebnis updateValueSetStatus: " + ret.getReturnInfos().getMessage());
+                if (ret.getReturnInfos().getStatus() == Status.OK)
+                {
+                }*/
                 return true;
             }
             else if (classname == PO_CLASSNAME.VALUESET_VERSION)

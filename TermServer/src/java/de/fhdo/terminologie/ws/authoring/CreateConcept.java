@@ -69,17 +69,6 @@ public class CreateConcept
   {
     if (logger.isInfoEnabled())
       logger.info("====== CreateConcept gestartet ======");
-
-    //DABACA
-        //This try-catch block is needed to keep the ZK-framework alive while big code-systems
-        //are transfered to the publication-platform.
-        try{
-            Window testWin = (Window)Executions.createComponents("", null, null);
-        }
-        catch(Exception e){
-        }
-        finally{}
-    
     
     // Return-Informationen anlegen
     CreateConceptResponseType response = new CreateConceptResponseType();

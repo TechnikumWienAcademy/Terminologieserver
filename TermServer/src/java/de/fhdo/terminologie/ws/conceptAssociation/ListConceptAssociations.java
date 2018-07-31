@@ -460,16 +460,6 @@ public class ListConceptAssociations
 
         }
         // Direction Both Ende
-        //DABACA
-        //This try-catch block is needed to keep the ZK-framework alive while big code-systems
-        //are transfered to the publication-platform.
-        try{
-            Window testWin = (Window)Executions.createComponents("", null, null);
-        }
-        catch(Exception e){
-        }
-        finally{}
-        
         response.setCodeSystemEntityVersionAssociation(returnList);
         if (returnList.isEmpty())
         {
