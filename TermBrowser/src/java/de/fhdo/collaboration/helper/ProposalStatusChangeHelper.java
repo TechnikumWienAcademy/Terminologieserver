@@ -7,6 +7,7 @@ package de.fhdo.collaboration.helper;
 
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.workflow.ReturnType;
+import java.util.ArrayList;
 import java.util.Date;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.event.EventListener;
@@ -35,20 +36,7 @@ public class ProposalStatusChangeHelper {
     //ZK
     private Desktop desktop;
     private EventListener eventListener;
-
-    static private ProposalStatusChangeHelper pscHelper;
     
-    static public ProposalStatusChangeHelper getPSCHelper(){
-        if(pscHelper==null){
-            pscHelper = new ProposalStatusChangeHelper();
-        }
-        return pscHelper;
-    }
-    
-    static public void resetPSCHelper(){
-        pscHelper = null;
-    }
-
     public String getSessionID() {
         return sessionID;
     }

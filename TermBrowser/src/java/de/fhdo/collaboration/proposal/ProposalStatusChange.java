@@ -25,6 +25,7 @@ import de.fhdo.collaboration.db.classes.Proposal;
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.helper.ProposalHelper;
 import de.fhdo.collaboration.helper.ProposalStatusChangeHelper;
+import de.fhdo.collaboration.helper.ProposalStatusChangeHelperController;
 import de.fhdo.collaboration.workflow.ProposalWorkflow;
 import de.fhdo.collaboration.workflow.ReturnType;
 import de.fhdo.collaboration.workflow.TerminologyReleaseManager;
@@ -88,7 +89,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
 
         //pscHelper stores parameters which are later needed by the thread
         //which executes the proposal status change
-        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelper.getPSCHelper();
+        ProposalStatusChangeHelper pscHelper = new ProposalStatusChangeHelper();
         pscHelper.setDesktop(Executions.getCurrent().getDesktop());
         pscHelper.setEventListener(this);
         pscHelper.setReason(((Textbox)getFellow("tbReason")).getValue());
@@ -99,6 +100,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
         pscHelper.setIsUserAllowd(ProposalStatus.getInstance().isUserAllowed(pscHelper.getStatusRel(), SessionHelper.getCollaborationUserID()));
         pscHelper.setCollaborationUserID(SessionHelper.getCollaborationUserID());
         pscHelper.setSessionID(CollaborationSession.getInstance().getSessionID());
+        ProposalStatusChangeHelperController.getPscHelperController().addPscHelperForSessions(pscHelper);
         
         if(pscHelper.getDateFrom() != null)
             logger.debug("Datum von: " + pscHelper.getDateFrom());
@@ -109,16 +111,17 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
         Thread pscThread = new Thread(){
             @Override
             public void run() {
-                continueStatusChange();
+                continueStatusChange(this.getName());
             }
         };
+        pscThread.setName(pscHelper.getSessionID());
         pscThread.start();
     }
     
-    public void continueStatusChange(){
-        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelper.getPSCHelper();
+    public void continueStatusChange(String paraSessionID){
+        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(paraSessionID);
         
-        pscHelper.setRetVal(ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, pscHelper.getReason(), pscHelper.getDateFrom(), pscHelper.getDateTo(), false));
+        pscHelper.setRetVal(ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, pscHelper.getReason(), pscHelper.getDateFrom(), pscHelper.getDateTo(), false, paraSessionID));
                
         long statusFrom = proposal.getStatus();
     
@@ -148,10 +151,10 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             else if (!transfer_success.isSuccess())
             {
                 logger.info(proposal.getVocabularyName()+ ": Freigabe fehlgeschlagen." +  transfer_success.getMessage());
-                Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("MSG_FailureInfo",null,""));
+                Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("MSG_FailureInfoSPLIT" + pscHelper.getSessionID(),null,""));
                 proposal.setStatus((int) statusToId);
                 //setting status back because transfer to public was not successful
-                ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , pscHelper.getDateFrom(), pscHelper.getDateTo(), false);
+                ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , pscHelper.getDateFrom(), pscHelper.getDateTo(), false, paraSessionID);
                 if(retResetStatus.isSuccess())
                 {
                     logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
@@ -165,7 +168,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
         }
     
         // Fenster schließen
-        Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("finish",null,""));
+        Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("finishSPLIT" + pscHelper.getSessionID(),null,""));
     }
   
     /**
@@ -177,12 +180,14 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
     }
 
     @Override
-    public void onEvent(Event event) throws Exception {
-        ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelper.getPSCHelper();        
+    public void onEvent(Event event) throws Exception {    
         
-        if(event.getName().equals("finish")){
+        if(event.getName().contains("finish")){
             this.setVisible(false);
             this.detach();
+            
+            String[] parts = event.getName().split("SPLIT");
+            ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(parts[1]);
             
             //Update proposal window
             if (updateInterface != null)
@@ -196,7 +201,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             Clients.clearBusy(this);
             if(pscHelper.getDesktop().isServerPushEnabled())
                 pscHelper.getDesktop().enableServerPush(false);
-            ProposalStatusChangeHelper.resetPSCHelper();
+            ProposalStatusChangeHelperController.getPscHelperController().removePscHelperForSessions(pscHelper);
             return;
         }
         
@@ -205,7 +210,10 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             return;
         }
         
-        if(event.getName().equals("MSG_FailureInfo")){
+        if(event.getName().contains("MSG_FailureInfo")){
+            String[] parts = event.getName().split("SPLIT");
+            ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(parts[1]);
+            
             Messagebox.show(pscHelper.getTransVal().getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
             return;
         }
