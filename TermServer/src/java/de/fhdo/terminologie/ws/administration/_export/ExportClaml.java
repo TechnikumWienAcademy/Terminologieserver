@@ -58,7 +58,6 @@ import de.fhdo.terminologie.ws.search.types.ReturnCodeSystemDetailsResponseType;
 import de.fhdo.terminologie.ws.types.ExportType;
 import de.fhdo.terminologie.ws.types.ReturnType;
 import de.fhdo.terminologie.ws.types.ReturnType.Status;
-import de.fhdo.terminologie.ws.types.SortingType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -91,7 +90,6 @@ import org.w3c.dom.Document;
 /**
  *
  * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
- * (robert.muetzner@fh-dortmund.de)
  * @author Michael Heller
  */
 public class ExportClaml
@@ -102,17 +100,13 @@ public class ExportClaml
     public static double percentageComplete = 0.0;
     public static String currentTask = "";
     private int countExported = 0;
-    //private Search search;
-    //private ConceptAssociations association;
     private CodeSystem codeSystem = null;
     private CodeSystemVersion codeSystemVersion = null;
     private ClaML claml = null;
     private ExportCodeSystemContentRequestType request;
     private Map<String, RubricKind> rubricKinds;
-    //private HashMap metaDataMap = new HashMap();
     SimpleDateFormat sdfEN;
     long timeStart;
-    //org.hibernate.Session hb_session;
 
     public ExportClaml()
     {
@@ -145,26 +139,24 @@ public class ExportClaml
         try
         {
             JAXBContext jc = JAXBContext.newInstance(packagename);
-
             codeSystem = this.request.getCodeSystem();
-
             // CodeSystem-Details lesen
             ReturnCodeSystemDetailsRequestType rcsdRequest = new ReturnCodeSystemDetailsRequestType();
             rcsdRequest.setCodeSystem(codeSystem);
-
             //Matthias: login
             rcsdRequest.setLogin(req.getLogin());
-
             ReturnCodeSystemDetailsResponseType rcsdResponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(rcsdRequest);
 
             if (rcsdResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
             {
                 //hb_session = HibernateUtil.getSessionFactory().openSession();
+
                 if (request.getExportInfos().isUpdateCheck())
                 {
 
                     if (!rcsdResponse.getCodeSystem().getCurrentVersionId().equals(codeSystem.getCodeSystemVersions().iterator().next().getVersionId()))
                     {
+
                         request.getCodeSystem().getCodeSystemVersions().iterator().next().setVersionId(rcsdResponse.getCodeSystem().getCurrentVersionId());
                         codeSystem = this.request.getCodeSystem();
                         // CodeSystem-Details lesen
@@ -172,6 +164,7 @@ public class ExportClaml
                         rcsdRequest.setCodeSystem(codeSystem);
 
                         rcsdResponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(rcsdRequest);
+
                     }
                 }
 
@@ -179,7 +172,7 @@ public class ExportClaml
                 {
                     // Codesystem aus Webservice-Antwort übernehmen
                     codeSystem = rcsdResponse.getCodeSystem();
-
+                    
                     if (codeSystem != null)
                     {
                         logger.debug("Codesystem geladen: " + codeSystem.getName());
@@ -306,7 +299,6 @@ public class ExportClaml
                         logger.debug("ClaML-Export-Dauer: " + diff);
 
                         StringWriter writer = new StringWriter();
-
                         try
                         {
                             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -328,9 +320,9 @@ public class ExportClaml
                             formattedXml = formattedXml.replace("&quot;", "\"");
                             //formattedXml = formattedXml.replace("&amp;", "&");
                             //formattedXml = formattedXml.replace("&lt;", "<");
-//              formattedXml = formattedXml.replace("&gt;", ">");
+                            //formattedXml = formattedXml.replace("&gt;", ">");
                             formattedXml = formattedXml.replace("\">\"", "\"&gt;\"");
-//              formattedXml = formattedXml.replace("&apos;", "'");
+                            //formattedXml = formattedXml.replace("&apos;", "'");
 
                             // Rückgabe erstellen
                             returnInfos.getExportInfos().setFilecontent(formattedXml.getBytes("UTF-8"));
@@ -355,7 +347,6 @@ public class ExportClaml
                             }
 
                         }
-
                         returnInfos.getExportInfos().setFormatId(ExportCodeSystemContentRequestType.EXPORT_CLAML_ID);
 
                         returnInfos.getReturnInfos().setCount(countExported);
@@ -401,10 +392,7 @@ public class ExportClaml
 
         }
         finally
-        {
-            //if (hb_session != null && hb_session.isOpen())
-            // hb_session.close();
-        }
+        {}
 
         return returnInfos;
     }

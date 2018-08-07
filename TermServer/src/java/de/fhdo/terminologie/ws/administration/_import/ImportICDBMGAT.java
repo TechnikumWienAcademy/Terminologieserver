@@ -923,7 +923,7 @@ public class ImportICDBMGAT
         {
             //DABACA
             if(!hb_session.getTransaction().wasRolledBack())
-            hb_session.getTransaction().rollback();
+                hb_session.getTransaction().rollback();
           
           resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
           

@@ -442,7 +442,7 @@ public class ImportVSCSV
 
         try
         {
-            //DABACA
+              //DABACA
             if(!hb_session.getTransaction().wasRolledBack())
                 hb_session.getTransaction().rollback();
           

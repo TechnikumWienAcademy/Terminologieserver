@@ -18,6 +18,13 @@
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
         </group>
         <group/>
+<<<<<<< HEAD
         <group name="Version 3.2"/>
+=======
+        <group name="Version 3.2">
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authorization/Authorization.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authorization/Login.java</file>
+        </group>
+>>>>>>> 3.2.12
     </open-files>
 </project-private>

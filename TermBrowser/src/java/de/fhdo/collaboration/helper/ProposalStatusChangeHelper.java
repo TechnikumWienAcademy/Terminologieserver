@@ -7,7 +7,6 @@ package de.fhdo.collaboration.helper;
 
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.workflow.ReturnType;
-import java.util.ArrayList;
 import java.util.Date;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.event.EventListener;
@@ -24,11 +23,13 @@ import org.zkoss.zk.ui.event.EventListener;
 public class ProposalStatusChangeHelper {
     private String reason;
     private String sessionID;
+    private String collaborationSessionID;
     private long collaborationUserID;
     private Date dateFrom;
     private Date dateTo;
     private boolean connectedToPub;
     private boolean isUserAllowd;
+    private boolean isUserLoggedIn;
     //TS
     private ReturnType retVal;
     private ReturnType transVal;
@@ -36,6 +37,22 @@ public class ProposalStatusChangeHelper {
     //ZK
     private Desktop desktop;
     private EventListener eventListener;
+    
+    public String getCollaborationSessionID() {
+        return collaborationSessionID;
+    }
+
+    public void setCollaborationSessionID(String collaborationSessionID) {
+        this.collaborationSessionID = collaborationSessionID;
+    }
+    
+    public boolean isIsUserLoggedIn() {
+        return isUserLoggedIn;
+    }
+
+    public void setIsUserLoggedIn(boolean isUserLoggedIn) {
+        this.isUserLoggedIn = isUserLoggedIn;
+    }
     
     public String getSessionID() {
         return sessionID;

@@ -100,6 +100,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
         pscHelper.setIsUserAllowd(ProposalStatus.getInstance().isUserAllowed(pscHelper.getStatusRel(), SessionHelper.getCollaborationUserID()));
         pscHelper.setCollaborationUserID(SessionHelper.getCollaborationUserID());
         pscHelper.setSessionID(CollaborationSession.getInstance().getSessionID());
+        pscHelper.setCollaborationSessionID(CollaborationSession.getInstance().getSessionID());
         ProposalStatusChangeHelperController.getPscHelperController().addPscHelperForSessions(pscHelper);
         
         if(pscHelper.getDateFrom() != null)
@@ -120,16 +121,15 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
     
     public void continueStatusChange(String paraSessionID){
         ProposalStatusChangeHelper pscHelper = ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(paraSessionID);
+        pscHelper.setRetVal(ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, pscHelper.getReason(), pscHelper.getDateFrom(), pscHelper.getDateTo(), false, pscHelper.getSessionID()));
         
-        pscHelper.setRetVal(ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, pscHelper.getReason(), pscHelper.getDateFrom(), pscHelper.getDateTo(), false, paraSessionID));
-               
         long statusFrom = proposal.getStatus();
     
         if ((pscHelper.getRetVal().isSuccess()) && (!pscHelper.getStatusRel().getStatusByStatusIdTo().getIsPublic()))
         {
             ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, pscHelper.getReason());
         }
-    
+        
         if ((pscHelper.getStatusRel().getStatusByStatusIdTo().getIsPublic())
             && (pscHelper.getRetVal().isSuccess())
             && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
@@ -141,7 +141,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
             transfer_success = releaseManager.initTransfer(proposal.getProposalobjects(), pscHelper.getStatusRel());
             pscHelper.setTransVal(transfer_success);
-            
+
             if (transfer_success.isSuccess())
             {
                 logger.info(proposal.getVocabularyName()+ ": Freigabe erfolgreich.");
@@ -154,7 +154,9 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                 Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("MSG_FailureInfoSPLIT" + pscHelper.getSessionID(),null,""));
                 proposal.setStatus((int) statusToId);
                 //setting status back because transfer to public was not successful
-                ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , pscHelper.getDateFrom(), pscHelper.getDateTo(), false, paraSessionID);
+
+                ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , pscHelper.getDateFrom(), pscHelper.getDateTo(), false, pscHelper.getSessionID());
+
                 if(retResetStatus.isSuccess())
                 {
                     logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
@@ -166,9 +168,10 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                 }
             }
         }
-    
+
         // Fenster schließen
         Executions.schedule(pscHelper.getDesktop(), pscHelper.getEventListener(), new Event("finishSPLIT" + pscHelper.getSessionID(),null,""));
+    
     }
   
     /**

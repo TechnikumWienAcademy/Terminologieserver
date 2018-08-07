@@ -277,6 +277,10 @@ public class ReturnCodeSystemDetails
   {
     boolean erfolg = true;
 
+    //DABACA TODO: Die Session-ID wird hier immer null sein, wenn eine Freigabe durchgeführt wird
+    //Man müsste die Parameter bearbeiten, sodass die Session-ID bei einer Freigabe in den Parametern
+    //Weitergereicht wird udn man so hier noch Zugriff darauf hat
+    /*
     if (Request.getLogin() != null)
     {
       if (Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0)
@@ -285,7 +289,7 @@ public class ReturnCodeSystemDetails
                 "Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
         erfolg = false;
       }
-    }
+    }*/
 
 
     if (Request.getCodeSystem() == null)

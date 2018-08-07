@@ -227,7 +227,7 @@ public class ImportICDAT_Async extends Window implements AfterCompose, IGenericL
 
                                     if (transfer_success.isSuccess())
                                     {
-                                        logger.info(proposal.getVocabularyName() + ": Freigabe erfolgreich.");
+                                        //logger.info(proposal.getVocabularyName() + ": Freigabe erfolgreich.");
                                         msg += " " + proposal.getVocabularyName() + ": Freigabe erfolgreich.";
                                         ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
                                     }
@@ -253,12 +253,14 @@ public class ImportICDAT_Async extends Window implements AfterCompose, IGenericL
                                 }
                                 catch (Exception ex)
                                 {
-                                    hb_session.getTransaction().rollback();
+                                    if(!hb_session.getTransaction().wasRolledBack())
+                                        hb_session.getTransaction().rollback();
                                     throw ex;
                                 }
                                 finally
                                 {
-                                    hb_session.close();
+                                    if(hb_session.isOpen())
+                                        hb_session.close();
                                 }
                             }
                         }
