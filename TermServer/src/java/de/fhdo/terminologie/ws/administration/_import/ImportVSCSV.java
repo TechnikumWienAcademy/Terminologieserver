@@ -442,7 +442,9 @@ public class ImportVSCSV
 
         try
         {
-          hb_session.getTransaction().rollback();
+              //DABACA
+            if(!hb_session.getTransaction().wasRolledBack())
+                hb_session.getTransaction().rollback();
           
           resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
           

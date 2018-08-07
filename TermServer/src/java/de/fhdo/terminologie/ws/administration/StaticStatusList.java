@@ -20,6 +20,7 @@
 package de.fhdo.terminologie.ws.administration;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 /**
@@ -33,6 +34,13 @@ public class StaticStatusList
     public static void addStatus(Long importId, ImportStatus status)
     {
         //removing finished imports to release memory
+        
+        Iterator it = _statusList.entrySet().iterator();
+        while(it.hasNext()){
+            Entry<Long, ImportStatus> item = (Entry<Long, ImportStatus>) it.next();
+            it.remove();
+        }
+        
         for(Entry<Long, ImportStatus> entry : _statusList.entrySet())
         {
             if((!entry.getValue().importRunning) && (entry.getValue().getImportTotal() == entry.getValue().getImportCount()))

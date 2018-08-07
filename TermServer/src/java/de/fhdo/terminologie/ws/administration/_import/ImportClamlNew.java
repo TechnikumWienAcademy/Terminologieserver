@@ -200,7 +200,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
             try
             {
-                hb_session.getTransaction().rollback();
+                //DABACA
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
                 logger.info("[ImportClaml.java] Rollback durchgeführt!");
             }
             catch (Exception exRollback)
@@ -235,7 +237,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         {
             try
             {
-                hb_session.getTransaction().rollback();
+                //DABACA
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
                 logger.info("[ImportClaml.java] Rollback durchgeführt!");
             }
             catch (Exception exRollback)

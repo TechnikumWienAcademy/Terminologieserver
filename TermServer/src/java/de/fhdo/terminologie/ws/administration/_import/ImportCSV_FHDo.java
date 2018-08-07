@@ -430,7 +430,9 @@ public class ImportCSV_FHDo
 
         try
         {
-          tx.rollback();
+            //DABACA
+            if(!tx.wasRolledBack())
+                tx.rollback();
           logger.info("[ImportCSV.java] Rollback durchgeführt!");
         }
         catch (Exception exRollback)

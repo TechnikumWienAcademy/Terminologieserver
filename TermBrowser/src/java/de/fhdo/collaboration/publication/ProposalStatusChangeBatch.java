@@ -157,7 +157,8 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
         {
           if(success)
           {
-            ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, true);
+            //DABACA
+            ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, true, SessionHelper.getSessionId());
 
             long statusFrom = proposal.getStatus();
             Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusToId);
@@ -183,7 +184,8 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
                     message += "Fehler: " + transfer_success.getMessage() + "\n";
                     //setting status back because transfer to public was not successful
                     proposal.setStatus((int) statusToId);
-                    ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, reason, dateFrom, dateTo, false);
+                    //DABACA
+                    ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, reason, dateFrom, dateTo, false,SessionHelper.getSessionId());
                     if(retResetStatus.isSuccess())
                     {
                         message += proposal.getVocabularyName() + ": Status wurde nicht geändert.";

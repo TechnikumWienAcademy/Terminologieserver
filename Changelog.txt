@@ -1,4 +1,25 @@
-﻿Changelog 3.2.12
+﻿Changelog 3.2.16
+	-Bugfixes
+		.) EHTSOID-142: Funktionen aus den Versionen 3.2.13 bis 3.2.15 wurden wieder entfernt.
+		.) EHTSOID-156: patientrecord.css wird nicht mehr aufgerufen.
+		.) EHTSOID-157: Erfolgreiche Freigabe-Meldungen wurden entfernt, wenn die Freigabe noch nicht abgeschlossen wurde.
+		.) EHTSOID-158: Unnötige Rollbacks werden nicht mehr durchgeführt.
+		.) EHTSOID-159: Durch die Änderung der Freigabe sollten auch keine Socket-Timeouts mehr auftreten.
+		.) EHTSOID-160: Die Freigabe erfolgt jetzt analog zum Import.
+
+Changelog 3.2.15
+	-Bugfixes
+		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+
+Changelog 3.2.14
+	-Bugfixes
+		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+
+Changelog 3.2.13
+	-Bugfixes
+		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+
+Changelog 3.2.12
 	-Bugfixes
 		.) EHTSOID-144: Es werden nun keine falschen Ergebnisse mehr angezeigt.
 		.) EHTSOID-142: Zusätzliche Fehlerbehandlungen bei der Freigabe eingefügt.

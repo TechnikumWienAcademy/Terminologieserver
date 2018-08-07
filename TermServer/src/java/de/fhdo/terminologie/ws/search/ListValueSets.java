@@ -233,7 +233,9 @@ public class ListValueSets
         boolean erfolg = true;
         if (Request != null)
         {
-
+            //DABACA TODO SESSION ID MUSS IN DEN PARAMETER EINGEBAUT WERDEN NACHDEM ER VOM THREAD
+            //NICHT MEHR ANGESPROCHEN WERDEN KANN BEI DER FREIGABE
+            /*
             if (Request.getLogin() != null)
             {
                 if (Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0)
@@ -242,7 +244,7 @@ public class ListValueSets
                             "Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
                     erfolg = false;
                 }
-            }
+            }*/
 
             if (Request.getValueSet() != null && Request.getValueSet().getValueSetVersions() != null)
             {

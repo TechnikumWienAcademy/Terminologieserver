@@ -205,7 +205,9 @@ public class ImportClaml
       logger.debug(ex.getMessage());
       try
       {
-        hb_session.getTransaction().rollback();
+        //DABACA
+        if(!hb_session.getTransaction().wasRolledBack())
+            hb_session.getTransaction().rollback();
         logger.info("[ImportClaml.java] Rollback durchgeführt!");
       }
       catch (Exception exRollback)
