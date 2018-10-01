@@ -99,8 +99,9 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
         pscHelper.setStatusRel(ProposalStatus.getInstance().getStatusRel(proposal.getStatus(), statusToId));
         pscHelper.setIsUserAllowd(ProposalStatus.getInstance().isUserAllowed(pscHelper.getStatusRel(), SessionHelper.getCollaborationUserID()));
         pscHelper.setCollaborationUserID(SessionHelper.getCollaborationUserID());
-        pscHelper.setSessionID(CollaborationSession.getInstance().getSessionID());
-        pscHelper.setCollaborationSessionID(CollaborationSession.getInstance().getSessionID());
+        
+        //pscHelper.setSessionID(CollaborationSession.getInstance().getSessionID());
+        //pscHelper.setCollaborationSessionID(CollaborationSession.getInstance().getSessionID());
         ProposalStatusChangeHelperController.getPscHelperController().addPscHelperForSessions(pscHelper);
         
         if(pscHelper.getDateFrom() != null)

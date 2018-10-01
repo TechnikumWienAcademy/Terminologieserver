@@ -18,13 +18,23 @@
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
         </group>
         <group/>
-<<<<<<< HEAD
-        <group name="Version 3.2"/>
-=======
         <group name="Version 3.2">
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLOINCNew.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authorization/Authorization.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListValueSets.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportICDBMGAT.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authorization/Login.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ReturnCodeSystemDetails.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportKAL.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_export/ExportClaml.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLeiKatAt.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/StaticStatusList.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportKBV.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClaml.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSCSV.java</file>
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateConcept.java</file>
         </group>
->>>>>>> 3.2.12
     </open-files>
 </project-private>

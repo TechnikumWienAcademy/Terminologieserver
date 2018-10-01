@@ -892,9 +892,9 @@ public class ProposalWorkflow
             }
 
             // 2. Rechte prüfen, ob angemeldeter Benutzer die Statusänderung durchführen darf
-            //if (ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID()))
+            if (ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID()))
             //DABACA
-            if(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).isIsUserAllowd())
+            //if(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).isIsUserAllowd())
 
             {
                 if (logger.isDebugEnabled())
@@ -1045,8 +1045,8 @@ public class ProposalWorkflow
                         psc.setCollaborationuser(new Collaborationuser());
 
                         //DABACA
-                        //psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
-                        psc.getCollaborationuser().setId(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationUserID());
+                        psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
+                        //psc.getCollaborationuser().setId(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationUserID());
 
                         psc.setProposalStatusFrom((int) statusFrom);
                         psc.setProposalStatusTo((int) statusTo);
@@ -1201,8 +1201,8 @@ public class ProposalWorkflow
                 UpdateCodeSystemVersionStatusRequestType request = new UpdateCodeSystemVersionStatusRequestType();
                 request.setLogin(new LoginType());
                 //DABACA
-                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-                request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
+                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                //request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
 
                 // Codesystem angeben
                 request.setCodeSystem(new CodeSystem());
@@ -1231,8 +1231,8 @@ public class ProposalWorkflow
                 request.setCodeSystemVersionId(po.getProposal().getVocabularyId());
                 request.setLogin(new LoginType());
                 //DABACA
-                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-                request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
+                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                //request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
 
                 // Codesystem angeben
                 request.setCodeSystemEntity(new CodeSystemEntity());
@@ -1290,8 +1290,8 @@ public class ProposalWorkflow
                 UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
                 request.setLogin(new LoginType());
                 //DABACA
-                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-                request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
+                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                //request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
                 
                 // Codesystem angeben
                 request.setValueSet(new ValueSet());
@@ -1319,8 +1319,8 @@ public class ProposalWorkflow
                 UpdateConceptValueSetMembershipStatusRequestType request = new UpdateConceptValueSetMembershipStatusRequestType();
                 request.setLogin(new LoginType());
                 //DABACA
-                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-                request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
+                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                //request.getLogin().setSessionID(ProposalStatusChangeHelperController.getPscHelperController().getPscHelperBySessionID(sessionID).getCollaborationSessionID());
                 
                 // Codesystem angeben
                 request.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
