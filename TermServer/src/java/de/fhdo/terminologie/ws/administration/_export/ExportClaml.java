@@ -154,7 +154,10 @@ public class ExportClaml
 
             //Matthias: login
             rcsdRequest.setLogin(req.getLogin());
-
+            //3.2.17 added
+            rcsdRequest.setLoginAlreadyChecked(true);
+            
+            
             ReturnCodeSystemDetailsResponseType rcsdResponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(rcsdRequest);
 
             if (rcsdResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
@@ -328,9 +331,9 @@ public class ExportClaml
                             formattedXml = formattedXml.replace("&quot;", "\"");
                             //formattedXml = formattedXml.replace("&amp;", "&");
                             //formattedXml = formattedXml.replace("&lt;", "<");
-//              formattedXml = formattedXml.replace("&gt;", ">");
+                            //formattedXml = formattedXml.replace("&gt;", ">");
                             formattedXml = formattedXml.replace("\">\"", "\"&gt;\"");
-//              formattedXml = formattedXml.replace("&apos;", "'");
+                            //formattedXml = formattedXml.replace("&apos;", "'");
 
                             // Rückgabe erstellen
                             returnInfos.getExportInfos().setFilecontent(formattedXml.getBytes("UTF-8"));
@@ -494,6 +497,10 @@ public class ExportClaml
         //Date dateDummy = new Date(0); //Fragen ! trick damit etwas geliefert wird!
         //this.codeSystem.setInsertTimestamp(dateDummy);
         //ListCodeSystemConceptsResponseType conceptsResp = new ListCodeSystemConcepts().ListCodeSystemConcepts(conceptsReq, hb_session);
+        
+        //3.2.17 added
+        conceptsReq.setLoginAlreadyChecked(true);
+        
         ListCodeSystemConceptsResponseType conceptsResp = new ListCodeSystemConcepts().ListCodeSystemConcepts(conceptsReq, true);
         //!!WIESO HIER KEINE RETURN INFORMATIONS (FALSCH BENANNT)
         logger.debug("[ExportClaml.java] " + conceptsResp.getReturnInfos().getMessage());
@@ -775,6 +782,8 @@ public class ExportClaml
         conceptAssocReq.setCodeSystemEntity(cse);
         conceptAssocReq.setLogin(this.request.getLogin());
         conceptAssocReq.setDirectionBoth(true); // beide Richtungen sind wichtig!
+        //3.2.17
+        conceptAssocReq.setLoginAlreadyChecked(true);
         //for (int i = 0; i < 2; ++i)
         {
             /*if(i == 0)

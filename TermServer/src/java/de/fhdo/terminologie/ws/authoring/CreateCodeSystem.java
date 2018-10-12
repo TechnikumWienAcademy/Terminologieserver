@@ -70,7 +70,8 @@ public class CreateCodeSystem
     }
 
     // Login-Informationen auswerten (gilt für jeden Webservice)    
-    if (parameter != null)
+    //3.2.17 added second check
+    if (parameter != null && !parameter.isLoginAlreadyChecked())
     {
       if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
         return response;

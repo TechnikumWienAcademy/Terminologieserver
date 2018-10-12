@@ -79,7 +79,8 @@ public class ListConceptAssociations
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;
     LoginInfoType loginInfoType = null;
-    if (parameter != null && parameter.getLogin() != null)
+    //3.2.17 added second check
+    if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
     {
       logger.debug("check Login");
 

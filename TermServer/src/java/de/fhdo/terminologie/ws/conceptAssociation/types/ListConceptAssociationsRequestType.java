@@ -36,7 +36,18 @@ public class ListConceptAssociationsRequestType
     private LoginType login;
     private CodeSystemEntity codeSystemEntity;
     private CodeSystemEntityVersionAssociation codeSystemEntityVersionAssociation;
+    //3.2.17
+    private boolean loginAlreadyChecked;
 
+    public boolean isLoginAlreadyChecked() {
+        return loginAlreadyChecked;
+    }
+
+    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
+        this.loginAlreadyChecked = loginAlreadyChecked;
+    }
+    
+    
     /**
      * @return the login
      */

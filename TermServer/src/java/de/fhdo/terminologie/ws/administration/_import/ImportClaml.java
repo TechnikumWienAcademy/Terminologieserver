@@ -204,8 +204,10 @@ public class ImportClaml
       logger.debug(ex.getMessage());
       try
       {
-        hb_session.getTransaction().rollback();
-        logger.info("[ImportClaml.java] Rollback durchgeführt!");
+          if(!hb_session.getTransaction().wasRolledBack()){
+                hb_session.getTransaction().rollback();
+                logger.info("[ImportClaml.java] Rollback durchgeführt!");
+          }
       }
       catch (Exception exRollback)
       {
@@ -823,6 +825,9 @@ public class ImportClaml
     ccatrt.setCodeSystemEntity(etAssoc);
 
     ccatrt.setLogin(login);
+    
+    //3.2.17 added
+    ccatrt.setLoginAlreadyChecked(true);
 
     CreateConceptAssociationType ccat = new CreateConceptAssociationType();
     this.ccatrespt = ccat.CreateConceptAssociationType(ccatrt, hb_session);
@@ -1063,6 +1068,9 @@ public class ImportClaml
     request.setCodeSystemEntity(cse);
     request.setLogin(login);
 
+    //3.2.17
+    request.setLoginAlreadyChecked(true);
+    
     //Konzept erstellen
     CreateConcept cc = new CreateConcept();
     this.ccsResponse = cc.CreateConcept(request, hb_session);
@@ -1136,6 +1144,9 @@ public class ImportClaml
     request.setCodeSystemEntity(cse);
     request.setLogin(login);
 
+    //3.2.17
+    request.setLoginAlreadyChecked(true);
+    
     //Konzept erstellen
     CreateConcept cc = new CreateConcept();
     this.ccsResponse = cc.CreateConcept(request, hb_session);

@@ -66,6 +66,8 @@ public class TerminologyReleaseManager
     private de.fhdo.terminologie.ws.searchPub.CodeSystem targetCS;
     private de.fhdo.terminologie.ws.searchPub.ValueSet targetVS;
     private long importId;
+    //3.2.17 added
+    private boolean sessionIDsSet;
 
     public TerminologyReleaseManager()
     {
@@ -81,6 +83,8 @@ public class TerminologyReleaseManager
         {
             logger.error(ex);
         }
+        //3.2.17 added
+        sessionIDsSet = this.areSessionIdsSet();
     }
 
     /**
@@ -91,9 +95,10 @@ public class TerminologyReleaseManager
     private boolean isPubPlattformAliveAndUserLoggedIn()
     {
         logger.info("TermBrowser: TerminologyReleaseManager.isPubPlattformAliveAndUserLoggedIn gestartet");
-        LoginRequestType request = new LoginRequestType();
+        //3.2.17 auskommentiert
+        /*LoginRequestType request = new LoginRequestType();
         request.setLogin(new LoginType());
-        request.getLogin().setSessionID(this.pubSessionId);
+        request.getLogin().setSessionID(this.pubSessionId);*/
         Authorization port_authorizationPub = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
 
         if (port_authorizationPub == null)
@@ -101,7 +106,11 @@ public class TerminologyReleaseManager
             logger.debug("PubServicePort ist null");
             return false;
         }
+        //3.2.17
+        return true;
 
+        //3.2.17 auskommentiert
+        /*
         try
         {
             CheckLoginResponse.Return response = port_authorizationPub.checkLogin(request);
@@ -120,7 +129,7 @@ public class TerminologyReleaseManager
         {
             logger.error(ex);
             return false;
-        }
+        }*/
     }
 
     private boolean areSessionIdsSet()
@@ -156,7 +165,9 @@ public class TerminologyReleaseManager
             
             //check if session Ids are set
             logger.debug("Überprüfe ob die SessionIDs gesetzt sind.");
-            if (!this.areSessionIdsSet())
+            //3.2.17
+            //if (!this.areSessionIdsSet())
+            if(!this.sessionIDsSet)
             {
                 logger.debug("Überprüfung fehlgeschlagen, SessionIDs nicht gesetzt.");
                 ret.setSuccess(false);
@@ -622,6 +633,9 @@ public class TerminologyReleaseManager
         request_search.getLogin().setSessionID(this.sessionId);
         request_search.setCodeSystem(new CodeSystem());
         request_search.getCodeSystem().setId(codesystemId);
+        //3.2.17
+        request_search.setLoginAlreadyChecked(true);
+        
         de.fhdo.terminologie.ws.search.ListCodeSystemsResponse.Return resp = port_search.listCodeSystems(request_search);
         
         if ((resp.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.search.Status.OK)
@@ -682,6 +696,8 @@ public class TerminologyReleaseManager
         ExportCodeSystemContentRequestType req_export_cs = new ExportCodeSystemContentRequestType();
         req_export_cs.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
         req_export_cs.getLogin().setSessionID(this.sessionId);
+        //3.2.17 added
+        req_export_cs.setLoginAlreadyChecked(true);
 
         req_export_cs.setCodeSystem(new CodeSystem());
         req_export_cs.getCodeSystem().setId(codesystemId);
@@ -769,6 +785,9 @@ public class TerminologyReleaseManager
         request_searchPub.getLogin().setSessionID(this.pubSessionId);
         request_searchPub.setCodeSystem(new de.fhdo.terminologie.ws.searchPub.CodeSystem());
         request_searchPub.getCodeSystem().setName(codesystemName);
+        //3.2.17
+        request_searchPub.setLoginAlreadyChecked(true);
+        
         de.fhdo.terminologie.ws.searchPub.ListCodeSystemsResponse.Return respSearchPub = port_searchPub.listCodeSystems(request_searchPub);
 
         if (respSearchPub.getReturnInfos().getStatus().equals(Status.OK))
@@ -790,7 +809,9 @@ public class TerminologyReleaseManager
         de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType request = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
-
+        //3.2.17
+        request.setLoginAlreadyChecked(true);
+        
         // Codesystem
         request.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
         request.getCodeSystem().setId(this.targetCS.getId());
@@ -814,6 +835,8 @@ public class TerminologyReleaseManager
         request.getImportInfos().setFilecontent(exportedCs.getFilecontent());
         request.setImportId(this.importId);
 
+        
+        
         de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import = port.importCodeSystem(request);
 
         return ret_import.getReturnInfos();
@@ -839,7 +862,9 @@ public class TerminologyReleaseManager
         csv_pub.setName("Temp_import");
         cs_pub.getCodeSystemVersions().add(csv_pub);
         request.setCodeSystem(cs_pub);
-
+        //3.2.17 added
+        request.setLoginAlreadyChecked(true);
+        
         de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
 
         de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemResponse.Return ret_pub = port.createCodeSystem(request);
@@ -860,6 +885,8 @@ public class TerminologyReleaseManager
                 de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType req_remove = new de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType();
                 req_remove.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
                 req_remove.getLogin().setSessionID(this.pubSessionId);
+                //3.2.17 added
+                req_remove.setLoginAlreadyChecked(true);
 
                 req_remove.setDeleteInfo(new de.fhdo.terminologie.ws.authoringPub.DeleteInfo());
                 de.fhdo.terminologie.ws.authoringPub.CodeSystem cs_remove = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();

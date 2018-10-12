@@ -154,8 +154,6 @@ public class ImportCSV_ELGA
             byte[] bytes = parameter.getImportInfos().getFilecontent();
             logger.debug("wandle zu InputStream um...");
             InputStream is = new ByteArrayInputStream(bytes);
-            //DABACA
-            //csv = new CsvReader(is, Charset.forName("ISO-8859-1"));
             csv = new CsvReader(is, Charset.forName("UTF-8"));
             //-1 because of column headers
             int numberOfLines = -1;
@@ -178,8 +176,6 @@ public class ImportCSV_ELGA
             is = new ByteArrayInputStream(bytes);
 
             //csv = new CsvReader("C:\\Temp\\notfallrel_diagnosen.csv");
-            //DABACA
-            //csv = new CsvReader(is, Charset.forName("ISO-8859-1"));
             csv = new CsvReader(is, Charset.forName("UTF-8"));
             csv.setDelimiter(';');
             csv.setTextQualifier('\'');
@@ -459,11 +455,12 @@ public class ImportCSV_ELGA
 
                 try
                 {
-                    hb_session.getTransaction().rollback();
-
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        hb_session.getTransaction().rollback();
+                        logger.info("[ImportSVS.java] Rollback durchgeführt!");
+                    }
+                     
                     resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
-
-                    logger.info("[ImportSVS.java] Rollback durchgeführt!");
                 }
                 catch (Exception exRollback)
                 {

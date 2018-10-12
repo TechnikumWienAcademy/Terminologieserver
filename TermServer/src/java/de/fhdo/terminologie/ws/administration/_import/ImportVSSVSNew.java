@@ -1021,12 +1021,12 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                 try
                 {
-                    hb_session.getTransaction().rollback();
-
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        hb_session.getTransaction().rollback();
+                        logger.info("[ImportCSV.java] Rollback durchgeführt!");
+                    }
+                    
                     String resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
-
-                    logger.info("[ImportCSV.java] Rollback durchgeführt!");
-
                     throw new ImportException("Fehler beim Import eines Value Sets: " + ex.getLocalizedMessage()+ "\n"+resultStr);
                 }
                 catch (Exception exRollback)

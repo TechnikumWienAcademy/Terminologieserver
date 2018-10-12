@@ -430,11 +430,12 @@ public class ImportLOINC
 
                 try
                 {
-                    hb_session.getTransaction().rollback();
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        hb_session.getTransaction().rollback();
+                        logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                    }
 
                     resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
-
-                    logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
                 }
                 catch (Exception exRollback)
                 {
@@ -733,8 +734,10 @@ public class ImportLOINC
 
                     try
                     {
-                        hb_session.getTransaction().rollback();
-                        logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                        if(!hb_session.getTransaction().wasRolledBack()){
+                            hb_session.getTransaction().rollback();
+                            logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                        }
                     }
                     catch (Exception exRollback)
                     {
@@ -1280,8 +1283,10 @@ public class ImportLOINC
 
                 try
                 {
-                    hb_session.getTransaction().rollback();
-                    logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        hb_session.getTransaction().rollback();
+                        logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                    }
                 }
                 catch (Exception exRollback)
                 {

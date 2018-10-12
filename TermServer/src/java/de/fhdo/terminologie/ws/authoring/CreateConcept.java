@@ -75,39 +75,46 @@ public class CreateConcept
     // Parameter prüfen
     if (validateParameter(parameter, response) == false)
     {
-      return response; // Fehler bei den Parametern
+        return response; // Fehler bei den Parametern
     }
-    
+   
     LoginType paramLogin = null;
     CodeSystem paramCodeSystem = null;
     CodeSystemEntity paramCodeSystemEntity = null;
     List<Property> paramProperty = null;
+    //3.2.17 added
+    boolean loginAlreadyChecked = false;
+            
     if (parameter != null)
     {
       paramLogin = parameter.getLogin();
       paramCodeSystem = parameter.getCodeSystem();
       paramCodeSystemEntity = parameter.getCodeSystemEntity();
       paramProperty = parameter.getProperty();
+      //3.2.17
+      loginAlreadyChecked = parameter.isLoginAlreadyChecked();
     }
 
-    CreateConceptOrAssociationType(response, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session);
-
-
+    //3.2.17 added last parameter
+    CreateConceptOrAssociationType(response, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session, loginAlreadyChecked);
+    
     return response;
   }
 
+  //3.2.17 added boolean loginAlreadyChecked
   public void CreateConceptOrAssociationType(CreateConceptResponseType response,
           LoginType paramLogin, CodeSystem paramCodeSystem,
           CodeSystemEntity paramCodeSystemEntity,
           List<Property> paramProperty,
-          org.hibernate.Session session)
+          org.hibernate.Session session,
+          boolean loginAlreadyChecked)
   {
     boolean createHibernateSession = (session == null);
-
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;
     LoginInfoType loginInfoType = null;
-    if (paramLogin != null)
+    //3.2.17 added second check
+    if (paramLogin != null && !loginAlreadyChecked)
     {
       loginInfoType = LoginHelper.getInstance().getLoginInfos(paramLogin, session);
       loggedIn = loginInfoType != null;
@@ -116,17 +123,18 @@ public class CreateConcept
     if (logger.isDebugEnabled())
       logger.debug("Benutzer ist eingeloggt: " + loggedIn);
 
-    if (loggedIn == false)
+    //3.2.17 added first check
+    if (!loginAlreadyChecked && loggedIn == false)
     {
       // Benutzer muss für diesen Webservice eingeloggt sein
       response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
       response.getReturnInfos().setMessage("Sie müssen am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
       return;
+      
     }
 
     // TODO Lizenzen prüfen (?)
-
     try
     {
       // Hibernate-Block, Session öffnen

@@ -200,8 +200,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
             try
             {
-                hb_session.getTransaction().rollback();
-                logger.info("[ImportClaml.java] Rollback durchgeführt!");
+                if(!hb_session.getTransaction().wasRolledBack()){
+                    hb_session.getTransaction().rollback();
+                    logger.info("[ImportClaml.java] Rollback durchgeführt!");
+                }
             }
             catch (Exception exRollback)
             {
@@ -235,8 +237,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         {
             try
             {
-                hb_session.getTransaction().rollback();
-                logger.info("[ImportClaml.java] Rollback durchgeführt!");
+                if(!hb_session.getTransaction().wasRolledBack()){
+                    hb_session.getTransaction().rollback();
+                    logger.info("[ImportClaml.java] Rollback durchgeführt!");
+                }
             }
             catch (Exception exRollback)
             {
@@ -709,6 +713,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         request.setLogin(this.getLoginType());
 
+        //3.2.17 added
+        request.setLoginAlreadyChecked(true);
+        
         //Code System erstellen
         CreateCodeSystem ccs = new CreateCodeSystem();
         CreateCodeSystemResponseType resp = ccs.CreateCodeSystem(request, hb_session);
@@ -777,6 +784,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         ccatrt.setLogin(this.getLoginType());
 
+        //3.2.17 added
+        ccatrt.setLoginAlreadyChecked(true);
+        
         CreateConceptAssociationType ccat = new CreateConceptAssociationType();
         this._ccatrespt = ccat.CreateConceptAssociationType(ccatrt, hb_session);
 
@@ -798,7 +808,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         try
         {
-
             if (this._clamlClassMap.get(clazz.getCode()) != null)
             {
                 this.CreateSingleConcept(clazz);
@@ -807,7 +816,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 {
                     this.createMetaData(clazz);
                 }
-
                 this._clamlClassMap.remove(clazz.getCode());
             }
 
@@ -864,9 +872,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         while (it3.hasNext() && found == true)
         {
             rubi = (Rubric) it3.next();
-
             rubKind = (String) rubi.getKind();
-
             if (!(rubKind.equals(RubricKinds.RUBRICKINDS.preferred.getCode())
                     || rubKind.equals(RubricKinds.RUBRICKINDS.note.getCode())))
             {
@@ -1006,6 +1012,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         request.setCodeSystemEntity(cse);
         request.setLogin(this.getLoginType());
 
+        //3.2.17
+        request.setLoginAlreadyChecked(true);
+        
         //Konzept erstellen
         CreateConcept cc = new CreateConcept();
         this._ccsResponse = cc.CreateConcept(request, hb_session);
@@ -1080,6 +1089,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         request.setCodeSystemEntity(cse);
         request.setLogin(this.getLoginType());
 
+        //3.2.17
+        request.setLoginAlreadyChecked(true);
+        
         //Konzept erstellen
         CreateConcept cc = new CreateConcept();
         this._ccsResponse = cc.CreateConcept(request, hb_session);

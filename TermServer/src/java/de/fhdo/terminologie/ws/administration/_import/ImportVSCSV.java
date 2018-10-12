@@ -442,11 +442,11 @@ public class ImportVSCSV
 
         try
         {
-          hb_session.getTransaction().rollback();
-          
+            if(!hb_session.getTransaction().wasRolledBack()){
+                hb_session.getTransaction().rollback();
+                logger.info("[ImportCSV.java] Rollback durchgeführt!");
+            }
           resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
-          
-          logger.info("[ImportCSV.java] Rollback durchgeführt!");
           
           ws_response.getReturnInfos().setMessage("Fehler beim Import eines Value Sets: " + ex.getLocalizedMessage());
           ws_response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);

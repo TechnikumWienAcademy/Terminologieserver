@@ -333,11 +333,12 @@ public class ImportKAL
 
         try
         {
-          hb_session.getTransaction().rollback();
+            if(!hb_session.getTransaction().wasRolledBack()){
+                 hb_session.getTransaction().rollback();
+                 logger.info("[ImportKAL.java] Rollback durchgeführt!");
+            }
           
           resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
-          
-          logger.info("[ImportKAL.java] Rollback durchgeführt!");
         }
         catch (Exception exRollback)
         {

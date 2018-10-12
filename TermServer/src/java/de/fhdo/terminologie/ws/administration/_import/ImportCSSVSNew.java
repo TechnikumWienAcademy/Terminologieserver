@@ -629,11 +629,12 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
                 try
                 {
-
-                    hb_session.getTransaction().rollback();
-
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        hb_session.getTransaction().rollback();
+                        logger.info("[ImportSVS.java] Rollback durchgeführt!");
+                    }
+                        
                     String resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
-                    logger.info("[ImportSVS.java] Rollback durchgeführt!");
                     throw new ImportException("Fehler beim Import einer SVS-Datei: " + ex.getLocalizedMessage() + "\n"+resultStr);
                 }
                 catch (Exception exRollback)

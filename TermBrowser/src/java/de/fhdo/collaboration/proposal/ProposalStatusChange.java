@@ -19,12 +19,9 @@
  */
 package de.fhdo.collaboration.proposal;
 
+import de.fhdo.collaboration.db.CollaborationSession;
 import de.fhdo.collaboration.db.DBSysParam;
-import de.fhdo.collaboration.db.HibernateUtil;
-import de.fhdo.collaboration.db.classes.Collaborationuser;
 import de.fhdo.collaboration.db.classes.Proposal;
-import de.fhdo.collaboration.db.classes.Proposalobject;
-import de.fhdo.collaboration.db.classes.Proposalstatuschange;
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.helper.ProposalHelper;
 import de.fhdo.collaboration.workflow.ProposalWorkflow;
@@ -33,31 +30,39 @@ import de.fhdo.collaboration.workflow.TerminologyReleaseManager;
 import de.fhdo.helper.ArgumentHelper;
 import de.fhdo.helper.SessionHelper;
 import de.fhdo.interfaces.IUpdateModal;
-import java.io.IOException;
 import java.util.Date;
-import org.hibernate.Session;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.ext.AfterCompose;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Datebox;
-import org.zkoss.zul.Grid;
-import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
-import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
 /**
  *
  * @author Robert Mützner
+ * edited: bachinger (3.2.17)
  */
-public class ProposalStatusChange extends Window implements AfterCompose
+public class ProposalStatusChange extends Window implements AfterCompose, EventListener
 {
 
   private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
   private IUpdateModal updateInterface;
   private Proposal proposal;
   private long statusToId;
+  public Thread pscThread;
   boolean isDiscussion;
+  
+  //3.2.17 these fields are needed since the execution of the status change is put into a thread
+  private Desktop desk;
+  private EventListener listener;
+  private ReturnType ret;
+  private TerminologyReleaseManager releaseManager;
 
   public ProposalStatusChange()
   {
@@ -87,72 +92,99 @@ public class ProposalStatusChange extends Window implements AfterCompose
     
   public void onOkClicked()
   {
-    // Statusänderung durchführen
-    String reason = ((Textbox) getFellow("tbReason")).getValue();
-    Date dateFrom = ((Datebox)getFellow("dateVon")).getValue();
-    Date dateTo = ((Datebox)getFellow("dateBis")).getValue();
-    
-    if(dateFrom != null)
-      logger.debug("Datum von: " + dateFrom);
-    else logger.debug("Datum von: null");
-    
-    ReturnType ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, false);
-    
+    //3.2.17 blocks the GUI for the client
+    Clients.showBusy(this, "");
+    //3.2.17 enables the thread to call the Executions.schedule() method
+    this.getDesktop().enableServerPush(true);
+    //3.2.17 all these variables are needed later by the thread, which cannot access them if they are not set here
+    desk = this.getDesktop();
+    listener = this;
+    releaseManager = new TerminologyReleaseManager();
     long statusFrom = proposal.getStatus();
     Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusToId);
-    
-    if ((ret.isSuccess()) && (!rel.getStatusByStatusIdTo().getIsPublic()))
-    {
-        ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
-    }
-    
-    if ((rel.getStatusByStatusIdTo().getIsPublic())
-            && (ret.isSuccess())
-            && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
-            && (SessionHelper.getValue("pub_connection").toString().equals("connected")))
-    {
-        ReturnType transfer_success = new ReturnType();
-        transfer_success.setSuccess(false);
-        TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
-        transfer_success = releaseManager.initTransfer(proposal.getProposalobjects(), rel);
+    final boolean isUserAllowed = ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID());
+    final long collabUserId = SessionHelper.getCollaborationUserID();
+    final String collabSessionID = CollaborationSession.getInstance().getSessionID();
+    final boolean isPubConnected = (SessionHelper.getValue("pub_connection").toString().equals("connected"));
         
-        if (transfer_success.isSuccess())
-        {
-            logger.info(proposal.getVocabularyName()+ ": Freigabe erfolgreich.");
-            ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
-            Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
-        }
-        else if (!transfer_success.isSuccess())
-        {
-            logger.info(proposal.getVocabularyName()+ ": Freigabe fehlgeschlagen." +  transfer_success.getMessage());
-            Messagebox.show(transfer_success.getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
-            proposal.setStatus((int) statusToId);
-            //setting status back because transfer to public was not successful
-            ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , dateFrom, dateTo, false);
-            if(retResetStatus.isSuccess())
-            {
-                logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
-                Messagebox.show("Status wurde nicht geändert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+    pscThread = new Thread(){
+        @Override
+        public void run(){
+            // Statusänderung durchführen
+            String reason = ((Textbox) getFellow("tbReason")).getValue();
+            Date dateFrom = ((Datebox)getFellow("dateVon")).getValue();
+            Date dateTo = ((Datebox)getFellow("dateBis")).getValue();
+    
+            if(dateFrom != null)
+                logger.debug("Datum von: " + dateFrom);
+            else 
+                logger.debug("Datum von: null");
+            
+            
+            //3.2.17 added collabUserId and collabSessionID parameter
+            ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, false, collabUserId, collabSessionID);
+    
+            long statusFrom = proposal.getStatus();
+            Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusToId);
                 
-                //change ReturnType to prevent Messagebox in ProposalView.upate()
-                ret = new ReturnType();
-                ret.setSuccess(true);
-                ret.setMessage("InlinePropUpdate");
+            if ((ret.isSuccess()) && (!rel.getStatusByStatusIdTo().getIsPublic()))
+            {
+                ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
             }
+            if ((rel.getStatusByStatusIdTo().getIsPublic())
+                && (ret.isSuccess())
+                && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
+                //3.2.17 commented out since this is checked before the thread is started
+                    //&& (SessionHelper.getValue("pub_connection").toString().equals("connected"))
+                    && isPubConnected)
+            {
+                ReturnType transfer_success = new ReturnType();
+                transfer_success.setSuccess(false);
+                //3.2.17 commented out since this is invoked before the thread is started
+                //TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
+                transfer_success = releaseManager.initTransfer(proposal.getProposalobjects(), rel);
+                
+                if (transfer_success.isSuccess())
+                {
+                    logger.info(proposal.getVocabularyName()+ ": Freigabe erfolgreich.");
+                    ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
+                    //3.2.17 commented out since this is done in the Executions.schedule
+                    //Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+                    Executions.schedule(desk, listener, new Event("SUCCESS"));
+                }
+                else if (!transfer_success.isSuccess())
+                {
+                    logger.info(proposal.getVocabularyName()+ ": Freigabe fehlgeschlagen." +  transfer_success.getMessage());
+                    //3.2.17 commented out since this is done in the Executions.schedule
+                    //Messagebox.show(transfer_success.getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
+                    Executions.schedule(desk, listener, new Event("FAILURESPLIT" + transfer_success.getMessage()));
+                    proposal.setStatus((int) statusToId);
+                    //setting status back because transfer to public was not successful
+                    //3.2.17 added collabUserId and collabSessionID parameter
+                    ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , dateFrom, dateTo, false, collabUserId, collabSessionID);
+                    if(retResetStatus.isSuccess())
+                    {
+                        logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
+                        //3.2.17 commented out since this is done in the Executions.schedule
+                        //Messagebox.show("Status wurde nicht geändert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+                        Executions.schedule(desk, listener, new Event("RESET"));
+                        
+                        //change ReturnType to prevent Messagebox in ProposalView.upate()
+                        ret = new ReturnType();
+                        ret.setSuccess(true);
+                        ret.setMessage("InlinePropUpdate");
+                    }
+                }
+            }
+
+            Executions.schedule(desk, listener, new Event("finish"));
         }
-    }
-
-    // Fenster schließen
-    this.setVisible(false);
-    this.detach();
-
-    // Vorschlag-Fenster aktualisieren
-    if (updateInterface != null)
-    {
-        updateInterface.update(ret, false);
-    }
-
-  }
+    };
+    if(isUserAllowed)
+        pscThread.start();
+    else
+        Executions.schedule(desk, listener, new Event("finish"));
+}
 
   /**
    * @param updateInterface the updateInterface to set
@@ -161,4 +193,31 @@ public class ProposalStatusChange extends Window implements AfterCompose
   {
     this.updateInterface = updateInterface;
   }
+  
+   public void onEvent(Event event) throws Exception
+    {
+        if(event.getName().contains("finish")){
+            // Fenster schließen
+            this.setVisible(false);
+            this.detach();
+
+            // Vorschlag-Fenster aktualisieren
+            if (updateInterface != null)
+            {
+               updateInterface.update(ret, false);
+            }
+            Clients.clearBusy(this);
+        }
+        else if(event.getName().contains("SUCCESS")){
+            Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+        }
+        else if(event.getName().contains("FAILURE")){
+            String[] message = event.getName().split("SPLIT");
+            Messagebox.show(message[message.length-1], "Freigabe", Messagebox.OK, Messagebox.ERROR);
+        }
+        else if(event.getName().contains("RESET")){
+            Messagebox.show("Status wurde nicht geändert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
+        }
+    }
+   
 }

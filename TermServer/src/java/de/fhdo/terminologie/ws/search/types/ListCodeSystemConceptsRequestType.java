@@ -57,6 +57,17 @@ public class ListCodeSystemConceptsRequestType
   @XmlElement(required = false)
   private SortingType sortingParameter;
   
+  @XmlElement(required = false)
+  //3.2.17 added
+    private boolean loginAlreadyChecked;
+
+    public boolean isLoginAlreadyChecked() {
+        return loginAlreadyChecked;
+    }
+
+    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
+        this.loginAlreadyChecked = loginAlreadyChecked;
+    }
   
   /**
    * @return the login

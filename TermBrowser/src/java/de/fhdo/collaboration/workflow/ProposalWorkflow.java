@@ -216,6 +216,8 @@ public class ProposalWorkflow
 
                     // Codesystem angeben
                     request.setCodeSystem(cs);
+                    //3.2.17
+                    request.setLoginAlreadyChecked(true);
 
                     // Webservice aufrufen
                     CreateCodeSystemResponse.Return ret = createCodeSystem(request);
@@ -393,6 +395,9 @@ public class ProposalWorkflow
                         request.getCodeSystemEntity().getCodeSystemVersionEntityMemberships().add(csc.getCodeSystemEntityVersion().getCodeSystemEntity().getCodeSystemVersionEntityMemberships().get(0));
                     }
 
+                    //3.2.17
+                    request.setLoginAlreadyChecked(true);
+                    
                     // Webservice aufrufen
                     CreateConceptResponse.Return ret = WebServiceHelper.createConcept(request);
 
@@ -870,7 +875,8 @@ public class ProposalWorkflow
         return returnInfos;
     }
 
-    public ReturnType changeProposalStatus(Proposal proposal, long statusTo, String reason, Date discDateFrom, Date discDateTo, boolean isBatch)
+    //3.2.17 added collabuserID parameter and collaborationSession 
+    public ReturnType changeProposalStatus(Proposal proposal, long statusTo, String reason, Date discDateFrom, Date discDateTo, boolean isBatch, long collabUserID, String collabSessionID)
     {
         ReturnType returnInfos = new ReturnType();
 
@@ -890,13 +896,15 @@ public class ProposalWorkflow
                 logger.debug("Statusänderung möglich");
             }
 
+            //3.2.17 AUSKOMMMENTIERT die überprüfung der rechte erfolgt nun schon im proposalstatuschange onokclicked()
+            /*
             // 2. Rechte prüfen, ob angemeldeter Benutzer die Statusänderung durchführen darf
             if (ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID()))
             {
                 if (logger.isDebugEnabled())
                 {
                     logger.debug("Rechte vorhanden!");
-                }
+                }*/
 
                 // 3. Statusänderung durchführen
                 Session hb_session = HibernateUtil.getSessionFactory().openSession();
@@ -1038,7 +1046,9 @@ public class ProposalWorkflow
                         //psc.getProposal().setId(proposal.getId());
                         psc.setChangeTimestamp(new Date());
                         psc.setCollaborationuser(new Collaborationuser());
-                        psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
+                        //3.2.17 replaced commented lined with this one
+                        psc.getCollaborationuser().setId(collabUserID);
+                        //psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
                         psc.setProposalStatusFrom((int) statusFrom);
                         psc.setProposalStatusTo((int) statusTo);
                         psc.setReason(reason);
@@ -1102,7 +1112,8 @@ public class ProposalWorkflow
 
                         for (Proposalobject po : terminologies)
                         {
-                            statusChangeSuccess = changeTerminologyServerStatus(rel.getStatusByStatusIdTo(), po, returnInfos);
+                            //3.2.17 added collabSessionID parameter
+                            statusChangeSuccess = changeTerminologyServerStatus(rel.getStatusByStatusIdTo(), po, returnInfos, collabSessionID);
                             if (!statusChangeSuccess)
                             {
                                 break;
@@ -1113,7 +1124,8 @@ public class ProposalWorkflow
                 catch (Exception ex)
                 {
                     LoggingOutput.outputException(ex, this);
-                    hb_session.getTransaction().rollback();
+                    if(!hb_session.getTransaction().wasRolledBack())
+                        hb_session.getTransaction().rollback();
 
                     returnInfos.setSuccess(false);
                     returnInfos.setMessage("Fehler beim Ändern des Status: " + ex.getLocalizedMessage());
@@ -1127,8 +1139,9 @@ public class ProposalWorkflow
 
                 returnInfos.setSuccess(true);
                 returnInfos.setMessage("Status erfolgreich geändert zu: " + rel.getStatusByStatusIdTo().getStatus() + "\n\nAndere Benutzer wurden über die Statusänderung per Email informiert.");
-            }
-            else
+            //}
+            //3.2.17 commented out
+            /*else
             {
                 // Statusänderung nicht möglich, da keine Rechte
                 if (logger.isDebugEnabled())
@@ -1138,7 +1151,7 @@ public class ProposalWorkflow
 
                 returnInfos.setMessage("Sie besitzen nicht die nötigen Rechte für diese Statusänderung!");
                 return returnInfos;
-            }
+            }*/
 
         }
         else
@@ -1158,7 +1171,8 @@ public class ProposalWorkflow
      * @param obj
      * @param returnInfos
      */
-    private static boolean changeTerminologyServerStatus(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po, ReturnType returnInfos)
+    //3.2.17 added collaborationsession parameter
+    private static boolean changeTerminologyServerStatus(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po, ReturnType returnInfos, String collabSessionID)
     {
         logger.debug("changeTerminologyServerStatus(), classId: " + po.getClassId() + ", classname: " + po.getClassname());
         PO_CLASSNAME classname = PO_CLASSNAME.get(po.getClassname());
@@ -1191,8 +1205,12 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateCodeSystemVersionStatusRequestType request = new UpdateCodeSystemVersionStatusRequestType();
                 request.setLogin(new LoginType());
-                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-
+                //3.2.17 
+                request.getLogin().setSessionID(collabSessionID);
+                request.setLoginAlreadyChecked(true);
+                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                
+                
                 // Codesystem angeben
                 request.setCodeSystem(new CodeSystem());
                 CodeSystemVersion csv = new CodeSystemVersion();
@@ -1389,8 +1407,10 @@ public class ProposalWorkflow
                 {
                     ExportCodeSystemContentRequestType req_export_cs = new ExportCodeSystemContentRequestType();
                     req_export_cs.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
-                    req_export_cs.getLogin().setSessionID(SessionHelper.getSessionId());
-
+                    req_export_cs.getLogin().setSessionID(SessionHelper.getSessionId());                    
+                    //3.2.17 added
+                    req_export_cs.setLoginAlreadyChecked(true);                    
+                    
                     req_export_cs.setCodeSystem(new CodeSystem());
                     req_export_cs.getCodeSystem().setId(resp.getCodeSystem().get(0).getId());
                     CodeSystemVersion csv = new CodeSystemVersion();

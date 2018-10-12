@@ -49,7 +49,8 @@ public class UpdateCodeSystemVersionStatus
     response.setReturnInfos(new ReturnType());
 
     // Login-Informationen auswerten (gilt für jeden Webservice)    
-    if (parameter != null)
+    //3.2.17 added second check
+    if (parameter != null && !parameter.getLoginAlreadyChecked())
     {
       if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
         return response;
@@ -122,19 +123,10 @@ public class UpdateCodeSystemVersionStatus
     {
         Response.getReturnInfos().setMessage("CodeSystem darf nicht NULL sein!");
         erfolg = false;
-        //DABACA
         Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
         Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         return erfolg;
-        //DABACA END
     }
-    //EXTERMINATUS 3.2.6
-//    else if (codeSystem.getId() == null || codeSystem.getId() == 0)
-//    {
-//      Response.getReturnInfos().setMessage(
-//              "Es muss eine ID für das CodeSystem angegeben werden!");
-//      erfolg = false;
-//    }
 
     Set<CodeSystemVersion> csvSet = codeSystem.getCodeSystemVersions();
     if (csvSet != null)

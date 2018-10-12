@@ -17,11 +17,47 @@
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSCSV.java</file>
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
         </group>
-        <group>
-            <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
-        </group>
         <group name="Version 3.2">
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
+        </group>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/types/CreateCodeSystemRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSSVS.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLOINCNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportICDBMGAT.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ExportCodeSystemContent.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateConcept.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/types/ListCodeSystemConceptsRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_export/ExportClaml.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListCodeSystems.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSSVSNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSSVSNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportKBV.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/types/CreateConceptAssociationTypeRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClaml.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSSVS.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSCSV.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSV_ELGA.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportICDBMGATNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateCodeSystem.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportCSV_FHDo.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportCodeSystem.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/RemoveTerminologyOrConcept.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/types/UpdateCodeSystemVersionStatusRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/types/ImportCodeSystemRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLOINC.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ReturnCodeSystemDetails.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/types/RemoveTerminologyOrConceptRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLeiKatAt.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListCodeSystemConcepts.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/types/ExportCodeSystemContentRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportCodeSystemNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/UpdateCodeSystemVersionStatus.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/types/ListCodeSystemsRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportKAL.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/types/ReturnCodeSystemDetailsRequestType.java</file>
         </group>
     </open-files>
 </project-private>
