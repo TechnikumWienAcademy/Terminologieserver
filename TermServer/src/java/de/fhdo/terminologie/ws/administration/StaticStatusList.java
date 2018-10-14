@@ -37,7 +37,10 @@ public class StaticStatusList
         {
             if((!entry.getValue().importRunning) && (entry.getValue().getImportTotal() == entry.getValue().getImportCount()))
             {
-                _statusList.remove(entry.getKey());
+                try{
+                    _statusList.remove(entry.getKey());
+                }
+                catch(Exception e){}
             }
         }
         
