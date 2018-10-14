@@ -69,8 +69,9 @@ public class CreateValueSetContent
     if (validateParameter(parameter, response) == false)
       return response;
 
-    // Login-Informationen auswerten (gilt für jeden Webservice)    
-    if (parameter != null)
+    // Login-Informationen auswerten (gilt für jeden Webservice)
+    //3.2.17 added second check
+    if (parameter != null && !parameter.isLoginAlreadyChecked())
     {
       if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true, session) == false)
         return response;

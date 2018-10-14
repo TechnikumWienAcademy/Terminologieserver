@@ -50,11 +50,11 @@ public class ListValueSets
         {
             logger.info("====== ListValueSets gestartet ======");
         }
-
+        
         // Return-Informationen anlegen
         ListValueSetsResponseType response = new ListValueSetsResponseType();
         response.setReturnInfos(new ReturnType());
-
+        
         // Parameter prüfen
         if (validateParameter(parameter, response) == false)
         {
@@ -64,8 +64,14 @@ public class ListValueSets
         // Login-Informationen auswerten (gilt für jeden Webservice)
         boolean loggedIn = false;
 
+        //3.2.17 added
+        if(parameter != null && parameter.isLoginAlreadyChecked()){
+            loggedIn = true;
+        }
+        
+        //3.2.17 added second check
         LoginInfoType loginInfoType = null;
-        if (parameter != null && parameter.getLogin() != null)
+        if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
         {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;

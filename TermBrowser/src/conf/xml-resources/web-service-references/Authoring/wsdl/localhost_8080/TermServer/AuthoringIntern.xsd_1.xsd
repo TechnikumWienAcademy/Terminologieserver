@@ -365,6 +365,7 @@
 <xs:sequence>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -495,6 +496,7 @@
 <xs:sequence>
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -688,6 +690,7 @@
 <xs:element name="codeSystemEntity" type="ns1:codeSystemEntity" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
 <xs:element name="property" type="ns1:property" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -716,6 +719,7 @@
 <xs:element name="conceptValueSetMembership" type="ns1:conceptValueSetMembership" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -767,6 +771,7 @@
 <xs:sequence>
 <xs:element name="deleteInfo" type="tns:deleteInfo" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -801,6 +806,7 @@
 <xs:sequence>
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 

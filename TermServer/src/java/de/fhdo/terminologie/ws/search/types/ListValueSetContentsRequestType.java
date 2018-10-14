@@ -45,6 +45,16 @@ public class ListValueSetContentsRequestType
   @XmlElement(required = false)
   private Boolean readMetadataLevel;
   
+  @XmlElement(required = false)
+  private boolean loginAlreadyChecked;
+
+    public boolean isLoginAlreadyChecked() {
+        return loginAlreadyChecked;
+    }
+
+    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
+        this.loginAlreadyChecked = loginAlreadyChecked;
+    }
 
   /**
    * @return the login

@@ -334,6 +334,8 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 //ConceptLinking
                 CreateValueSetContentRequestType request = new CreateValueSetContentRequestType();
                 request.setLogin(this.getLoginType());
+                //3.2.17 added
+                request.setLoginAlreadyChecked(true);
 
                 //Nur letzte Version
                 ValueSet vs = this.getValueset();

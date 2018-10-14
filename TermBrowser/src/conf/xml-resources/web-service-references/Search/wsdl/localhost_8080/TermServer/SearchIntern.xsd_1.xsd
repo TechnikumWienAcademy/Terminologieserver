@@ -290,6 +290,7 @@
 <xs:element name="codeSystemConceptSearch" type="xs:boolean" minOccurs="0"/>
 <xs:element name="term" type="xs:string" minOccurs="0"/>
 <xs:element name="code" type="xs:string" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -407,6 +408,7 @@
 <xs:element name="valueSet" type="ns1:valueSet"/>
 <xs:element name="sortingParameter" type="tns:sortingType" minOccurs="0"/>
 <xs:element name="readMetadataLevel" type="xs:boolean" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -651,6 +653,7 @@
 <xs:sequence>
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -729,6 +732,7 @@
 <xs:sequence>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 

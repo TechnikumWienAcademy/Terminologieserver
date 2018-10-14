@@ -580,6 +580,8 @@ public class ProposalWorkflow
                             de.fhdo.terminologie.ws.authoring.LoginType login = new de.fhdo.terminologie.ws.authoring.LoginType();
                             login.setSessionID(CollaborationSession.getInstance().getSessionID());
                             parameter2.setLogin(login);
+                            //3.2.17 added
+                            parameter2.setLoginAlreadyChecked(true);
 
                             // valueset
                             ValueSet vs = new ValueSet();
@@ -1237,8 +1239,10 @@ public class ProposalWorkflow
                 UpdateConceptStatusRequestType request = new UpdateConceptStatusRequestType();
                 request.setCodeSystemVersionId(po.getProposal().getVocabularyId());
                 request.setLogin(new LoginType());
-                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-
+                //3.2.17
+                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                request.getLogin().setSessionID(collabSessionID);
+                    
                 // Codesystem angeben
                 request.setCodeSystemEntity(new CodeSystemEntity());
                 CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
@@ -1294,14 +1298,18 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
                 request.setLogin(new LoginType());
-                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-
+                //3.2.17
+                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                request.getLogin().setSessionID(collabSessionID);
+                
                 // Codesystem angeben
                 request.setValueSet(new ValueSet());
                 ValueSetVersion vsv = new ValueSetVersion();
                 vsv.setVersionId(po.getClassId());
                 vsv.setStatus(newStatus);
                 request.getValueSet().getValueSetVersions().add(vsv);
+                //3.2.17 added
+                request.setLoginAlreadyChecked(true);
 
                 // Webservice aufrufen
                 UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
@@ -1321,8 +1329,10 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateConceptValueSetMembershipStatusRequestType request = new UpdateConceptValueSetMembershipStatusRequestType();
                 request.setLogin(new LoginType());
-                request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-
+                //3.2.17
+                //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
+                request.getLogin().setSessionID(collabSessionID);
+                
                 // Codesystem angeben
                 request.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
                 request.getCodeSystemEntityVersion().getConceptValueSetMemberships().clear();
@@ -1645,6 +1655,9 @@ public class ProposalWorkflow
                     valueSetId = p.getClassId();
                 }
             }
+            //3.2.17 added
+            request_search.setLoginAlreadyChecked(true);
+            
             ListValueSetsResponse.Return resp = port_search.listValueSets(request_search);
 
             if ((resp.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.search.Status.OK)
@@ -1690,6 +1703,8 @@ public class ProposalWorkflow
 
                     requestVsContent.setValueSet(valueSet);
                     requestVsContent.setReadMetadataLevel(false);
+                    //3.2.17 added
+                    requestVsContent.setLoginAlreadyChecked(true);
 
                     ListValueSetContentsResponse.Return responseVsContent = WebServiceHelper.listValueSetContents(requestVsContent);
 
@@ -1751,6 +1766,9 @@ public class ProposalWorkflow
 
                     logger.debug("Export-Service-Aufruf...");
 
+                    //3.2.17 added
+                    req_export_vs.setLoginAlreadyChecked(true);
+                    
                     // WS-Aufruf
                     ExportValueSetContentResponse.Return response = WebServiceHelper.exportValueSetContent(req_export_vs);
                     if (response.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.administration.Status.OK))
@@ -1846,6 +1864,9 @@ public class ProposalWorkflow
                                 request.getImportInfos().setFilecontent(response.getExportInfos().getFilecontent());
                                 request.getImportInfos().setRole(CODES.ROLE_TRANSFER);
                                 request.getImportInfos().setOrder(Boolean.TRUE);
+                                
+                                //3.2.17 added
+                                request.setLoginAlreadyChecked(true);
 
                                 de.fhdo.terminologie.ws.administrationPub.ImportValueSetResponse.Return ret_import = port.importValueSet(request);
                                 if (ret_import.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))

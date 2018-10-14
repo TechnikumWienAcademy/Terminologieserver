@@ -30,6 +30,15 @@ public class ListValueSetsRequestType
 {
   private LoginType login;
   private ValueSet valueSet;
+  private boolean loginAlreadyChecked;
+
+    public boolean isLoginAlreadyChecked() {
+        return loginAlreadyChecked;
+    }
+
+    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
+        this.loginAlreadyChecked = loginAlreadyChecked;
+    }
   
   public ListValueSetsRequestType()
   {
