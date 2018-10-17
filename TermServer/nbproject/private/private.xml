@@ -20,14 +20,6 @@
         <group name="Version 3.2">
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
         </group>
-        <group>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateValueSetContent.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListValueSets.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportStatus.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSSVSNew.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportCodeSystemNew.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/StaticStatusList.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

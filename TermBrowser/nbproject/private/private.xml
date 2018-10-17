@@ -3,6 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="Version 3.2"/>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/proposal/ProposalStatusChange.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/conf/xml-resources/web-service-references/Authoring/wsdl/localhost_8080/TermServer/AuthoringIntern.xsd_1.xsd</file>
+        </group>
     </open-files>
 </project-private>

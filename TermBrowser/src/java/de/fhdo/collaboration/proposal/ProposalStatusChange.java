@@ -28,9 +28,17 @@ import de.fhdo.collaboration.workflow.ProposalWorkflow;
 import de.fhdo.collaboration.workflow.ReturnType;
 import de.fhdo.collaboration.workflow.TerminologyReleaseManager;
 import de.fhdo.helper.ArgumentHelper;
+import de.fhdo.helper.LoginHelper;
 import de.fhdo.helper.SessionHelper;
+import de.fhdo.helper.WebServiceUrlHelper;
 import de.fhdo.interfaces.IUpdateModal;
+import de.fhdo.terminologie.ws.authorizationPub.Authorization;
+import de.fhdo.terminologie.ws.authorizationPub.CheckLoginResponse;
+import de.fhdo.terminologie.ws.authorizationPub.LoginRequestType;
+import de.fhdo.terminologie.ws.authorizationPub.LoginType;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -63,6 +71,8 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
   private EventListener listener;
   private ReturnType ret;
   private TerminologyReleaseManager releaseManager;
+  //3.2.18
+  boolean running;
 
   public ProposalStatusChange()
   {
@@ -81,7 +91,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
       logger.debug("proposal-ID: " + proposal.getId());
     }
 
-
+    running = false;
   }
 
     public void afterCompose()
@@ -180,8 +190,29 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             Executions.schedule(desk, listener, new Event("finish"));
         }
     };
-    if(isUserAllowed)
+    if(isUserAllowed){
+        running = true;
         pscThread.start();
+        //3.2.18 this thread keeps the socket from disconnecting
+        Thread pingThread = new Thread(){
+            @Override
+            public void run(){
+                while(running){
+                    try {
+                    LoginRequestType request = new LoginRequestType();
+                    request.setLogin(new LoginType());
+                    request.getLogin().setSessionID(SessionHelper.getSessionId());
+                    Authorization port_authorizationPub = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
+                    CheckLoginResponse.Return response = port_authorizationPub.checkLogin(request);
+                    //rate of the ping
+                    this.sleep(60*1000);
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
+        };
+        pingThread.start();
+    }
     else
         Executions.schedule(desk, listener, new Event("finish"));
 }
@@ -197,6 +228,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
    public void onEvent(Event event) throws Exception
     {
         if(event.getName().contains("finish")){
+            running = false;
             // Fenster schlieﬂen
             this.setVisible(false);
             this.detach();
@@ -209,13 +241,16 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             Clients.clearBusy(this);
         }
         else if(event.getName().contains("SUCCESS")){
+            running = false;
             Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
         }
         else if(event.getName().contains("FAILURE")){
+            running = false;
             String[] message = event.getName().split("SPLIT");
             Messagebox.show(message[message.length-1], "Freigabe", Messagebox.OK, Messagebox.ERROR);
         }
         else if(event.getName().contains("RESET")){
+            running = false;
             Messagebox.show("Status wurde nicht ge‰ndert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
         }
     }

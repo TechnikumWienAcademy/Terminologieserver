@@ -23,7 +23,7 @@
     </language-config>
 
     <session-config>
-        <session-timeout>3600</session-timeout><!-- 3600(1h) -->
+        <session-timeout>10800</session-timeout><!-- 3600(1h) -->
         <device-type>ajax</device-type>
         <timeout-message>Ihre Sitzung ist aus Sicherheitsgründen abgelaufen. Bitte laden Sie die Seite erneut.</timeout-message>
     </session-config>

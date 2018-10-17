@@ -6,6 +6,11 @@
             <file>file:/C:/A_Dev/terminologieserver/TermAdmin/src/java/de/fhdo/gui/admin/modules/ImportClaML.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermAdmin/src/java/de/fhdo/gui/admin/modules/collaboration/workflow/ProposalWorkflow.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermAdmin/src/conf/xml-resources/web-service-references/Authoring_1/wsdl/localhost_8080/TermServer/Authoring.xsd_1.xsd</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermAdmin/src/conf/xml-resources/web-service-references/Authoring/wsdl/localhost_8080/TermServer/Authoring.xsd_1.xsd</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermAdmin/src/conf/xml-resources/web-service-references/Authoring/wsdl/localhost_8080/TermServer/AuthoringIntern.xsd_1.xsd</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermAdmin/web/WEB-INF/wsdl/localhost_8080/TermServer/AuthoringIntern.xsd_1.xsd</file>
+        </group>
     </open-files>
 </project-private>

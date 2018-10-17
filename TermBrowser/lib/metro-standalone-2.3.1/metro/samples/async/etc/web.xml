@@ -62,6 +62,6 @@
         <url-pattern>/addnumbers</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>60</session-timeout>
+        <session-timeout>240</session-timeout>
     </session-config>
 </web-app>
