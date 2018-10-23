@@ -5,7 +5,7 @@
         <group name="Version 3.2"/>
         <group>
             <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/proposal/ProposalStatusChange.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/conf/xml-resources/web-service-references/Authoring/wsdl/localhost_8080/TermServer/AuthoringIntern.xsd_1.xsd</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/Definitions.java</file>
         </group>
     </open-files>
 </project-private>

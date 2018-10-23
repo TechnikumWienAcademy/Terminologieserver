@@ -20,6 +20,8 @@
         <group name="Version 3.2">
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+        </group>
     </open-files>
 </project-private>
