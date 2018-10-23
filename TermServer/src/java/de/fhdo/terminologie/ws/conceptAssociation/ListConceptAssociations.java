@@ -36,8 +36,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.hibernate.Query;
-import org.zkoss.zk.ui.Executions;
-import org.zkoss.zul.Window;
 
 /**
  *
@@ -81,7 +79,8 @@ public class ListConceptAssociations
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;
     LoginInfoType loginInfoType = null;
-    if (parameter != null && parameter.getLogin() != null)
+    //3.2.17 added second check
+    if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
     {
       logger.debug("check Login");
 
@@ -460,6 +459,9 @@ public class ListConceptAssociations
 
         }
         // Direction Both Ende
+
+
+
         response.setCodeSystemEntityVersionAssociation(returnList);
         if (returnList.isEmpty())
         {

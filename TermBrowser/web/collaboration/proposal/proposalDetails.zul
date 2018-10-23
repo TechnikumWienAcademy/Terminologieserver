@@ -6,7 +6,6 @@
      use="de.fhdo.collaboration.proposal.ProposalDetails"
      title="${labels.collab.newProposal}" border="normal">
     <borderlayout>
-        <timer repeats="true" running="true" delay="1000" onTimer="System.out.println(new Date().toString())"/>
       <center border="0">
         <div>
         <groupbox mold="3d" width="100%" closable="false">

@@ -1,40 +1,42 @@
-﻿Changelog 3.2.16
+﻿Changelog 3.2.18
 	-Bugfixes
-<<<<<<< HEAD
-		.) EHTSOID-156: patientrecord.css wird nicht mehr aufgerufen.
-		.) EHTSOID-142: Funktionen aus den Versionen 3.2.13 bis 3.2.15 wurden wieder entfernt.
-		.) EHTSOID-158: Unnötige Rollbacks werden nicht mehr durchgeführt.
-=======
-		.) EHTSOID-142: Funktionen aus den Versionen 3.2.13 bis 3.2.15 wurden wieder entfernt.
-		.) EHTSOID-156: patientrecord.css wird nicht mehr aufgerufen.
-		.) EHTSOID-157: Erfolgreiche Freigabe-Meldungen wurden entfernt, wenn die Freigabe noch nicht abgeschlossen wurde.
-		.) EHTSOID-158: Unnötige Rollbacks werden nicht mehr durchgeführt.
-		.) EHTSOID-159: Durch die Änderung der Freigabe sollten auch keine Socket-Timeouts mehr auftreten.
-		.) EHTSOID-160: Die Freigabe erfolgt jetzt analog zum Import.
->>>>>>> 3.2.12
+		.) EHTSOID-160: Die Freigabe wurde weiter verändert um die bestehenden Probleme zu beheben.
+
+Changelog 3.2.17
+    -Bugfixes
+        .) EHTSOID-160: Die Freigabe wurde weiter verändert um die bestehenden Probleme zu beheben.
+
+Changelog 3.2.16
+    -Bugfixes
+        .) EHTSOID-142: Funktionen aus den Versionen 3.2.13 bis 3.2.15 wurden wieder entfernt.
+        .) EHTSOID-156: patientrecord.css wird nicht mehr aufgerufen.
+        .) EHTSOID-157: Erfolgreiche Freigabe-Meldungen wurden entfernt, wenn die Freigabe noch nicht abgeschlossen wurde.
+        .) EHTSOID-158: Unnötige Rollbacks werden nicht mehr durchgeführt.
+        .) EHTSOID-159: Durch die Änderung der Freigabe sollten auch keine Socket-Timeouts mehr auftreten.
+        .) EHTSOID-160: Die Freigabe erfolgt jetzt analog zum Import.
 
 Changelog 3.2.15
-	-Bugfixes
-		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+    -Bugfixes
+        .) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
 
 Changelog 3.2.14
-	-Bugfixes
-		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+    -Bugfixes
+        .) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
 
 Changelog 3.2.13
-	-Bugfixes
-		.) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
+    -Bugfixes
+        .) EHTSOID-142: Eine zusätzliche Funktion soll ausschließen, dass der Fehler vom Framework der Oberfläche kommt.
 
 Changelog 3.2.12
-	-Bugfixes
-		.) EHTSOID-144: Es werden nun keine falschen Ergebnisse mehr angezeigt.
-		.) EHTSOID-142: Zusätzliche Fehlerbehandlungen bei der Freigabe eingefügt.
+    -Bugfixes
+        .) EHTSOID-144: Es werden nun keine falschen Ergebnisse mehr angezeigt.
+        .) EHTSOID-142: Zusätzliche Fehlerbehandlungen bei der Freigabe eingefügt.
 
 Changelog 3.2.11
-	-Bugfixes
-		.) EHTSOID-141: Es erscheint kein Fehler mehr, wenn die Suche verwendet wird.
-	-Änderungen
-		.) EHTSOID-118: Logging von Stack-Traces aktiviert.
+    -Bugfixes
+        .) EHTSOID-141: Es erscheint kein Fehler mehr, wenn die Suche verwendet wird.
+    -Änderungen
+        .) EHTSOID-118: Logging von Stack-Traces aktiviert.
 
 Changelog 3.2.10
 	-Bugfixes

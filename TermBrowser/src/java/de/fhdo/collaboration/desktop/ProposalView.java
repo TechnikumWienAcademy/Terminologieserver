@@ -61,14 +61,7 @@ import org.zkoss.zul.Window;
  */
 public class ProposalView extends Window implements AfterCompose, IUpdateModal
 {
-private int test = 0;
-    
-public int testTimer(boolean increment){
-    if(increment)
-        test++;
-    return test;
-}
-    
+
   private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
   private IUpdateModal updateInterface;
   private Proposal proposal;
@@ -416,7 +409,6 @@ public int testTimer(boolean increment){
       ReturnType ret = (ReturnType) o;
       if (ret.isSuccess())
       {
-        //DABACA
         if(!(ret.getMessage().equals("InlinePropUpdate") || ret.getMessage().contains("gelöscht")))
             Messagebox.show("Status erfolgreich geändert.", "Status ändern", Messagebox.OK, Messagebox.INFORMATION);
 				
@@ -440,7 +432,6 @@ public int testTimer(boolean increment){
       }
       else
       {
-        //DABACA 
         Messagebox.show(ret.getMessage(), "Status ändern", Messagebox.OK, Messagebox.ERROR);
       }
     }

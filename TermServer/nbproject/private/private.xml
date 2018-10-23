@@ -17,6 +17,7 @@
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSCSV.java</file>
             <file>file:/C:/A_Dev/TermServer/branches/terminologie_3_2_0/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
         </group>
+<<<<<<< HEAD
         <group/>
         <group name="Version 3.2">
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLOINCNew.java</file>
@@ -35,6 +36,13 @@
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClaml.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSCSV.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateConcept.java</file>
+=======
+        <group name="Version 3.2">
+            <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
+        </group>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+>>>>>>> ba08c0540c37cb53307ca47ca788efe11503122a
         </group>
     </open-files>
 </project-private>

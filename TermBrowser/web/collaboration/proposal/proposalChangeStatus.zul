@@ -37,8 +37,8 @@
         </grid>
       </center>
       <south height="28px" border="0" collapsible="true">
-        <div align="right" style="margin-right:0px;">          
-            <button label="Statusänderung unwiderruflich durchführen" onClick="winProposalChangeStatus.onOkClicked()" autodisable="self"
+        <div align="right" style="margin-right:0px;">
+          <button label="Statusänderung unwiderruflich durchführen" onClick="winProposalChangeStatus.onOkClicked()" autodisable="self"
           />
           <!--<button label="Abbrechen" onClick="winProposalChangeStatus.onCancelClicked()" autodisable="self" />-->
         </div>

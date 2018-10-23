@@ -81,8 +81,13 @@ public class ListValueSetContents
 
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;
+    
+    //3.2.17 added
+    if(parameter != null && parameter.isLoginAlreadyChecked())
+        loggedIn = true;
 
-    if (parameter != null && parameter.getLogin() != null)
+    //3.2.17 added second check
+    if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
     {
       LoginInfoType loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
       loggedIn = loginInfoType != null;

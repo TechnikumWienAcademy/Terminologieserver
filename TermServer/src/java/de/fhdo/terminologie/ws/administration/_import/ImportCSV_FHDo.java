@@ -129,9 +129,7 @@ public class ImportCSV_FHDo
       InputStream is = new ByteArrayInputStream(bytes);
 
       //csv = new CsvReader("C:\\Temp\\notfallrel_diagnosen.csv");
-      //DABACA
-            //csv = new CsvReader(is, Charset.forName("ISO-8859-1"));
-            csv = new CsvReader(is, Charset.forName("UTF-8"));
+      csv = new CsvReader(is, Charset.forName("UTF-8"));
       csv.setDelimiter(';');
       csv.setTextQualifier('"');
       csv.setUseTextQualifier(true);
@@ -430,10 +428,10 @@ public class ImportCSV_FHDo
 
         try
         {
-            //DABACA
-            if(!tx.wasRolledBack())
+            if(!tx.wasRolledBack()){
                 tx.rollback();
-          logger.info("[ImportCSV.java] Rollback durchgeführt!");
+                logger.info("[ImportCSV.java] Rollback durchgeführt!");
+            }
         }
         catch (Exception exRollback)
         {

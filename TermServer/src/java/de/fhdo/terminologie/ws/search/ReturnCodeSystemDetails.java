@@ -51,6 +51,7 @@ public class ReturnCodeSystemDetails
    * werden Details zu allen Versionen ausgegeben
    *
    */
+  //3.2.17 added loginalreadychecked
   public ReturnCodeSystemDetailsResponseType ReturnCodeSystemDetails(ReturnCodeSystemDetailsRequestType parameter)
   {
 
@@ -62,7 +63,7 @@ public class ReturnCodeSystemDetails
     // Return-Informationen anlegen
     ReturnCodeSystemDetailsResponseType response = new ReturnCodeSystemDetailsResponseType();
     response.setReturnInfos(new ReturnType());
-
+    
     // Parameter prüfen
     if (validateParameter(parameter, response) == false)
     {
@@ -72,12 +73,13 @@ public class ReturnCodeSystemDetails
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;
     LoginInfoType loginInfoType = null;
-    if (parameter != null && parameter.getLogin() != null)
+    //3.2.17 added loginalreadychecked check
+    if (parameter != null && !parameter.getLoginAlreadyChecked() && parameter.getLogin() != null)
     {
       loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
       loggedIn = loginInfoType != null;
     }
-
+    
     if (logger.isDebugEnabled())
     {
       logger.debug("Benutzer ist eingeloggt: " + loggedIn);
@@ -272,24 +274,19 @@ public class ReturnCodeSystemDetails
     return response;
   }
 
-  private boolean validateParameter(ReturnCodeSystemDetailsRequestType Request,
-          ReturnCodeSystemDetailsResponseType Response)
+  private boolean validateParameter(ReturnCodeSystemDetailsRequestType Request, ReturnCodeSystemDetailsResponseType Response)
   {
     boolean erfolg = true;
 
-    //DABACA TODO: Die Session-ID wird hier immer null sein, wenn eine Freigabe durchgeführt wird
-    //Man müsste die Parameter bearbeiten, sodass die Session-ID bei einer Freigabe in den Parametern
-    //Weitergereicht wird udn man so hier noch Zugriff darauf hat
-    /*
-    if (Request.getLogin() != null)
+    //3.2.17 added second check
+    if(Request.getLogin() != null && !Request.getLoginAlreadyChecked())
     {
       if (Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0)
       {
-        Response.getReturnInfos().setMessage(
-                "Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
+        Response.getReturnInfos().setMessage("Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
         erfolg = false;
       }
-    }*/
+    }
 
 
     if (Request.getCodeSystem() == null)

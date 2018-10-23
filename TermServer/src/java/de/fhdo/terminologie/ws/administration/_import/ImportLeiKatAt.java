@@ -745,13 +745,12 @@ public class ImportLeiKatAt
 
         try
         {
-            //DABACA
-            if(!hb_session.getTransaction().wasRolledBack())
+            if(!hb_session.getTransaction().wasRolledBack()){
                 hb_session.getTransaction().rollback();
-            
-          resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
+                logger.info("[ImportLeiKat.java] Rollback durchgeführt!");
+            }
           
-          logger.info("[ImportLeiKat.java] Rollback durchgeführt!");
+          resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
         }
         catch (Exception exRollback)
         {

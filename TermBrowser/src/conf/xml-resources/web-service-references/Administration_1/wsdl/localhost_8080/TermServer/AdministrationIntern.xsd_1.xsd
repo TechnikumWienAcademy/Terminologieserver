@@ -185,6 +185,7 @@
 <xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
 <xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -330,6 +331,7 @@
 <xs:element name="importId" type="xs:long" minOccurs="0"/>
 <xs:element name="importInfos" type="tns:importType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -375,6 +377,7 @@
 <xs:element name="importInfos" type="tns:importType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -491,6 +494,7 @@
 <xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 

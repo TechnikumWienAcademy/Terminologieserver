@@ -50,11 +50,11 @@ public class ListValueSets
         {
             logger.info("====== ListValueSets gestartet ======");
         }
-
+        
         // Return-Informationen anlegen
         ListValueSetsResponseType response = new ListValueSetsResponseType();
         response.setReturnInfos(new ReturnType());
-
+        
         // Parameter prüfen
         if (validateParameter(parameter, response) == false)
         {
@@ -64,8 +64,14 @@ public class ListValueSets
         // Login-Informationen auswerten (gilt für jeden Webservice)
         boolean loggedIn = false;
 
+        //3.2.17 added
+        if(parameter != null && parameter.isLoginAlreadyChecked()){
+            loggedIn = true;
+        }
+        
+        //3.2.17 added second check
         LoginInfoType loginInfoType = null;
-        if (parameter != null && parameter.getLogin() != null)
+        if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
         {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
@@ -233,9 +239,7 @@ public class ListValueSets
         boolean erfolg = true;
         if (Request != null)
         {
-            //DABACA TODO SESSION ID MUSS IN DEN PARAMETER EINGEBAUT WERDEN NACHDEM ER VOM THREAD
-            //NICHT MEHR ANGESPROCHEN WERDEN KANN BEI DER FREIGABE
-            /*
+
             if (Request.getLogin() != null)
             {
                 if (Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0)
@@ -244,7 +248,7 @@ public class ListValueSets
                             "Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
                     erfolg = false;
                 }
-            }*/
+            }
 
             if (Request.getValueSet() != null && Request.getValueSet().getValueSetVersions() != null)
             {

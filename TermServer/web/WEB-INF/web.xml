@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <listener>
+        <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
+    </listener>
+    <listener>  
         <listener-class>
             de.fhdo.terminologie.helper.TermServerServletContextListener
         </listener-class>
     </listener>
-    <listener>
-        <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
-    </listener>
     <servlet>
-        <servlet-name>Authoring</servlet-name>
-        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet>
-        <servlet-name>ConceptAssociations</servlet-name>
+        <servlet-name>Administration</servlet-name>
         <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -24,17 +19,17 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
+        <servlet-name>ConceptAssociations</servlet-name>
+        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
         <servlet-name>Authorization</servlet-name>
         <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
-        <servlet-name>ObjectIdentifier</servlet-name>
-        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet>
-        <servlet-name>Administration</servlet-name>
+        <servlet-name>Authoring</servlet-name>
         <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -43,37 +38,42 @@
         <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>ObjectIdentifier</servlet-name>
+        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>Authoring</servlet-name>
-        <url-pattern>/Authoring</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ConceptAssociations</servlet-name>
-        <url-pattern>/ConceptAssociations</url-pattern>
+        <servlet-name>Administration</servlet-name>
+        <url-pattern>/Administration</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Search</servlet-name>
         <url-pattern>/Search</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>ConceptAssociations</servlet-name>
+        <url-pattern>/ConceptAssociations</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>Authorization</servlet-name>
         <url-pattern>/Authorization</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>ObjectIdentifier</servlet-name>
-        <url-pattern>/ObjectIdentifier</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>Administration</servlet-name>
-        <url-pattern>/Administration</url-pattern>
+        <servlet-name>Authoring</servlet-name>
+        <url-pattern>/Authoring</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SSo</servlet-name>
         <url-pattern>/SSo</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ObjectIdentifier</servlet-name>
+        <url-pattern>/ObjectIdentifier</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
-            30
+            240
         </session-timeout>
     </session-config>
     <welcome-file-list>

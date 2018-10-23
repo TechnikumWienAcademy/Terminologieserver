@@ -68,7 +68,8 @@ public class ImportCodeSystemNew
         // Login-Informationen auswerten (gilt für jeden Webservice)
         boolean loggedIn = false;
         LoginInfoType loginInfoType = null;
-        if (parameter != null && parameter.getLogin() != null)
+        //3.2.17 added second check
+        if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
         {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
@@ -86,6 +87,9 @@ public class ImportCodeSystemNew
                 }
             }
         }
+        //3.2.17 added second check
+        if(parameter !=null && parameter.isLoginAlreadyChecked())
+            loggedIn = parameter.isLoginAlreadyChecked();
 
         logger.debug("Eingeloggt: " + loggedIn);
 
@@ -348,8 +352,6 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
-            //DABACA
-            e.printStackTrace();
         }
         catch (ImportParameterValidationException e)
         {
@@ -435,8 +437,6 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
-            //DABACA
-            e.printStackTrace();
         }
         catch (ImportParameterValidationException ex)
         {
@@ -477,8 +477,6 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
-            //DABACA
-            e.printStackTrace();
         }
         catch (ImportParameterValidationException ex)
         {
@@ -541,8 +539,6 @@ public class ImportCodeSystemNew
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler beim Import: " + e.getLocalizedMessage());
-            //DABACA
-            e.printStackTrace();
         }
         catch (ImportParameterValidationException e)
         {

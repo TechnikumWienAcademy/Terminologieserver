@@ -723,7 +723,7 @@ public class ImportCSV_Async extends Window implements AfterCompose, IGenericLis
 
                                     if (transfer_success.isSuccess())
                                     {
-                                        //logger.info(proposal.getVocabularyName() + ": Freigabe erfolgreich.");
+                                        logger.info(proposal.getVocabularyName() + ": Freigabe erfolgreich.");
                                         msg += " " + proposal.getVocabularyName() + ": Freigabe erfolgreich.";
                                         ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
                                     }
@@ -749,14 +749,12 @@ public class ImportCSV_Async extends Window implements AfterCompose, IGenericLis
                                 }
                                 catch (Exception ex)
                                 {
-                                    if(!hb_session.getTransaction().wasRolledBack())
-                                        hb_session.getTransaction().rollback();
+                                    hb_session.getTransaction().rollback();
                                     throw ex;
                                 }
                                 finally
                                 {
-                                    if(hb_session.isOpen())
-                                        hb_session.close();
+                                    hb_session.close();
                                 }
                             }
                         }

@@ -77,7 +77,8 @@ public class ExportCodeSystemContent
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;
     LoginInfoType loginInfoType = null;
-    if (parameter != null && parameter.getLogin() != null)
+    //3.2.17 added check for alreadylogged in
+    if (parameter != null && !parameter.getLoginAlreadyChecked() && parameter.getLogin() != null)
     {
         loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
         loggedIn = loginInfoType != null;
@@ -86,20 +87,7 @@ public class ExportCodeSystemContent
     if (logger.isDebugEnabled())
       logger.debug("Benutzer ist eingeloggt: " + loggedIn);
 
-    //logged in = true; da sonst Export ohne Anmeldung nicht möglich ist.
-    //EXTERMINATUS 3.2.1
     loggedIn = true;
-    if (loggedIn == false)
-    {
-        // Benutzer muss für diesen Webservice eingeloggt sein
-        StaticExportStatus.decreaseAvtiveSessions();
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        response.getReturnInfos().setStatus(ReturnType.Status.OK);
-        response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP403);
-        response.getReturnInfos().setMessage("Sie müssen mit Administrationsrechten am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
-        return response;
-    }
-    //EXTERMINATUS ENDE
 
     if (parameter == null || parameter.getExportInfos() == null || parameter.getExportInfos().getFormatId() == null)
     {
@@ -117,6 +105,7 @@ public class ExportCodeSystemContent
       try
       {
         ExportClaml exportClaML = new ExportClaml();
+        //3.2.17 check if paramter for alreadyloggedin has to be set
         response = exportClaML.export(parameter);
 
         /*response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);

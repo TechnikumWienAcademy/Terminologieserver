@@ -87,8 +87,6 @@ import javax.xml.stream.events.XMLEvent;
 import org.hibernate.FlushMode;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.zkoss.zk.ui.Executions;
-import org.zkoss.zul.Window;
 
 /**
  *
@@ -187,17 +185,16 @@ public class ImportClaml
       this.loadClamlXML(is);
 
       _status = StaticStatusList.getStatus(_importId);
-    
-    //DABACA WASROLLEDBACK UND WASCOMMITTED ABFRAGEN EINGEFÜGT
-    if (_status != null && _status.cancel){
-        if(!hb_session.getTransaction().wasRolledBack())
-            hb_session.getTransaction().rollback();
-    }
-    else{
-        hb_session.flush();
-        if(!hb_session.getTransaction().wasCommitted())
-            hb_session.getTransaction().commit();
-    }				
+      
+      if (_status != null && _status.cancel)
+      {
+        hb_session.getTransaction().rollback();
+      }
+			else{
+				hb_session.flush();
+        hb_session.getTransaction().commit();
+			}
+				
     }
     catch (Exception ex)
     {
@@ -207,11 +204,10 @@ public class ImportClaml
       logger.debug(ex.getMessage());
       try
       {
-
-        //DABACA
-        if(!hb_session.getTransaction().wasRolledBack())
-            hb_session.getTransaction().rollback();
-        logger.info("[ImportClaml.java] Rollback durchgeführt!");
+          if(!hb_session.getTransaction().wasRolledBack()){
+                hb_session.getTransaction().rollback();
+                logger.info("[ImportClaml.java] Rollback durchgeführt!");
+          }
       }
       catch (Exception exRollback)
       {
@@ -548,8 +544,8 @@ public class ImportClaml
 					//Matthias: write clazz to map to be processed later
 					clamlClassMap.put(clazz.getCode(), clazz);
 					logger.info("Concept reading: " + clazz.getCode() + "(" + clamlClassMap.size() + ")");
-	
-            /*{
+					
+					/*{
             // Jetzt Konzept erstellen
             this.CreateSingleConcept(clazz);
             if (clazz.getMeta() != null && clazz.getMeta().size() > 0)
@@ -829,6 +825,9 @@ public class ImportClaml
     ccatrt.setCodeSystemEntity(etAssoc);
 
     ccatrt.setLogin(login);
+    
+    //3.2.17 added
+    ccatrt.setLoginAlreadyChecked(true);
 
     CreateConceptAssociationType ccat = new CreateConceptAssociationType();
     this.ccatrespt = ccat.CreateConceptAssociationType(ccatrt, hb_session);
@@ -1069,6 +1068,9 @@ public class ImportClaml
     request.setCodeSystemEntity(cse);
     request.setLogin(login);
 
+    //3.2.17
+    request.setLoginAlreadyChecked(true);
+    
     //Konzept erstellen
     CreateConcept cc = new CreateConcept();
     this.ccsResponse = cc.CreateConcept(request, hb_session);
@@ -1142,6 +1144,9 @@ public class ImportClaml
     request.setCodeSystemEntity(cse);
     request.setLogin(login);
 
+    //3.2.17
+    request.setLoginAlreadyChecked(true);
+    
     //Konzept erstellen
     CreateConcept cc = new CreateConcept();
     this.ccsResponse = cc.CreateConcept(request, hb_session);

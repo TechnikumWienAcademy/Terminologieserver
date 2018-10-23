@@ -1191,13 +1191,12 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
                 try
                 {
-                    //DABACA
-                    if(!hb_session.getTransaction().wasRolledBack())
+                    if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
+                        logger.info("[ImportLeiKat.java] Rollback durchgeführt!");
+                    }
 
                     String resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
-
-                    logger.info("[ImportLeiKat.java] Rollback durchgeführt!");
                     throw new ImportException(s);
                 }
                 catch (Exception exRollback)

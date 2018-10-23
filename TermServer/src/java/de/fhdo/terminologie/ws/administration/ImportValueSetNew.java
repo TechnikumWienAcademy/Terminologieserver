@@ -57,21 +57,26 @@ public class ImportValueSetNew
         // Login-Informationen auswerten (gilt für jeden Webservice)
         boolean loggedIn = false;
         LoginInfoType loginInfoType = null;
-        if (parameter != null && parameter.getLogin() != null)
-        {
-            loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
-            loggedIn = loginInfoType != null;
+        //3.2.17 added loginAlreadyChecked
+        if(parameter != null){
+            if(parameter.isLoginAlreadyChecked()){
+                loggedIn = true;
+            }
+            else if(parameter.getLogin() != null){
+                loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
+                loggedIn = loginInfoType != null;
 
-            if (loggedIn)
-            {
+                if (loggedIn)
+                {
 
-                if (loginInfoType.getTermUser().isIsAdmin())
-                {
-                    loggedIn = true;
-                }
-                else
-                {
-                    loggedIn = false;
+                    if (loginInfoType.getTermUser().isIsAdmin())
+                    {
+                        loggedIn = true;
+                    }
+                    else
+                    {
+                        loggedIn = false;
+                    }
                 }
             }
         }

@@ -334,6 +334,8 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 //ConceptLinking
                 CreateValueSetContentRequestType request = new CreateValueSetContentRequestType();
                 request.setLogin(this.getLoginType());
+                //3.2.17 added
+                request.setLoginAlreadyChecked(true);
 
                 //Nur letzte Version
                 ValueSet vs = this.getValueset();
@@ -1021,14 +1023,12 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                 try
                 {
-                    //DABACA
-                    if(!hb_session.getTransaction().wasRolledBack())
+                    if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-
+                        logger.info("[ImportCSV.java] Rollback durchgeführt!");
+                    }
+                    
                     String resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
-
-                    logger.info("[ImportCSV.java] Rollback durchgeführt!");
-
                     throw new ImportException("Fehler beim Import eines Value Sets: " + ex.getLocalizedMessage()+ "\n"+resultStr);
                 }
                 catch (Exception exRollback)

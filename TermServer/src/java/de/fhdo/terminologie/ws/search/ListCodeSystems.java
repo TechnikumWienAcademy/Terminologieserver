@@ -72,7 +72,8 @@ public class ListCodeSystems
         boolean loggedIn = false;
         boolean isAdmin = false;
         LoginInfoType loginInfoType = null;
-        if (parameter != null && parameter.getLogin() != null)
+        //3.2.17 added second check
+        if (parameter != null && !parameter.getLoginAlreadyChecked() && parameter.getLogin() != null)
         {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;

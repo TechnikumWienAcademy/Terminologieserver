@@ -103,6 +103,7 @@ public class ExportCodeSystemSVS
 
                     //ValueSetDetails abrufen
                     ReturnCodeSystemDetails rcsd = new ReturnCodeSystemDetails();
+                    
                     ReturnCodeSystemDetailsResponseType responseCodeSystemDetails = rcsd.ReturnCodeSystemDetails(requestCodeSystemDetails);
                     if (logger.isInfoEnabled())
                     {

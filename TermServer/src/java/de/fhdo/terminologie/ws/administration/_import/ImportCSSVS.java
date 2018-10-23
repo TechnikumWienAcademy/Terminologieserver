@@ -607,13 +607,12 @@ public class ImportCSSVS
 
         try
         {
-            //DABACA
-            if(!hb_session.getTransaction().wasRolledBack())
-                hb_session.getTransaction().rollback();
-          
+          if(!hb_session.getTransaction().wasRolledBack()){
+            hb_session.getTransaction().rollback();
+            logger.info("[ImportSVS.java] Rollback durchgeführt!");
+          }
+          //3.2.17 moved out of the upper block
           resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
-          
-          logger.info("[ImportSVS.java] Rollback durchgeführt!");
         }
         catch (Exception exRollback)
         {

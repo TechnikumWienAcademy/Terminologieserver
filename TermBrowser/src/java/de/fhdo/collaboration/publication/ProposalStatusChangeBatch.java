@@ -50,6 +50,7 @@ import org.zkoss.zul.Window;
 /**
  *
  * @author Robert Mützner
+ * edited: bachinger (3.2.17)
  */
 public class ProposalStatusChangeBatch extends Window implements AfterCompose
 {
@@ -59,6 +60,8 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
   private List<Proposal> proposals;
   private long statusToId;
   boolean isDiscussion;
+  //3.2.17
+  TerminologyReleaseManager releaseManager;
 
   public ProposalStatusChangeBatch()
   {
@@ -87,6 +90,9 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
 
   public void onOkClicked()
   {
+      //3.2.17
+      releaseManager = new TerminologyReleaseManager();
+      
     // Statusänderung durchführen
     String reason = ((Textbox) getFellow("tbReason")).getValue();
     Date dateFrom = ((Datebox) getFellow("dateVon")).getValue();
@@ -158,9 +164,10 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
         {
           if(success)
           {
-            //DABACA
-            ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, true, SessionHelper.getSessionId());
-
+            //3.2.17 added collabuserID to parameter and added line which gets the collabuserID same with collabsession
+              long collabUserID = SessionHelper.getCollaborationUserID();
+              String collabSessionID = CollaborationSession.getInstance().getSessionID();
+            ret = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusToId, reason, dateFrom, dateTo, true, collabUserID, collabSessionID);
 
             long statusFrom = proposal.getStatus();
             Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusToId);
@@ -170,7 +177,8 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
                     && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
                     && (SessionHelper.getValue("pub_connection").toString().equals("connected")))
             {
-                TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
+                //3.2.17 is invoked at the start now
+                //TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();
                 transfer_success = releaseManager.initTransfer(proposal.getProposalobjects(), rel);
 
                 if (transfer_success.isSuccess())
@@ -186,10 +194,8 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
                     message += "Fehler: " + transfer_success.getMessage() + "\n";
                     //setting status back because transfer to public was not successful
                     proposal.setStatus((int) statusToId);
-
-                    //DABACA
-                    ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, reason, dateFrom, dateTo, false,SessionHelper.getSessionId());
-
+                    //3.2.17 added collabuserID parameter and collabsession
+                    ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, reason, dateFrom, dateTo, false, collabUserID, collabSessionID);
                     if(retResetStatus.isSuccess())
                     {
                         message += proposal.getVocabularyName() + ": Status wurde nicht geändert.";

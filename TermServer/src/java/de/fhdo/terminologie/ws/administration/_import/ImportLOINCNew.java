@@ -380,9 +380,7 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
 
                     try
                     {
-                        //DABACA
-                        if(!hb_session.getTransaction().wasRolledBack())
-                            hb_session.getTransaction().rollback();
+                        hb_session.getTransaction().rollback();
                         logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
                     }
                     catch (Exception exRollback)
@@ -939,10 +937,10 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
 
                 try
                 {
-                    //DABACA
-                    if(!hb_session.getTransaction().wasRolledBack())
+                    if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-                    logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                        logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                    }
                 }
                 catch (Exception exRollback)
                 {
