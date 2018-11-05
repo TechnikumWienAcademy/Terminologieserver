@@ -1048,6 +1048,7 @@ public class ProposalWorkflow
                         //psc.getProposal().setId(proposal.getId());
                         psc.setChangeTimestamp(new Date());
                         psc.setCollaborationuser(new Collaborationuser());
+
                         //3.2.17 replaced commented lined with this one
                         psc.getCollaborationuser().setId(collabUserID);
                         //psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
@@ -1207,11 +1208,11 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateCodeSystemVersionStatusRequestType request = new UpdateCodeSystemVersionStatusRequestType();
                 request.setLogin(new LoginType());
+
                 //3.2.17 
                 request.getLogin().setSessionID(collabSessionID);
                 request.setLoginAlreadyChecked(true);
                 //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-                
                 
                 // Codesystem angeben
                 request.setCodeSystem(new CodeSystem());
@@ -1239,10 +1240,11 @@ public class ProposalWorkflow
                 UpdateConceptStatusRequestType request = new UpdateConceptStatusRequestType();
                 request.setCodeSystemVersionId(po.getProposal().getVocabularyId());
                 request.setLogin(new LoginType());
+
                 //3.2.17
                 //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
                 request.getLogin().setSessionID(collabSessionID);
-                    
+                
                 // Codesystem angeben
                 request.setCodeSystemEntity(new CodeSystemEntity());
                 CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
@@ -1298,6 +1300,7 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
                 request.setLogin(new LoginType());
+
                 //3.2.17
                 //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
                 request.getLogin().setSessionID(collabSessionID);
@@ -1329,6 +1332,7 @@ public class ProposalWorkflow
                 // Status der Codesystem-Version ändern
                 UpdateConceptValueSetMembershipStatusRequestType request = new UpdateConceptValueSetMembershipStatusRequestType();
                 request.setLogin(new LoginType());
+
                 //3.2.17
                 //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
                 request.getLogin().setSessionID(collabSessionID);

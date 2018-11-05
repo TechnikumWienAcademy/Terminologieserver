@@ -169,10 +169,14 @@ public class CreateConcept
 
       try // 2. try-catch-Block zum Abfangen von Hibernate-Fehlern
       {
+        logger.info("DABACA 1");
+
         // Neue Entity und Entity-Version erstellen
         CodeSystemEntity entity = new CodeSystemEntity();
         hb_session.save(entity);
 
+        logger.info("DABACA 2");
+        
         CodeSystemEntityVersion entityVersion = (CodeSystemEntityVersion) paramCodeSystemEntity.getCodeSystemEntityVersions().toArray()[0];
 
         CodeSystemConcept concept = null;
@@ -183,6 +187,8 @@ public class CreateConcept
         if (entityVersion.getAssociationTypes() != null && entityVersion.getAssociationTypes().size() > 0)
           assType = (AssociationType) entityVersion.getAssociationTypes().toArray()[0];
 
+        logger.info("DABACA 3");
+        
         //entityVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
         //entityVersion.setStatus();  
         if(entityVersion.getStatus() == null)
@@ -199,8 +205,12 @@ public class CreateConcept
         entityVersion.setAssociationTypes(null);
         entityVersion.setPropertyVersions(null);
 
+        logger.info("DABACA 4");
+        
         hb_session.save(entityVersion);
 
+        logger.info("DABACA 5");
+        
         // Antwort erstellen
         codeSystemEntityVersionId = entityVersion.getVersionId();
 
@@ -218,15 +228,20 @@ public class CreateConcept
         logger.debug("EntityId: " + entity.getId());
         logger.debug("EntityVersionId: " + codeSystemEntityVersionId);
 
+        logger.info("DABACA 6");
+        
         // CurrentVersion in der Entity speichern
         entity.setCurrentVersionId(entityVersion.getVersionId());
         hb_session.update(entity);
 
+        logger.info("DABACA 7");
+        
         logger.debug("CurrentVersionId: " + entity.getCurrentVersionId());
 
         // Konzept speichern (inkl. Translations)
         if (concept != null)
         {
+          logger.info("DABACA 8");
           concept.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
           concept.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
           concept.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
@@ -239,6 +254,7 @@ public class CreateConcept
           }
 
           hb_session.save(concept);
+          logger.info("DABACA 9");
         }
         if (assType != null)
         {
@@ -246,7 +262,10 @@ public class CreateConcept
           assType.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
           assType.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
 
+          logger.info("DABACA 10");
+          
           hb_session.save(assType);
+          logger.info("DABACA 11");
         }
 
         // Beziehung zum Vokabular speichern
@@ -274,7 +293,9 @@ public class CreateConcept
             }
           }
 
+          logger.info("DABACA 12");
           hb_session.save(membership);
+          logger.info("DABACA 13");
         }
 
         // Property speichern
@@ -303,13 +324,17 @@ public class CreateConcept
               lastPropVersion = propertyVersion;
             }
 
+            logger.info("DABACA 14");
             hb_session.save(property);
-
+logger.info("DABACA 15");
+            
             // current-Version-ID setzen
             if (lastPropVersion != null)
             {
               property.setCurrentVersionId(lastPropVersion.getVersionId());
+              logger.info("DABACA 16");
               hb_session.update(property);
+              logger.info("DABACA 17");
             }
 
             lastPropVersion = null;
@@ -325,11 +350,14 @@ public class CreateConcept
 
               lastPropVersion = propertyVersion;
 
+              logger.info("DABACA 18");
               hb_session.update(propertyVersion);
+              logger.info("DABACA 19");
             }
           }
         }
 
+        logger.info("DABACA 20");
         if (paramCodeSystem != null && paramCodeSystem.getId() != null)
         {  
             //Check ob MetadataParameter default Values angelegt werden müssen
@@ -362,7 +390,10 @@ public class CreateConcept
                         csmv.setMetadataParameter(mp);
                         csmv.setCodeSystemEntityVersion(entityVersion);
 
+                        logger.info("DABACA 21");
+                        
                         hb_session.save(csmv);
+                        logger.info("DABACA 22");
                     }
                 }
               }
@@ -400,7 +431,8 @@ public class CreateConcept
             logger.warn("[CreateConcept.java] Ã„nderungen nicht erfolgreich, codeSystemEntityVersionId: "
                     + codeSystemEntityVersionId);
 
-            hb_session.getTransaction().rollback();
+            if(!hb_session.getTransaction().wasRolledBack())
+                hb_session.getTransaction().rollback();
 
             // Status an den Aufrufer weitergeben
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
