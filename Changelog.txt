@@ -1,4 +1,8 @@
-﻿Changelog 3.2.18
+﻿Changelog 3.2.19
+	-Bugfixes
+		.) EHTSOID-160: Die Freigabe wurde weiter verändert um die bestehenden Probleme zu beheben.
+
+Changelog 3.2.18
 	-Bugfixes
 		.) EHTSOID-160: Die Freigabe wurde weiter verändert um die bestehenden Probleme zu beheben.
 
