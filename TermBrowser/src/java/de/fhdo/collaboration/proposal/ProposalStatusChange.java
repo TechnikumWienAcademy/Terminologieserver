@@ -204,6 +204,12 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                     request.getLogin().setSessionID(SessionHelper.getSessionId());
                     Authorization port_authorizationPub = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
                     CheckLoginResponse.Return response = port_authorizationPub.checkLogin(request);
+                    
+                    de.fhdo.terminologie.ws.authorization.LoginRequestType requestCol = new de.fhdo.terminologie.ws.authorization.LoginRequestType();
+                    requestCol.setLogin(new de.fhdo.terminologie.ws.authorization.LoginType());
+                    requestCol.getLogin().setSessionID(SessionHelper.getSessionId());
+                    de.fhdo.terminologie.ws.authorization.Authorization port_authorization = WebServiceUrlHelper.getInstance().getAuthorizationServicePort();
+                    de.fhdo.terminologie.ws.authorization.CheckLoginResponse.Return responseCol = port_authorization.checkLogin(requestCol);
                     //rate of the ping
                     this.sleep(60*1000);
                     } catch (InterruptedException ex) {
