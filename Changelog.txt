@@ -1,4 +1,8 @@
-﻿Changelog 3.2.19
+﻿Changelog 3.2.20
+	-Bugfixes
+		.) EHTSOID-73: application/soap+xml sollte nun akzeptiert werden.
+
+Changelog 3.2.19
 	-Bugfixes
 		.) EHTSOID-160: Die Freigabe wurde weiter verändert um die bestehenden Probleme zu beheben.
 

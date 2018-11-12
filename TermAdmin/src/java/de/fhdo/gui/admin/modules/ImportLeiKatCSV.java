@@ -103,12 +103,15 @@ public class ImportLeiKatCSV extends Window implements AfterCompose, IGenericLis
 				logger.info("ct: " + media.getContentType());
         logger.info("format: " + media.getFormat());
 				
-        if(media.getContentType().equals("text/xml") || media.getContentType().equals("application/ms-excel") 
-						|| media.getContentType().equals("text/csv")
-						//Matthias:added
-						|| media.getContentType().equals("application/csv")
-						//Matthias media type added
-						|| media.getContentType().equals("application/vnd.ms-excel")){  
+        if(media.getContentType().equals("text/xml") 
+                || media.getContentType().equals("application/ms-excel") 
+                || media.getContentType().equals("text/csv")
+                //Matthias:added
+                || media.getContentType().equals("application/csv")
+                //Matthias media type added
+                || media.getContentType().equals("application/vnd.ms-excel")
+                //3.2.20
+                || media.getContentType().equals("application/soap+xml")){  
             if (media.isBinary())
             {
               logger.debug("media.isBinary()");

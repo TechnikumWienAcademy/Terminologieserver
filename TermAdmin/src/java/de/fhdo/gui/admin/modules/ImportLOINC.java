@@ -90,11 +90,13 @@ public class ImportLOINC extends Window implements AfterCompose, IGenericListAct
       if (media != null)
       {
         
-        if(media.getContentType().equals("text/xml") || 
-           media.getContentType().equals("application/ms-excel") || 
-					 media.getContentType().equals("application/csv") ||
-           media.getContentType().equals("text/csv") || 
-           media.getContentType().equals("application/vnd.ms-excel")){    
+        if(media.getContentType().equals("text/xml") 
+                || media.getContentType().equals("application/ms-excel") 
+                || media.getContentType().equals("application/csv") 
+                || media.getContentType().equals("text/csv")
+                || media.getContentType().equals("application/vnd.ms-excel")
+                //3.2.20
+                || media.getContentType().equals("application/soap+xml")){    
             if (media.isBinary())
             {
               logger.debug("media.isBinary()");

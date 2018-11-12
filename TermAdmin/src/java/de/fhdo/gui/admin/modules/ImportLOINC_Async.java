@@ -108,7 +108,9 @@ public class ImportLOINC_Async extends Window implements AfterCompose, IGenericL
                         || media.getContentType().equals("application/ms-excel")
                         || media.getContentType().equals("application/csv")
                         || media.getContentType().equals("text/csv")
-                        || media.getContentType().equals("application/vnd.ms-excel"))
+                        || media.getContentType().equals("application/vnd.ms-excel")
+                        //3.2.20
+                        || media.getContentType().equals("application/soap+xml"))
                 {
                     if (media.isBinary())
                     {

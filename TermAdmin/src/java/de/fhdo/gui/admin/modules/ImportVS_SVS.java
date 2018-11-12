@@ -107,9 +107,13 @@ public class ImportVS_SVS extends Window implements AfterCompose, IGenericListAc
 
       if (media != null)
       {
-        if(media.getContentType().equals("text/xml") || media.getContentType().equals("application/ms-excel") || media.getContentType().equals("text/csv")
-						//Matthias media type added
-						|| media.getContentType().equals("application/vnd.ms-excel")){  
+        if(media.getContentType().equals("text/xml") 
+                || media.getContentType().equals("application/ms-excel") 
+                || media.getContentType().equals("text/csv")
+                //Matthias media type added
+                || media.getContentType().equals("application/vnd.ms-excel")
+                //3.20.20
+                || media.getContentType().equals("application/soap+xml")){  
             if (media.isBinary())
             {
               logger.debug("media.isBinary()");

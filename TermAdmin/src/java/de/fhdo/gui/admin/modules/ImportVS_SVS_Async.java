@@ -140,9 +140,13 @@ public class ImportVS_SVS_Async extends Window implements AfterCompose, IGeneric
 
             if (media != null)
             {
-                if (media.getContentType().equals("text/xml") || media.getContentType().equals("application/ms-excel") || media.getContentType().equals("text/csv")
+                if (media.getContentType().equals("text/xml") 
+                        || media.getContentType().equals("application/ms-excel") 
+                        || media.getContentType().equals("text/csv")
                         //Matthias media type added
-                        || media.getContentType().equals("application/vnd.ms-excel"))
+                        || media.getContentType().equals("application/vnd.ms-excel")
+                        //3.2.20
+                        || media.getContentType().equals("application/soap+xml"))
                 {
                     if (media.isBinary())
                     {

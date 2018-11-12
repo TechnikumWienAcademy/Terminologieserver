@@ -259,7 +259,7 @@ Copyright (C) 2004 Potix Corporation. All Rights Reserved.
     </mime-mapping>
     <mime-mapping>
         <extension>xml</extension>
-        <mime-type>text/xml</mime-type>
+        <mime-type>application/soap+xml</mime-type>
     </mime-mapping>
     <mime-mapping>
         <extension>xul</extension>

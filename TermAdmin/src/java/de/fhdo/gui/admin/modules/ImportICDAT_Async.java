@@ -451,10 +451,13 @@ public class ImportICDAT_Async extends Window implements AfterCompose, IGenericL
                 logger.info("ct: " + media.getContentType());
                 logger.info("format: " + media.getFormat());
 
-                if (media.getContentType().equals("text/xml") || media.getContentType().equals("application/ms-excel")
+                if (media.getContentType().equals("text/xml") 
+                        || media.getContentType().equals("application/ms-excel")
                         || media.getContentType().equals("text/csv")
                         || media.getContentType().equals("application/csv")
-                        || media.getContentType().equals("application/vnd.ms-excel"))
+                        || media.getContentType().equals("application/vnd.ms-excel")
+                        //3.2.20
+                        || media.getContentType().equals("application/soap+xml"))
                 {
                     if (media.isBinary())
                     {
