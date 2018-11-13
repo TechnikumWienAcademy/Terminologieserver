@@ -1,3 +1,4 @@
 3.2.20
 	-In allen Import-Klassen wurde der MIME-Typ application/soap+xml hinzugefügt (auffindbar durch Suche nach 3.2.20)
 	-IDP, TermBrowser, TermAdmin: im web.xml wurde das xml-MIME-Mapping von text/xml auf application/soap+xml geändert
+	-In allen Import-Klassen wird vor der Ausgabe der "Rollback fehlgeschlagen!"-Meldung eine Abfrage durchgeführt, ob die Transaktion zurückgerollt wurde oder nicht

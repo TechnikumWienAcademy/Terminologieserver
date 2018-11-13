@@ -439,8 +439,10 @@ public class ImportLOINC
                 }
                 catch (Exception exRollback)
                 {
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        logger.info(exRollback.getMessage());
+                        logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                    }
                 }
             }
             finally
@@ -741,8 +743,10 @@ public class ImportLOINC
                     }
                     catch (Exception exRollback)
                     {
-                        logger.info(exRollback.getMessage());
-                        logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                        if(!hb_session.getTransaction().wasRolledBack()){
+                            logger.info(exRollback.getMessage());
+                            logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                        }
                     }
                 }
                 finally
@@ -1290,8 +1294,10 @@ public class ImportLOINC
                 }
                 catch (Exception exRollback)
                 {
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        logger.info(exRollback.getMessage());
+                        logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                    }
                 }
             }
             finally

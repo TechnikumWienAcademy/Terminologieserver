@@ -342,8 +342,10 @@ public class ImportKAL
         }
         catch (Exception exRollback)
         {
-          logger.info(exRollback.getMessage());
-          logger.info("[ImportKAL.java] Rollback fehlgeschlagen!");
+            if(!hb_session.getTransaction().wasRolledBack()){
+                logger.info(exRollback.getMessage());
+                logger.info("[ImportKAL.java] Rollback fehlgeschlagen!");
+            }
         }
       }
       finally

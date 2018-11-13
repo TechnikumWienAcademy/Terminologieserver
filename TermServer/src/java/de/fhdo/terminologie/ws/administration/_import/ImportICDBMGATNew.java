@@ -1201,8 +1201,10 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                 }
                 catch (Exception exRollback)
                 {
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportLeiKat.java] Rollback fehlgeschlagen!");
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        logger.info(exRollback.getMessage());
+                        logger.info("[ImportLeiKat.java] Rollback fehlgeschlagen!");
+                    }
                 }
             }
             finally

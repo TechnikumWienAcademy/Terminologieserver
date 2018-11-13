@@ -435,8 +435,10 @@ public class ImportCSV_FHDo
         }
         catch (Exception exRollback)
         {
-          logger.info(exRollback.getMessage());
-          logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+            if(!tx.wasRolledBack()){
+                logger.info(exRollback.getMessage());
+                logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+            }
         }
       }
       finally

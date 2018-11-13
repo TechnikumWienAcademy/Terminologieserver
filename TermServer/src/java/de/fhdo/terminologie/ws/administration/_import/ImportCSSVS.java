@@ -616,8 +616,10 @@ public class ImportCSSVS
         }
         catch (Exception exRollback)
         {
-          logger.info(exRollback.getMessage());
-          logger.info("[ImportSVS.java] Rollback fehlgeschlagen!");
+            if(!hb_session.getTransaction().wasRolledBack()){
+                logger.info(exRollback.getMessage());
+                logger.info("[ImportSVS.java] Rollback fehlgeschlagen!");
+            }
         }
       }
       finally

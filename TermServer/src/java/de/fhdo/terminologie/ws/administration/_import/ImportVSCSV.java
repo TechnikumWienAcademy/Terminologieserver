@@ -454,11 +454,13 @@ public class ImportVSCSV
         }
         catch (Exception exRollback)
         {
-          logger.info(exRollback.getMessage());
-          logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
-          ws_response.getReturnInfos().setMessage("Rollback fehlgeschlagen! Fehler beim Import eines Value Sets: " + exRollback.getLocalizedMessage());
-          ws_response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-          ws_response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            if(!hb_session.getTransaction().wasRolledBack()){
+                logger.info(exRollback.getMessage());
+                logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+                ws_response.getReturnInfos().setMessage("Rollback fehlgeschlagen! Fehler beim Import eines Value Sets: " + exRollback.getLocalizedMessage());
+                ws_response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                ws_response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            }
         }
       }
       finally

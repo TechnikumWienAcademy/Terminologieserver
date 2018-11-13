@@ -188,8 +188,10 @@ public class ImportKBV
       }
       catch (Exception exRollback)
       {
-        logger.info(exRollback.getMessage());
-        logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+          if(!hb_session.getTransaction().wasRolledBack()){
+            logger.info(exRollback.getMessage());
+            logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+        }
       }
     }
     finally

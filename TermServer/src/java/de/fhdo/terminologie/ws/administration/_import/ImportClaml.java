@@ -211,8 +211,10 @@ public class ImportClaml
       }
       catch (Exception exRollback)
       {
-        logger.info(exRollback.getMessage());
-        logger.info("[ImportClaml.java] Rollback fehlgeschlagen!");
+            if(!hb_session.getTransaction().wasRolledBack()){
+                logger.info(exRollback.getMessage());
+                logger.info("[ImportClaml.java] Rollback fehlgeschlagen!");
+            }
       }
 
       //LoggingOutput.outputException(ex, this);

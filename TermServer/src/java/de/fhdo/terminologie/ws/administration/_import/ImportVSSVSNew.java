@@ -1033,9 +1033,11 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 }
                 catch (Exception exRollback)
                 {
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
-                    throw new ImportException("Rollback fehlgeschlagen! Fehler beim Import eines Value Sets: " + exRollback.getLocalizedMessage());
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        logger.info(exRollback.getMessage());
+                        logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+                        throw new ImportException("Rollback fehlgeschlagen! Fehler beim Import eines Value Sets: " + exRollback.getLocalizedMessage());
+                    }
                 }
             }
             finally

@@ -464,8 +464,10 @@ public class ImportCSV_ELGA
                 }
                 catch (Exception exRollback)
                 {
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportSVS.java] Rollback fehlgeschlagen!");
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        logger.info(exRollback.getMessage());
+                        logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+                    }
                 }
             }
             finally

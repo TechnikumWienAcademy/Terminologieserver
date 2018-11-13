@@ -207,8 +207,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             }
             catch (Exception exRollback)
             {
-                logger.info(exRollback.getMessage());
-                logger.info("[ImportClaml.java] Rollback fehlgeschlagen!");
+                if(!hb_session.getTransaction().wasRolledBack()){
+                    logger.info(exRollback.getMessage());
+                    logger.info("[ImportSVS.java] Rollback fehlgeschlagen!");
+                }
             }
             
             throw new ImportException(ex.getLocalizedMessage());
@@ -244,8 +246,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             }
             catch (Exception exRollback)
             {
-                logger.info(exRollback.getMessage());
-                logger.info("[ImportClaml.java] Rollback fehlgeschlagen!");
+                if(!hb_session.getTransaction().wasRolledBack()){
+                    logger.info(exRollback.getMessage());
+                    logger.info("[ImportClaml.java] Rollback fehlgeschlagen!");
+                }
             }
             //currentTask = "";
             //percentageComplete = 0.0;

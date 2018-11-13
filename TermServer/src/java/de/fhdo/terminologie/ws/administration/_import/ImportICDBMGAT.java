@@ -930,8 +930,10 @@ public class ImportICDBMGAT
         }
         catch (Exception exRollback)
         {
-          logger.info(exRollback.getMessage());
-          logger.info("[ImportLeiKat.java] Rollback fehlgeschlagen!");
+            if(!hb_session.getTransaction().wasRolledBack()){
+                logger.info(exRollback.getMessage());
+                logger.info("[ImportLeiKat.java] Rollback fehlgeschlagen!");
+            }
         }
       }
       finally
