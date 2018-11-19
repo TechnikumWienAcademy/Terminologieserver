@@ -2,6 +2,7 @@
 	-Bugfixes
 		.) EHTSOID-73: application/soap+xml sollte nun akzeptiert werden.
 		.) EHTSOID-158: Rollback-Fehlermeldungen werden nicht mehr angezeigt wenn sie nicht auftreten.
+		.) EHTSOID-172: Die aktuellen Vorgänge werden wieder angezeigt.
 
 Changelog 3.2.19
 	-Bugfixes

@@ -47,7 +47,7 @@ public class ActualProceedings
     private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
     private static final String PROCEEDING_NEW = "NEU";
-    private static final String PROCEEDING_CHANGED = "GEÃ„NDERT";
+    private static final String PROCEEDING_CHANGED = "GEÄNDERT";
     private static final String PROCEEDING_OBSOLETE = "OBSOLET";
 
     /**
@@ -66,7 +66,8 @@ public class ActualProceedings
         ActualProceedingsResponseType response = new ActualProceedingsResponseType();
         response.setReturnInfos(new ReturnType());
         
-        boolean loggedIn = false;
+        //3.2.20 commented out
+        /*boolean loggedIn = false;
         LoginInfoType loginInfoType = null;
         if (parameter != null && parameter.getLogin() != null)
         {
@@ -80,8 +81,9 @@ public class ActualProceedings
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.OK);
             response.getReturnInfos().setMessage("Sie müssen mit Administrationsrechten am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
+            logger.info("DABACA 1");
             return response;
-        }
+        }*/
         
         List<ActualProceeding> apList = new ArrayList<ActualProceeding>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:MM:ss");
