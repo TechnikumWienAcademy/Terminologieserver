@@ -41,7 +41,6 @@ import de.fhdo.terminologie.ws.administration.types.ImportValueSetStatusRequestT
 import de.fhdo.terminologie.ws.administration.types.ImportValueSetStatusResponseType;
 import de.fhdo.terminologie.ws.administration.types.MaintainDomainRequestType;
 import de.fhdo.terminologie.ws.administration.types.MaintainDomainResponseType;
-import de.fhdo.terminologie.ws.types.ReturnType;
 import java.io.IOException;
 import javax.annotation.Resource;
 import javax.jws.WebService;
@@ -52,8 +51,6 @@ import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 import org.apache.log4j.Logger;
 
-
-
 /**
  *
  * @author Bernhard Rimatzki
@@ -61,8 +58,18 @@ import org.apache.log4j.Logger;
 @WebService(serviceName = "Administration")
 public class Administration
 {
+    //3.2.20
+    @Resource
+    public boolean importRunning;
+    
   private static Logger logger = Logger4j.getInstance().getLogger();
     
+  //3.2.20
+  @WebMethod(operationName = "checkImportRunning")
+  public boolean checkImportRunning(){
+      return importRunning;
+  }
+  
   // Mit Hilfe des WebServiceContext lässt sich die ClientIP bekommen.
   @Resource
   private WebServiceContext webServiceContext;
@@ -96,12 +103,16 @@ public class Administration
   @WebMethod(operationName = "ImportCodeSystem")
   public ImportCodeSystemResponseType ImportCodeSystem(@WebParam(name = "parameter") ImportCodeSystemRequestType parameter)
   {
-    SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+      //3.2.20 next line
+      importRunning = true;
+      SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
     
     
        //preparation for new and more stable imports
       ImportCodeSystemNew nics = new ImportCodeSystemNew();
       ImportCodeSystemResponseType response = nics.ImportCodeSystem(parameter);
+      //3.2.20 next line
+      importRunning = false;
       return response;
     
     /*

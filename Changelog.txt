@@ -3,7 +3,9 @@
 		.) EHTSOID-73: application/soap+xml sollte nun akzeptiert werden.
 		.) EHTSOID-158: Rollback-Fehlermeldungen werden nicht mehr angezeigt wenn sie nicht auftreten.
 		.) EHTSOID-172: Die aktuellen Vorgänge werden wieder angezeigt.
-
+	-Änderungen
+		.) Zusätzliche Debug-Logeinträge für den Import eingefügt.
+		
 Changelog 3.2.19
 	-Bugfixes
 		.) EHTSOID-160: Die Freigabe wurde weiter verändert um die bestehenden Probleme zu beheben.

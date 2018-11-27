@@ -68,6 +68,8 @@ public abstract class AbstractImport
     
     protected void validateParameters() throws ImportParameterValidationException
     {
+        //3.2.20
+        logger.debug("validateParameters-function started");
         if(this.importId == null)
         {
             throw new ImportParameterValidationException("ImportId must not be null.");
@@ -87,6 +89,8 @@ public abstract class AbstractImport
         {
             throw new ImportParameterValidationException("Either Filecontent or FileContentList have to be set.");
         }
+        //3.2.20
+        logger.debug("validateParamters-function finished");
     }
     
     protected void setTotalCountInStatusList(int totalCount, Long importId)

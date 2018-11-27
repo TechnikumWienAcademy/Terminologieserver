@@ -46,6 +46,10 @@
 
 <xs:element name="associationType" type="ns1:associationType"/>
 
+<xs:element name="checkImportRunning" type="tns:checkImportRunning"/>
+
+<xs:element name="checkImportRunningResponse" type="tns:checkImportRunningResponse"/>
+
 <xs:element name="codeSystem" type="ns1:codeSystem"/>
 
 <xs:element name="codeSystemConcept" type="ns1:codeSystemConcept"/>
@@ -185,7 +189,7 @@
 <xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
 <xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -259,6 +263,7 @@
 <xs:complexType name="returnType">
 <xs:sequence>
 <xs:element name="count" type="xs:int"/>
+<xs:element name="httpStatus" type="tns:httpStatus" minOccurs="0"/>
 <xs:element name="message" type="xs:string" minOccurs="0"/>
 <xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0"/>
 <xs:element name="status" type="tns:status" minOccurs="0"/>
@@ -290,6 +295,16 @@
 </xs:sequence>
 </xs:complexType>
 </xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="checkImportRunning">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="checkImportRunningResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -331,7 +346,7 @@
 <xs:element name="importId" type="xs:long" minOccurs="0"/>
 <xs:element name="importInfos" type="tns:importType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -376,8 +391,8 @@
 <xs:element name="importId" type="xs:long" minOccurs="0"/>
 <xs:element name="importInfos" type="tns:importType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -391,6 +406,41 @@
 </xs:sequence>
 </xs:complexType>
 </xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ActualProceedings">
+<xs:sequence>
+<xs:element name="parameter" type="tns:actualProceedingsRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="actualProceedingsRequestType">
+<xs:sequence>
+<xs:element name="login" type="tns:loginType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ActualProceedingsResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:actualProceedingsResponseType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="actualProceedingsResponseType">
+<xs:sequence>
+<xs:element name="actualProceedings" type="tns:actualProceeding" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="actualProceeding">
+<xs:sequence>
+<xs:element name="lastChangeDate" type="xs:string" minOccurs="0"/>
+<xs:element name="status" type="xs:string" minOccurs="0"/>
+<xs:element name="terminologieName" type="xs:string" minOccurs="0"/>
+<xs:element name="terminologieType" type="xs:string" minOccurs="0"/>
+<xs:element name="terminologieVersionName" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -447,41 +497,6 @@
 </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="ActualProceedings">
-<xs:sequence>
-<xs:element name="parameter" type="tns:actualProceedingsRequestType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="actualProceedingsRequestType">
-<xs:sequence>
-<xs:element name="login" type="tns:loginType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="ActualProceedingsResponse">
-<xs:sequence>
-<xs:element name="return" type="tns:actualProceedingsResponseType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="actualProceedingsResponseType">
-<xs:sequence>
-<xs:element name="actualProceedings" type="tns:actualProceeding" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="actualProceeding">
-<xs:sequence>
-<xs:element name="lastChangeDate" type="xs:string" minOccurs="0"/>
-<xs:element name="status" type="xs:string" minOccurs="0"/>
-<xs:element name="terminologieName" type="xs:string" minOccurs="0"/>
-<xs:element name="terminologieType" type="xs:string" minOccurs="0"/>
-<xs:element name="terminologieVersionName" type="xs:string" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
 <xs:complexType name="ExportValueSetContent">
 <xs:sequence>
 <xs:element name="parameter" type="tns:exportValueSetContentRequestType" minOccurs="0"/>
@@ -493,8 +508,8 @@
 <xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
 <xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -535,6 +550,15 @@
 </xs:element>
 </xs:sequence>
 </xs:complexType>
+
+<xs:simpleType name="httpStatus">
+<xs:restriction base="xs:string">
+<xs:enumeration value="HTTP403"/>
+<xs:enumeration value="HTTP409"/>
+<xs:enumeration value="HTTP500"/>
+<xs:enumeration value="HTTP503"/>
+</xs:restriction>
+</xs:simpleType>
 
 <xs:simpleType name="overallErrorCategory">
 <xs:restriction base="xs:string">

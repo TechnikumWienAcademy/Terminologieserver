@@ -28,17 +28,9 @@ import de.fhdo.collaboration.workflow.ProposalWorkflow;
 import de.fhdo.collaboration.workflow.ReturnType;
 import de.fhdo.collaboration.workflow.TerminologyReleaseManager;
 import de.fhdo.helper.ArgumentHelper;
-import de.fhdo.helper.LoginHelper;
 import de.fhdo.helper.SessionHelper;
-import de.fhdo.helper.WebServiceUrlHelper;
 import de.fhdo.interfaces.IUpdateModal;
-import de.fhdo.terminologie.ws.authorizationPub.Authorization;
-import de.fhdo.terminologie.ws.authorizationPub.CheckLoginResponse;
-import de.fhdo.terminologie.ws.authorizationPub.LoginRequestType;
-import de.fhdo.terminologie.ws.authorizationPub.LoginType;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -193,31 +185,6 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
     if(isUserAllowed){
         running = true;
         pscThread.start();
-        //3.2.18 this thread keeps the socket from disconnecting
-        Thread pingThread = new Thread(){
-            @Override
-            public void run(){
-                while(running){
-                    try {
-                    LoginRequestType request = new LoginRequestType();
-                    request.setLogin(new LoginType());
-                    request.getLogin().setSessionID(SessionHelper.getSessionId());
-                    Authorization port_authorizationPub = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
-                    CheckLoginResponse.Return response = port_authorizationPub.checkLogin(request);
-                    
-                    de.fhdo.terminologie.ws.authorization.LoginRequestType requestCol = new de.fhdo.terminologie.ws.authorization.LoginRequestType();
-                    requestCol.setLogin(new de.fhdo.terminologie.ws.authorization.LoginType());
-                    requestCol.getLogin().setSessionID(SessionHelper.getSessionId());
-                    de.fhdo.terminologie.ws.authorization.Authorization port_authorization = WebServiceUrlHelper.getInstance().getAuthorizationServicePort();
-                    de.fhdo.terminologie.ws.authorization.CheckLoginResponse.Return responseCol = port_authorization.checkLogin(requestCol);
-                    //rate of the ping
-                    this.sleep(60*1000);
-                    } catch (InterruptedException ex) {
-                    }
-                }
-            }
-        };
-        pingThread.start();
     }
     else
         Executions.schedule(desk, listener, new Event("finish"));

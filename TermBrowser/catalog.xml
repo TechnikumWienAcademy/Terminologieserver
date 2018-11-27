@@ -16,13 +16,13 @@
     <system systemId="http://localhost:8080/TermServer/Authorization?wsdl" uri="src/conf/xml-resources/web-service-references/Authorization_1/wsdl/localhost_8080/TermServer/Authorization.wsdl"/>
     <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=1" uri="src/conf/xml-resources/web-service-references/Authorization_1/wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_1.xsd"/>
     <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=2" uri="src/conf/xml-resources/web-service-references/Authorization_1/wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_2.xsd"/>
-    <system systemId="http://localhost:8080/TermServer/Administration?wsdl" uri="src/conf/xml-resources/web-service-references/Administration_1/wsdl/localhost_8080/TermServer/Administration.wsdl"/>
-    <system systemId="http://localhost:8080/TermServer/AdministrationIntern?xsd=1" uri="src/conf/xml-resources/web-service-references/Administration_1/wsdl/localhost_8080/TermServer/AdministrationIntern.xsd_1.xsd"/>
-    <system systemId="http://localhost:8080/TermServer/AdministrationIntern?xsd=2" uri="src/conf/xml-resources/web-service-references/Administration_1/wsdl/localhost_8080/TermServer/AdministrationIntern.xsd_2.xsd"/>
     <system systemId="http://localhost:8080/IDP/AuthorizationIDP?wsdl" uri="src/conf/xml-resources/web-service-references/AuthorizationIDP/wsdl/localhost_8080/IDP/AuthorizationIDP.wsdl"/>
     <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=1" uri="src/conf/xml-resources/web-service-references/AuthorizationIDP/wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_1.xsd"/>
     <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=2" uri="src/conf/xml-resources/web-service-references/AuthorizationIDP/wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_2.xsd"/>
     <system systemId="http://localhost:8080/IDP/UserManagement?wsdl" uri="src/conf/xml-resources/web-service-references/UserManagement/wsdl/localhost_8080/IDP/UserManagement.wsdl"/>
     <system systemId="http://localhost:8080/IDP/UserManagement?xsd=1" uri="src/conf/xml-resources/web-service-references/UserManagement/wsdl/localhost_8080/IDP/UserManagement.xsd_1.xsd"/>
     <system systemId="http://localhost:8080/IDP/UserManagement?xsd=2" uri="src/conf/xml-resources/web-service-references/UserManagement/wsdl/localhost_8080/IDP/UserManagement.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Administration?wsdl" uri="src/conf/xml-resources/web-service-references/Administration_1/wsdl/localhost_8080/TermServer/Administration.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/AdministrationIntern?xsd=1" uri="src/conf/xml-resources/web-service-references/Administration_1/wsdl/localhost_8080/TermServer/AdministrationIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AdministrationIntern?xsd=2" uri="src/conf/xml-resources/web-service-references/Administration_1/wsdl/localhost_8080/TermServer/AdministrationIntern.xsd_2.xsd"/>
 </catalog>

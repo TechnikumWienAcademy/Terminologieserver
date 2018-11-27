@@ -48,8 +48,6 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -59,8 +57,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -72,13 +68,6 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.mapping.Column;
-import org.hibernate.mapping.PersistentClass;
-import org.hibernate.mapping.Property;
-import org.hibernate.metadata.ClassMetadata;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -120,26 +109,31 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     @Override
     public void setImportData(ImportCodeSystemRequestType request)
     {
-        logger.info("setImportData started");
+        logger.info("setImportData-function started");
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
         this._codesystem = request.getCodeSystem();
         this._fileContent = request.getImportInfos().getFilecontent();
+        logger.debug("setImportData-function finished");
     }
 
     @Override
     public void startImport() throws ImportException, ImportParameterValidationException
     {
-        logger.info("startImport started");
+        logger.info("startImport-function started");
         //creating Hibernate Session and starting transaction
         try
         {
+            //3.2.20 next line
+            logger.debug("Opening hibernate-session and validating parameters started");
             this.hb_session = HibernateUtil.getSessionFactory().openSession();
             this.hb_session.getTransaction().begin();
             this.hb_session.setFlushMode(FlushMode.COMMIT);
             this.validateParameters();
+            //3.2.20 next line
+            logger.debug("Opening hibernate-session and validating parameters finished");
         }
         catch (HibernateException ex)
         {
@@ -163,9 +157,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                
         try
         {
-            logger.debug("Oeffne Datei...");
-
-            logger.debug("wandle zu InputStream um...");
+            logger.debug("Opening file and creating ByteArrayInputStream");
             InputStream is = new ByteArrayInputStream(this._fileContent);
 
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -182,14 +174,18 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
             this._status = StaticStatusList.getStatus(this.getImportId());
 
-            if (this._status != null && this._status.isCancel())
+            //3.2.20 added wasrolledback
+            if (this._status != null && this._status.isCancel() && !hb_session.getTransaction().wasRolledBack())
             {
                 hb_session.getTransaction().rollback();
             }
             else
             {
-                hb_session.flush();
-                hb_session.getTransaction().commit();
+                //3.2.20 added if around block
+                if(!hb_session.getTransaction().wasCommitted()){
+                    hb_session.flush();
+                    hb_session.getTransaction().commit();
+                }
             }
 
         }
@@ -289,14 +285,14 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         XMLEventReader eventReader = inputFactory.createXMLEventReader(is);
 
         // Read the XML document
-        logger.debug("Analyze data...");
+        logger.debug("Analyze data");
 
         //Attribute für CreateCodeSystem
         String authority = "";
         String uid = "";
 
         int countEvery = 0;
-
+        
         while (eventReader.hasNext())
         {
             this._status = StaticStatusList.getStatus(this.getImportId());
@@ -304,7 +300,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             {
                 break;
             }
-
+            
             XMLEvent event = eventReader.nextEvent();
 
             if (event.isStartElement())
@@ -646,6 +642,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
     private void createCodeSystem(String title, String uid, String versionName, Date date, String authority, String description) throws Exception
     {
+        //3.2.20
+        logger.debug("Creating CodeSystem, title = " + title + " uid = " + uid + " versionName = " + versionName + " date = " + date.toString() + " authority = " + authority + " description = " + description);
+        
         // Codesystem suchen, erst anlegen, wenn nicht vorhanden
         CreateCodeSystemRequestType request = new CreateCodeSystemRequestType();
 
@@ -740,12 +739,18 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 + " where codeSystemId=" + resp.getCodeSystem().getId();
         List<MetadataParameter> md_list = hb_session.createQuery(hql).list();
 
+        //3.2.20 next line
+        int metadatacounter = 0;
         for (MetadataParameter mp : md_list)
         {
             this._metaDataMap.put(mp.getParamName(), mp.getId());
             this._metadataParameterMap.put(mp.getId(), mp);
             logger.debug("found metadata: " + mp.getParamName() + " with id: " + mp.getId());
+            //3.2.20
+            metadatacounter++;
         }
+        //3.2.20
+        logger.debug("METADATA-COUNTER = " + metadatacounter);
     }
     
     private AssociationType CreateAssociationType(String forwardName, String reverseName)

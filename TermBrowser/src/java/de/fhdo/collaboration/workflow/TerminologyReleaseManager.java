@@ -68,6 +68,8 @@ public class TerminologyReleaseManager
     private long importId;
     //3.2.17 added
     private boolean sessionIDsSet;
+    //3.2.20 added
+    private de.fhdo.terminologie.ws.administrationPub.Administration adminPort;
 
     public TerminologyReleaseManager()
     {
@@ -198,6 +200,7 @@ public class TerminologyReleaseManager
                 List<de.fhdo.terminologie.ws.searchPub.CodeSystem> result = this.getTargetCodeSystemFromPub(csToExport.getName());
 
                 boolean exists = false;
+                //listengröße gleich 1 for schleife entfernen
                 if ((result != null) && (result.size() == 1))
                 {
                     //check if name of found CS and CS to be exported are identical
@@ -224,6 +227,7 @@ public class TerminologyReleaseManager
                 else if (result.size() > 1)
                 {
                     //checks if the CS name is identical
+                    //break einfügen
                     for (de.fhdo.terminologie.ws.searchPub.CodeSystem cs : result)
                     {
                         if (cs.getName().equals(csToExport.getName()))
@@ -801,6 +805,10 @@ public class TerminologyReleaseManager
         }
     }
 
+    //3.2.20
+    de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType requestThread;
+    de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import;
+    
     private de.fhdo.terminologie.ws.administrationPub.ReturnType importCodeSystem(CodeSystemVersion csv, ExportType exportedCs) throws ServerSOAPFaultException
     {
         logger.info("TermBrowser: TerminologyReleaseManager.importCodeSystem gestartet");
@@ -835,10 +843,60 @@ public class TerminologyReleaseManager
         request.getImportInfos().setFilecontent(exportedCs.getFilecontent());
         request.setImportId(this.importId);
 
-        
-        
-        de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import = port.importCodeSystem(request);
+        //3.2.20 next line
+        //de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return();
+        //3.2.20 added try catch and thread
+        requestThread = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
+        requestThread.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
+        requestThread.getLogin().setSessionID(this.pubSessionId);
+        //3.2.17
+        requestThread.setLoginAlreadyChecked(true);
+        requestThread.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
+        requestThread.getCodeSystem().setId(this.targetCS.getId());
 
+        requestThread.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
+        if (this.targetCS.getName().contains("LOINC"))
+        {
+            requestThread.getImportInfos().setOrder(true);
+            requestThread.getImportInfos().setRole(CODES.ROLE_ADMIN);
+        }
+        else
+        {
+            requestThread.getImportInfos().setRole(CODES.ROLE_TRANSFER);
+        }
+        requestThread.getCodeSystem().getCodeSystemVersions().add(csv_pub);
+        requestThread.getImportInfos().setFormatId(exportedCs.getFormatId());
+        requestThread.getCodeSystem().setName(this.targetCS.getName());
+        requestThread.getImportInfos().setFilecontent(exportedCs.getFilecontent());
+        requestThread.setImportId(this.importId);
+        
+        adminPort = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
+        try{
+            //original line before 3.2.20
+            //de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import2 = port.importCodeSystem(request);
+            Thread thread = new Thread(){
+              @Override
+              public void run(){
+                  //de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
+                  //port.importCodeSystem(requestThread);
+                  ret_import = adminPort.importCodeSystem(requestThread);
+              }
+            };
+            thread.start();
+            
+            boolean importRunning = true;
+            int counter = 1;
+            while(importRunning){
+                Thread.sleep(5*1000);
+                importRunning = adminPort.checkImportRunning();
+                logger.info("Pub-import running for " + counter*5 + " seconds");
+                counter++;
+            }
+        }
+        catch(Exception e){
+            logger.info("Exception caught while importing CodeSystem on pub and communicating back to collab");
+            e.printStackTrace();
+        }
         return ret_import.getReturnInfos();
     }
 
@@ -1316,7 +1374,8 @@ public class TerminologyReleaseManager
                 transfer_success = this.transferTerminologyToPublicServer(rel.getStatusByStatusIdTo(), po);
                 if (!transfer_success.isSuccess())
                 {
-                    logger.debug("Ein ProposalObject konnte nicht erfolgreich zum PublicServer transferiert werden");
+                    //3.2.20 changed to info from debug
+                    logger.info("Ein ProposalObject konnte nicht erfolgreich zum PublicServer transferiert werden");
                     break;
                 }
             }

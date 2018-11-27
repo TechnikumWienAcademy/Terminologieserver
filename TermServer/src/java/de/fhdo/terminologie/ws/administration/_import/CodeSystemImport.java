@@ -25,7 +25,7 @@ public abstract class CodeSystemImport extends AbstractImport
     @Override
     protected void validateParameters() throws ImportParameterValidationException
     {
-        logger.info("validateParameters started");
+        logger.info("validateParameters-function started");
 
         try
         {
@@ -40,6 +40,9 @@ public abstract class CodeSystemImport extends AbstractImport
         {
             throw new ImportParameterValidationException("Codesystem must not be null.");
         }
+        
+        //3.2.20
+        logger.debug("validateParameters-function finished");
     }
     
     public CodeSystem getCodeSystem()
