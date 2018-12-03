@@ -77,7 +77,65 @@ public class Authoring
 
   @Resource
   private WebServiceContext webServiceContext;
-
+  //3.2.21 start
+  @Resource
+  private boolean removeTerminologyOrConceptPubRunning;
+  @Resource
+  private RemoveTerminologyOrConceptResponseType removeTerminologyOrConceptPubResponse;
+    
+  
+    @WebMethod(operationName = "getRemoveTerminologyOrConceptPubRunning")
+    public boolean getRemoveTerminologyOrConceptRunnning(){
+        return removeTerminologyOrConceptPubRunning;
+    }
+    
+    @WebMethod(operationName = "getRemoveTerminologyOrConceptPubResponse")
+    public RemoveTerminologyOrConceptResponseType getRemoveTerminologyOrConceptPubResponse(){
+        return removeTerminologyOrConceptPubResponse;
+    }
+  
+    /**
+     * Web service operation
+     */
+    @WebMethod(operationName = "RemoveTerminologyOrConceptPub")
+    public void RemoveTerminologyOrConceptPub(@WebParam(name = "parameter") RemoveTerminologyOrConceptRequestType parameter) {
+        removeTerminologyOrConceptPubRunning = true;
+        SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+        removeTerminologyOrConceptPubResponse = new RemoveTerminologyOrConcept().RemoveTerminologyOrConcept(parameter);
+        removeTerminologyOrConceptPubRunning = false;
+    }
+    
+    //3.2.21 end
+    //3.2.21 start
+     @Resource
+    private boolean createCodeSystemPubRunning;
+    @Resource
+    private CreateCodeSystemResponseType createCodeSystemPubResponse;
+    
+    @WebMethod(operationName = "getCreateCodeSystemPubRunning")
+    public boolean getCreateCodeSystemPubRunning(){
+        return createCodeSystemPubRunning;
+    }
+    
+    @WebMethod(operationName = "getCreateCodeSystemPubResponse")
+    public CreateCodeSystemResponseType getCreateCodeSystemPubResponse(){
+        return createCodeSystemPubResponse;
+    }
+  
+    /**
+     * Web service operation
+     */
+    @WebMethod(operationName = "CreateCodeSystemPub")
+    public void CreateCodeSystemPub(@WebParam(name = "parameter") CreateCodeSystemRequestType parameter)
+    {
+      createCodeSystemPubRunning = true;
+      SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+      CreateCodeSystem ccs = new CreateCodeSystem();
+      createCodeSystemPubResponse = ccs.CreateCodeSystem(parameter);
+      createCodeSystemPubRunning = false;
+    }
+    //3.2.21 end
+    
   @WebMethod(operationName = "CreateCodeSystem")
   public CreateCodeSystemResponseType CreateCodeSystem(@WebParam(name = "parameter") CreateCodeSystemRequestType parameter)
   {
@@ -86,6 +144,35 @@ public class Authoring
     return ccs.CreateCodeSystem(parameter);
   }
 
+  //3.2.21 start
+  @Resource
+  private boolean createValueSetPubRunning;
+  @Resource
+  private CreateValueSetResponseType createValueSetPubResponse;
+  
+  @WebMethod(operationName = "isCreateValueSetPubRunning")
+  public boolean isCreateValueSetPubRunning(){
+      return createValueSetPubRunning;
+  }
+  
+  @WebMethod(operationName = "getCreateValueSetPubResponse")
+  public CreateValueSetResponseType getCreateValueSetPubResponse(){
+      return createValueSetPubResponse;
+  }
+  
+  /**
+   * Web service operation
+   */
+  @WebMethod(operationName = "CreateValueSetPub")
+  public void CreateValueSetPub(@WebParam(name = "parameter") CreateValueSetRequestType parameter)
+  {
+    createValueSetPubRunning = true;
+    SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+    createValueSetPubResponse =  new CreateValueSet().CreateValueSet(parameter);
+    createValueSetPubRunning = false;
+  }
+  //3.2.21 end
+  
   /**
    * Web service operation
    */
@@ -256,7 +343,7 @@ public class Authoring
         SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
         return new MaintainConceptValueSetMembership().MaintainConceptValueSetMembership(parameter);
     }
-
+    
     /**
      * Web service operation
      */

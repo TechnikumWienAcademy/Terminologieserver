@@ -24,6 +24,10 @@
 
 <xs:element name="ImportCodeSystemCancelResponse" type="tns:ImportCodeSystemCancelResponse"/>
 
+<xs:element name="ImportCodeSystemPub" type="tns:ImportCodeSystemPub"/>
+
+<xs:element name="ImportCodeSystemPubResponse" type="tns:ImportCodeSystemPubResponse"/>
+
 <xs:element name="ImportCodeSystemResponse" type="tns:ImportCodeSystemResponse"/>
 
 <xs:element name="ImportCodeSystemStatus" type="tns:ImportCodeSystemStatus"/>
@@ -31,6 +35,10 @@
 <xs:element name="ImportCodeSystemStatusResponse" type="tns:ImportCodeSystemStatusResponse"/>
 
 <xs:element name="ImportValueSet" type="tns:ImportValueSet"/>
+
+<xs:element name="ImportValueSetPub" type="tns:ImportValueSetPub"/>
+
+<xs:element name="ImportValueSetPubResponse" type="tns:ImportValueSetPubResponse"/>
 
 <xs:element name="ImportValueSetResponse" type="tns:ImportValueSetResponse"/>
 
@@ -105,6 +113,14 @@
 </xs:complexType>
 </xs:element>
 
+<xs:element name="getImportValueSetPubResponse" type="tns:getImportValueSetPubResponse"/>
+
+<xs:element name="getImportValueSetPubResponseResponse" type="tns:getImportValueSetPubResponseResponse"/>
+
+<xs:element name="getPubImportResponse" type="tns:getPubImportResponse"/>
+
+<xs:element name="getPubImportResponseResponse" type="tns:getPubImportResponseResponse"/>
+
 <xs:element name="importCodeSystemResponseType">
 <xs:complexType>
 <xs:sequence>
@@ -145,6 +161,10 @@
 </xs:complexType>
 </xs:element>
 
+<xs:element name="isImportValueSetPubRunning" type="tns:isImportValueSetPubRunning"/>
+
+<xs:element name="isImportValueSetPubRunningResponse" type="tns:isImportValueSetPubRunningResponse"/>
+
 <xs:element name="licenceType" type="ns1:licenceType"/>
 
 <xs:element name="licencedUser" type="ns1:licencedUser"/>
@@ -177,99 +197,6 @@
 
 <xs:element name="valueSetVersion" type="ns1:valueSetVersion"/>
 
-<xs:complexType name="ExportCodeSystemContent">
-<xs:sequence>
-<xs:element name="parameter" type="tns:exportCodeSystemContentRequestType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="exportCodeSystemContentRequestType">
-<xs:sequence>
-<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
-<xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
-<xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
-<xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<xs:complexType name="exportType">
-<xs:sequence>
-<xs:element name="filecontent" type="xs:base64Binary" minOccurs="0"/>
-<xs:element name="formatId" type="xs:long" minOccurs="0"/>
-<xs:element name="updateCheck" type="xs:boolean"/>
-<xs:element name="url" type="xs:string" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="exportParameterType">
-<xs:sequence>
-<xs:element name="associationInfos" type="xs:string" minOccurs="0"/>
-<xs:element name="codeSystemInfos" type="xs:boolean"/>
-<xs:element name="dateFrom" type="xs:dateTime" minOccurs="0"/>
-<xs:element name="translations" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="loginType">
-<xs:sequence>
-<xs:element name="ip" type="xs:string" minOccurs="0"/>
-<xs:element name="password" type="xs:string" minOccurs="0"/>
-<xs:element name="sessionID" type="xs:string" minOccurs="0"/>
-<xs:element name="username" type="xs:string" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="ExportCodeSystemContentResponse">
-<xs:sequence>
-<xs:element name="return" minOccurs="0">
-<xs:complexType>
-<xs:sequence>
-<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
-<xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="returnType">
-<xs:sequence>
-<xs:element name="count" type="xs:int"/>
-<xs:element name="httpStatus" type="tns:httpStatus" minOccurs="0"/>
-<xs:element name="message" type="xs:string" minOccurs="0"/>
-<xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0"/>
-<xs:element name="status" type="tns:status" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
 <xs:complexType name="ImportCodeSystemStatus">
 <xs:sequence>
 <xs:element name="parameter" type="tns:importCodeSystemStatusRequestType" minOccurs="0"/>
@@ -280,6 +207,15 @@
 <xs:sequence>
 <xs:element name="importId" type="xs:long" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="loginType">
+<xs:sequence>
+<xs:element name="ip" type="xs:string" minOccurs="0"/>
+<xs:element name="password" type="xs:string" minOccurs="0"/>
+<xs:element name="sessionID" type="xs:string" minOccurs="0"/>
+<xs:element name="username" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -298,11 +234,21 @@
 </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="checkImportRunning">
+<xs:complexType name="returnType">
+<xs:sequence>
+<xs:element name="count" type="xs:int"/>
+<xs:element name="httpStatus" type="tns:httpStatus" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0"/>
+<xs:element name="status" type="tns:status" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="isImportValueSetPubRunning">
 <xs:sequence/>
 </xs:complexType>
 
-<xs:complexType name="checkImportRunningResponse">
+<xs:complexType name="isImportValueSetPubRunningResponse">
 <xs:sequence>
 <xs:element name="return" type="xs:boolean"/>
 </xs:sequence>
@@ -321,6 +267,33 @@
 </xs:sequence>
 </xs:complexType>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <xs:complexType name="CreateDomainResponse">
 <xs:sequence>
 <xs:element name="return" minOccurs="0">
@@ -328,52 +301,6 @@
 <xs:sequence>
 <xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
 <xs:element name="domain" type="ns1:domain" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="ImportCodeSystem">
-<xs:sequence>
-<xs:element name="parameter" type="tns:importCodeSystemRequestType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="importCodeSystemRequestType">
-<xs:sequence>
-<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
-<xs:element name="importId" type="xs:long" minOccurs="0"/>
-<xs:element name="importInfos" type="tns:importType" minOccurs="0"/>
-<xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="importType">
-<xs:sequence>
-<xs:element name="fileContentList" type="tns:filecontentListEntry" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element name="filecontent" type="xs:base64Binary" minOccurs="0"/>
-<xs:element name="formatId" type="xs:long" minOccurs="0"/>
-<xs:element name="order" type="xs:boolean" minOccurs="0"/>
-<xs:element name="role" type="xs:string" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="filecontentListEntry">
-<xs:sequence>
-<xs:element name="code" type="xs:int" minOccurs="0"/>
-<xs:element name="content" type="xs:base64Binary" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="ImportCodeSystemResponse">
-<xs:sequence>
-<xs:element name="return" minOccurs="0">
-<xs:complexType>
-<xs:sequence>
-<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
-<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 </xs:element>
@@ -396,6 +323,23 @@
 </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="importType">
+<xs:sequence>
+<xs:element name="fileContentList" type="tns:filecontentListEntry" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="filecontent" type="xs:base64Binary" minOccurs="0"/>
+<xs:element name="formatId" type="xs:long" minOccurs="0"/>
+<xs:element name="order" type="xs:boolean" minOccurs="0"/>
+<xs:element name="role" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="filecontentListEntry">
+<xs:sequence>
+<xs:element name="code" type="xs:int" minOccurs="0"/>
+<xs:element name="content" type="xs:base64Binary" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="ImportValueSetResponse">
 <xs:sequence>
 <xs:element name="return" minOccurs="0">
@@ -403,6 +347,182 @@
 <xs:sequence>
 <xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportValueSetStatus">
+<xs:sequence>
+<xs:element name="parameter" type="tns:importValueSetStatusRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="importValueSetStatusRequestType">
+<xs:sequence>
+<xs:element name="importId" type="xs:long" minOccurs="0"/>
+<xs:element name="login" type="tns:loginType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportValueSetStatusResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+<xs:element name="isRunning" type="xs:boolean" minOccurs="0"/>
+<xs:element name="currentIndex" type="xs:int" minOccurs="0"/>
+<xs:element name="totalCount" type="xs:int" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportValueSetPub">
+<xs:sequence>
+<xs:element name="parameter" type="tns:importValueSetRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportValueSetPubResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="MaintainDomain">
+<xs:sequence>
+<xs:element name="parameter" type="tns:maintainDomainRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="maintainDomainRequestType">
+<xs:sequence>
+<xs:element name="domain" type="ns1:domain" minOccurs="0"/>
+<xs:element name="login" type="tns:loginType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="MaintainDomainResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getImportValueSetPubResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="getImportValueSetPubResponseResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+<xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ExportCodeSystemContent">
+<xs:sequence>
+<xs:element name="parameter" type="tns:exportCodeSystemContentRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="exportCodeSystemContentRequestType">
+<xs:sequence>
+<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
+<xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
+<xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
+<xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="exportType">
+<xs:sequence>
+<xs:element name="filecontent" type="xs:base64Binary" minOccurs="0"/>
+<xs:element name="formatId" type="xs:long" minOccurs="0"/>
+<xs:element name="updateCheck" type="xs:boolean"/>
+<xs:element name="url" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="exportParameterType">
+<xs:sequence>
+<xs:element name="associationInfos" type="xs:string" minOccurs="0"/>
+<xs:element name="codeSystemInfos" type="xs:boolean"/>
+<xs:element name="dateFrom" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="translations" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ExportCodeSystemContentResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+<xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportCodeSystemPub">
+<xs:sequence>
+<xs:element name="parameter" type="tns:importCodeSystemRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="importCodeSystemRequestType">
+<xs:sequence>
+<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
+<xs:element name="importId" type="xs:long" minOccurs="0"/>
+<xs:element name="importInfos" type="tns:importType" minOccurs="0"/>
+<xs:element name="login" type="tns:loginType" minOccurs="0"/>
+<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportCodeSystemPubResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="checkImportRunning">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="checkImportRunningResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportCodeSystem">
+<xs:sequence>
+<xs:element name="parameter" type="tns:importCodeSystemRequestType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ImportCodeSystemResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 </xs:element>
@@ -469,28 +589,17 @@
 </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="ImportValueSetStatus">
-<xs:sequence>
-<xs:element name="parameter" type="tns:importValueSetStatusRequestType" minOccurs="0"/>
-</xs:sequence>
+<xs:complexType name="getPubImportResponse">
+<xs:sequence/>
 </xs:complexType>
 
-<xs:complexType name="importValueSetStatusRequestType">
-<xs:sequence>
-<xs:element name="importId" type="xs:long" minOccurs="0"/>
-<xs:element name="login" type="tns:loginType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="ImportValueSetStatusResponse">
+<xs:complexType name="getPubImportResponseResponse">
 <xs:sequence>
 <xs:element name="return" minOccurs="0">
 <xs:complexType>
 <xs:sequence>
 <xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
-<xs:element name="isRunning" type="xs:boolean" minOccurs="0"/>
-<xs:element name="currentIndex" type="xs:int" minOccurs="0"/>
-<xs:element name="totalCount" type="xs:int" minOccurs="0"/>
+<xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 </xs:element>
@@ -520,31 +629,6 @@
 <xs:sequence>
 <xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
 <xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="MaintainDomain">
-<xs:sequence>
-<xs:element name="parameter" type="tns:maintainDomainRequestType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="maintainDomainRequestType">
-<xs:sequence>
-<xs:element name="domain" type="ns1:domain" minOccurs="0"/>
-<xs:element name="login" type="tns:loginType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="MaintainDomainResponse">
-<xs:sequence>
-<xs:element name="return" minOccurs="0">
-<xs:complexType>
-<xs:sequence>
-<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 </xs:element>

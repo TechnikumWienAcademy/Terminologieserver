@@ -30,27 +30,28 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 import java.util.Set;
 
 /**
- *
+ * TODO Javadoc
+ * 3.2.20 Checked
  * @author Mathias Aschhoff
  */
 public class UpdateConceptStatus
 {
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
   public UpdateConceptStatusResponseType UpdateConceptStatus(UpdateConceptStatusRequestType parameter)
   {
     if (logger.isInfoEnabled())    
-      logger.info("====== UpdateConceptStatus gestartet ======");    
+      logger.info("====== UpdateConceptStatus started ======");    
 
     UpdateConceptStatusResponseType response = new UpdateConceptStatusResponseType();
     response.setReturnInfos(new ReturnType());
 
-    //Parameter prüfen
+    //Checking parameters
     if (validateParameter(parameter, response) == false)    
-      return response; // Fehler bei den Parametern
+      return response; // Parameter check failed
     
-    // Login-Informationen auswerten (gilt für jeden Webservice)    
+    // Checking login   
     if (parameter != null){
         if(LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
             return response;    
@@ -62,8 +63,8 @@ public class UpdateConceptStatus
       Long csvId = parameter.getCodeSystemVersionId();
       CodeSystemEntityVersion csev = (CodeSystemEntityVersion) cse.getCodeSystemEntityVersions().toArray()[0];
 
-      // Hibernate-Block, Session öffnen
-      org.hibernate.Session     hb_session = HibernateUtil.getSessionFactory().openSession();
+      // Opening hibernate session
+      org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
       hb_session.getTransaction().begin();
 
       try
@@ -77,22 +78,20 @@ public class UpdateConceptStatus
       }
       catch (Exception e)
       {
-        hb_session.getTransaction().rollback();
-        // Fehlermeldung an den Aufrufer weiterleiten
+          if(!hb_session.getTransaction().wasRolledBack())
+             hb_session.getTransaction().rollback();
         response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
         response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         response.getReturnInfos().setMessage("Fehler bei 'UpdateConceptStatus': " + e.getLocalizedMessage());
 
-        logger.error("Fehler bei 'UpdateConceptStatus'-Hibernate: " + e.getLocalizedMessage());
-        
-        e.printStackTrace();
+        logger.error("Error at 'UpdateConceptStatus'-Hibernate: " + e.getLocalizedMessage());
       }
       finally
       {
-        hb_session.close();
+          if(hb_session.isOpen())
+            hb_session.close();
       }
       if (true) {
-            // Status an den Aufrufer weitergeben
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
             response.getReturnInfos().setStatus(ReturnType.Status.OK);
             response.getReturnInfos().setMessage("Status erfolgreich geändert.");
@@ -101,14 +100,11 @@ public class UpdateConceptStatus
     }
     catch (Exception e)
     {
-      // Fehlermeldung an den Aufrufer weiterleiten
       response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
       response.getReturnInfos().setMessage("Fehler bei 'UpdateConceptStatus': " + e.getLocalizedMessage());
 
-      logger.error("Fehler bei 'UpdateConceptStatus': " + e.getLocalizedMessage());
-      
-      e.printStackTrace();
+      logger.error("Error at 'UpdateConceptStatus': " + e.getLocalizedMessage());
     }
     return response;
   }

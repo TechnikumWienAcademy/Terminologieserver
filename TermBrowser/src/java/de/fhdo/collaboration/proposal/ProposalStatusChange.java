@@ -50,13 +50,16 @@ import org.zkoss.zul.Window;
  */
 public class ProposalStatusChange extends Window implements AfterCompose, EventListener
 {
+    final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private IUpdateModal updateInterface;
+    final private Proposal proposal;
+    final private long statusToId;
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-  private IUpdateModal updateInterface;
-  private Proposal proposal;
-  private long statusToId;
-  public Thread pscThread;
-  boolean isDiscussion;
+    /**
+     * TODO
+     */
+    public Thread pscThread;
+    boolean isDiscussion;
   
   //3.2.17 these fields are needed since the execution of the status change is put into a thread
   private Desktop desk;
@@ -70,8 +73,8 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
   {
     if (logger.isDebugEnabled())
     {
-      logger.debug("ProposalStatusChange() - Konstruktor");
-      logger.debug("lade Parameter...");
+      logger.debug("ProposalStatusChange() - Constructor");
+      logger.debug("Loading parameters");
     }
 
     proposal = (Proposal) ArgumentHelper.getWindowArgument("proposal");
@@ -118,9 +121,9 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             Date dateTo = ((Datebox)getFellow("dateBis")).getValue();
     
             if(dateFrom != null)
-                logger.debug("Datum von: " + dateFrom);
+                logger.debug("Date from: " + dateFrom);
             else 
-                logger.debug("Datum von: null");
+                logger.debug("Date from: null");
             
             
             //3.2.17 added collabUserId and collabSessionID parameter
@@ -148,7 +151,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                 
                 if (transfer_success.isSuccess())
                 {
-                    logger.info(proposal.getVocabularyName()+ ": Freigabe erfolgreich.");
+                    logger.info(proposal.getVocabularyName()+ ": Proposal status change successful");
                     ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
                     //3.2.17 commented out since this is done in the Executions.schedule
                     //Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
@@ -156,7 +159,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                 }
                 else if (!transfer_success.isSuccess())
                 {
-                    logger.info(proposal.getVocabularyName()+ ": Freigabe fehlgeschlagen." +  transfer_success.getMessage());
+                    logger.info(proposal.getVocabularyName()+ ": Proposal status change failed" +  transfer_success.getMessage());
                     //3.2.17 commented out since this is done in the Executions.schedule
                     //Messagebox.show(transfer_success.getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
                     Executions.schedule(desk, listener, new Event("FAILURESPLIT" + transfer_success.getMessage()));
@@ -166,7 +169,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                     ReturnType retResetStatus = ProposalWorkflow.getInstance().changeProposalStatus(proposal, statusFrom, "Freigabe konnte auf Grund eines Fehlers nicht durchgeführt werden. "+transfer_success.getMessage() , dateFrom, dateTo, false, collabUserId, collabSessionID);
                     if(retResetStatus.isSuccess())
                     {
-                        logger.info(proposal.getVocabularyName() + ": Status wurde nicht geändert");
+                        logger.info(proposal.getVocabularyName() + ": : Proposal status has not been changed");
                         //3.2.17 commented out since this is done in the Executions.schedule
                         //Messagebox.show("Status wurde nicht geändert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
                         Executions.schedule(desk, listener, new Event("RESET"));

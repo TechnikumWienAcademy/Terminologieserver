@@ -36,14 +36,9 @@
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportVSCSV.java</file>
         </group>
         <group>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/AbstractImport.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportCodeSystem.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportStatus.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/StaticStatusList.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportCodeSystemNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authorization/Authorization.java</file>
             <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/Administration.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ExportCodeSystemContent.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/Search.java</file>
         </group>
     </open-files>
 </project-private>

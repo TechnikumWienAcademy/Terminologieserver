@@ -7,35 +7,47 @@
 <xsd:import namespace="de.fhdo.termserver.types" schemaLocation="http://localhost:8080/TermServer/SearchIntern?xsd=2"/>
 </xsd:schema>
 </types>
-<message name="ReturnCodeSystemDetails">
-<part name="parameters" element="tns:ReturnCodeSystemDetails"/>
+<message name="ListCodeSystemsPub">
+<part name="parameters" element="tns:ListCodeSystemsPub"/>
 </message>
-<message name="ReturnCodeSystemDetailsResponse">
-<part name="parameters" element="tns:ReturnCodeSystemDetailsResponse"/>
+<message name="ListCodeSystemsPubResponse">
+<part name="parameters" element="tns:ListCodeSystemsPubResponse"/>
 </message>
-<message name="ListConceptAssociationTypes">
-<part name="parameters" element="tns:ListConceptAssociationTypes"/>
+<message name="isListValueSetsPubRunning">
+<part name="parameters" element="tns:isListValueSetsPubRunning"/>
 </message>
-<message name="ListConceptAssociationTypesResponse">
-<part name="parameters" element="tns:ListConceptAssociationTypesResponse"/>
+<message name="isListValueSetsPubRunningResponse">
+<part name="parameters" element="tns:isListValueSetsPubRunningResponse"/>
 </message>
-<message name="ListMetadataParameter">
-<part name="parameters" element="tns:ListMetadataParameter"/>
+<message name="getListValueSetsPubRespone">
+<part name="parameters" element="tns:getListValueSetsPubRespone"/>
 </message>
-<message name="ListMetadataParameterResponse">
-<part name="parameters" element="tns:ListMetadataParameterResponse"/>
+<message name="getListValueSetsPubResponeResponse">
+<part name="parameters" element="tns:getListValueSetsPubResponeResponse"/>
 </message>
-<message name="ListValueSetContentsByTermOrCode">
-<part name="parameters" element="tns:ListValueSetContentsByTermOrCode"/>
+<message name="isListGloballySearchedConceptsRunning">
+<part name="parameters" element="tns:isListGloballySearchedConceptsRunning"/>
 </message>
-<message name="ListValueSetContentsByTermOrCodeResponse">
-<part name="parameters" element="tns:ListValueSetContentsByTermOrCodeResponse"/>
+<message name="isListGloballySearchedConceptsRunningResponse">
+<part name="parameters" element="tns:isListGloballySearchedConceptsRunningResponse"/>
 </message>
-<message name="ListGloballySearchedConcepts">
-<part name="parameters" element="tns:ListGloballySearchedConcepts"/>
+<message name="ListGloballySearchedConceptsPub">
+<part name="parameters" element="tns:ListGloballySearchedConceptsPub"/>
 </message>
-<message name="ListGloballySearchedConceptsResponse">
-<part name="parameters" element="tns:ListGloballySearchedConceptsResponse"/>
+<message name="ListGloballySearchedConceptsPubResponse">
+<part name="parameters" element="tns:ListGloballySearchedConceptsPubResponse"/>
+</message>
+<message name="getListGloballySearchedConceptsResponse">
+<part name="parameters" element="tns:getListGloballySearchedConceptsResponse"/>
+</message>
+<message name="getListGloballySearchedConceptsResponseResponse">
+<part name="parameters" element="tns:getListGloballySearchedConceptsResponseResponse"/>
+</message>
+<message name="ReturnConceptDetails">
+<part name="parameters" element="tns:ReturnConceptDetails"/>
+</message>
+<message name="ReturnConceptDetailsResponse">
+<part name="parameters" element="tns:ReturnConceptDetailsResponse"/>
 </message>
 <message name="ReturnValueSetDetails">
 <part name="parameters" element="tns:ReturnValueSetDetails"/>
@@ -43,23 +55,29 @@
 <message name="ReturnValueSetDetailsResponse">
 <part name="parameters" element="tns:ReturnValueSetDetailsResponse"/>
 </message>
-<message name="ListCodeSystemsInTaxonomy">
-<part name="parameters" element="tns:ListCodeSystemsInTaxonomy"/>
+<message name="ListDomainValues">
+<part name="parameters" element="tns:ListDomainValues"/>
 </message>
-<message name="ListCodeSystemsInTaxonomyResponse">
-<part name="parameters" element="tns:ListCodeSystemsInTaxonomyResponse"/>
+<message name="ListDomainValuesResponse">
+<part name="parameters" element="tns:ListDomainValuesResponse"/>
 </message>
-<message name="ReturnConceptValueSetMembership">
-<part name="parameters" element="tns:ReturnConceptValueSetMembership"/>
+<message name="ListValueSets">
+<part name="parameters" element="tns:ListValueSets"/>
 </message>
-<message name="ReturnConceptValueSetMembershipResponse">
-<part name="parameters" element="tns:ReturnConceptValueSetMembershipResponse"/>
+<message name="ListValueSetsResponse">
+<part name="parameters" element="tns:ListValueSetsResponse"/>
 </message>
 <message name="ListCodeSystemConcepts">
 <part name="parameters" element="tns:ListCodeSystemConcepts"/>
 </message>
 <message name="ListCodeSystemConceptsResponse">
 <part name="parameters" element="tns:ListCodeSystemConceptsResponse"/>
+</message>
+<message name="ReturnCodeSystemDetails">
+<part name="parameters" element="tns:ReturnCodeSystemDetails"/>
+</message>
+<message name="ReturnCodeSystemDetailsResponse">
+<part name="parameters" element="tns:ReturnCodeSystemDetailsResponse"/>
 </message>
 <message name="ListValueSetContents">
 <part name="parameters" element="tns:ListValueSetContents"/>
@@ -73,35 +91,11 @@
 <message name="ReturnVsConceptMetadataResponse">
 <part name="parameters" element="tns:ReturnVsConceptMetadataResponse"/>
 </message>
-<message name="ReturnConceptDetails">
-<part name="parameters" element="tns:ReturnConceptDetails"/>
-</message>
-<message name="ReturnConceptDetailsResponse">
-<part name="parameters" element="tns:ReturnConceptDetailsResponse"/>
-</message>
-<message name="ReturnConceptAssociationTypeDetails">
-<part name="parameters" element="tns:ReturnConceptAssociationTypeDetails"/>
-</message>
-<message name="ReturnConceptAssociationTypeDetailsResponse">
-<part name="parameters" element="tns:ReturnConceptAssociationTypeDetailsResponse"/>
-</message>
-<message name="ListDomainValues">
-<part name="parameters" element="tns:ListDomainValues"/>
-</message>
-<message name="ListDomainValuesResponse">
-<part name="parameters" element="tns:ListDomainValuesResponse"/>
-</message>
 <message name="ListDomains">
 <part name="parameters" element="tns:ListDomains"/>
 </message>
 <message name="ListDomainsResponse">
 <part name="parameters" element="tns:ListDomainsResponse"/>
-</message>
-<message name="ListValueSets">
-<part name="parameters" element="tns:ListValueSets"/>
-</message>
-<message name="ListValueSetsResponse">
-<part name="parameters" element="tns:ListValueSetsResponse"/>
 </message>
 <message name="ListCodeSystems">
 <part name="parameters" element="tns:ListCodeSystems"/>
@@ -109,42 +103,114 @@
 <message name="ListCodeSystemsResponse">
 <part name="parameters" element="tns:ListCodeSystemsResponse"/>
 </message>
+<message name="ListMetadataParameter">
+<part name="parameters" element="tns:ListMetadataParameter"/>
+</message>
+<message name="ListMetadataParameterResponse">
+<part name="parameters" element="tns:ListMetadataParameterResponse"/>
+</message>
+<message name="ListConceptAssociationTypes">
+<part name="parameters" element="tns:ListConceptAssociationTypes"/>
+</message>
+<message name="ListConceptAssociationTypesResponse">
+<part name="parameters" element="tns:ListConceptAssociationTypesResponse"/>
+</message>
+<message name="ReturnConceptValueSetMembership">
+<part name="parameters" element="tns:ReturnConceptValueSetMembership"/>
+</message>
+<message name="ReturnConceptValueSetMembershipResponse">
+<part name="parameters" element="tns:ReturnConceptValueSetMembershipResponse"/>
+</message>
+<message name="ListCodeSystemsInTaxonomy">
+<part name="parameters" element="tns:ListCodeSystemsInTaxonomy"/>
+</message>
+<message name="ListCodeSystemsInTaxonomyResponse">
+<part name="parameters" element="tns:ListCodeSystemsInTaxonomyResponse"/>
+</message>
+<message name="ReturnConceptAssociationTypeDetails">
+<part name="parameters" element="tns:ReturnConceptAssociationTypeDetails"/>
+</message>
+<message name="ReturnConceptAssociationTypeDetailsResponse">
+<part name="parameters" element="tns:ReturnConceptAssociationTypeDetailsResponse"/>
+</message>
+<message name="ListValueSetContentsByTermOrCode">
+<part name="parameters" element="tns:ListValueSetContentsByTermOrCode"/>
+</message>
+<message name="ListValueSetContentsByTermOrCodeResponse">
+<part name="parameters" element="tns:ListValueSetContentsByTermOrCodeResponse"/>
+</message>
+<message name="ListGloballySearchedConcepts">
+<part name="parameters" element="tns:ListGloballySearchedConcepts"/>
+</message>
+<message name="ListGloballySearchedConceptsResponse">
+<part name="parameters" element="tns:ListGloballySearchedConceptsResponse"/>
+</message>
+<message name="checkListCodeSystemsPubRunning">
+<part name="parameters" element="tns:checkListCodeSystemsPubRunning"/>
+</message>
+<message name="checkListCodeSystemsPubRunningResponse">
+<part name="parameters" element="tns:checkListCodeSystemsPubRunningResponse"/>
+</message>
+<message name="getListCodeSystemsPubReturn">
+<part name="parameters" element="tns:getListCodeSystemsPubReturn"/>
+</message>
+<message name="getListCodeSystemsPubReturnResponse">
+<part name="parameters" element="tns:getListCodeSystemsPubReturnResponse"/>
+</message>
+<message name="ListValueSetsPub">
+<part name="parameters" element="tns:ListValueSetsPub"/>
+</message>
+<message name="ListValueSetsPubResponse">
+<part name="parameters" element="tns:ListValueSetsPubResponse"/>
+</message>
 <portType name="Search">
-<operation name="ReturnCodeSystemDetails">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnCodeSystemDetailsRequest" message="tns:ReturnCodeSystemDetails"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnCodeSystemDetailsResponse" message="tns:ReturnCodeSystemDetailsResponse"/>
+<operation name="ListCodeSystemsPub">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsPubRequest" message="tns:ListCodeSystemsPub"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsPubResponse" message="tns:ListCodeSystemsPubResponse"/>
 </operation>
-<operation name="ListConceptAssociationTypes">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListConceptAssociationTypesRequest" message="tns:ListConceptAssociationTypes"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListConceptAssociationTypesResponse" message="tns:ListConceptAssociationTypesResponse"/>
+<operation name="isListValueSetsPubRunning">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/isListValueSetsPubRunningRequest" message="tns:isListValueSetsPubRunning"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/isListValueSetsPubRunningResponse" message="tns:isListValueSetsPubRunningResponse"/>
 </operation>
-<operation name="ListMetadataParameter">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListMetadataParameterRequest" message="tns:ListMetadataParameter"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListMetadataParameterResponse" message="tns:ListMetadataParameterResponse"/>
+<operation name="getListValueSetsPubRespone">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/getListValueSetsPubResponeRequest" message="tns:getListValueSetsPubRespone"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/getListValueSetsPubResponeResponse" message="tns:getListValueSetsPubResponeResponse"/>
 </operation>
-<operation name="ListValueSetContentsByTermOrCode">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetContentsByTermOrCodeRequest" message="tns:ListValueSetContentsByTermOrCode"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetContentsByTermOrCodeResponse" message="tns:ListValueSetContentsByTermOrCodeResponse"/>
+<operation name="isListGloballySearchedConceptsRunning">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/isListGloballySearchedConceptsRunningRequest" message="tns:isListGloballySearchedConceptsRunning"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/isListGloballySearchedConceptsRunningResponse" message="tns:isListGloballySearchedConceptsRunningResponse"/>
 </operation>
-<operation name="ListGloballySearchedConcepts">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListGloballySearchedConceptsRequest" message="tns:ListGloballySearchedConcepts"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListGloballySearchedConceptsResponse" message="tns:ListGloballySearchedConceptsResponse"/>
+<operation name="ListGloballySearchedConceptsPub">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListGloballySearchedConceptsPubRequest" message="tns:ListGloballySearchedConceptsPub"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListGloballySearchedConceptsPubResponse" message="tns:ListGloballySearchedConceptsPubResponse"/>
+</operation>
+<operation name="getListGloballySearchedConceptsResponse">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/getListGloballySearchedConceptsResponseRequest" message="tns:getListGloballySearchedConceptsResponse"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/getListGloballySearchedConceptsResponseResponse" message="tns:getListGloballySearchedConceptsResponseResponse"/>
+</operation>
+<operation name="ReturnConceptDetails">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptDetailsRequest" message="tns:ReturnConceptDetails"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptDetailsResponse" message="tns:ReturnConceptDetailsResponse"/>
 </operation>
 <operation name="ReturnValueSetDetails">
 <input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnValueSetDetailsRequest" message="tns:ReturnValueSetDetails"/>
 <output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnValueSetDetailsResponse" message="tns:ReturnValueSetDetailsResponse"/>
 </operation>
-<operation name="ListCodeSystemsInTaxonomy">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsInTaxonomyRequest" message="tns:ListCodeSystemsInTaxonomy"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsInTaxonomyResponse" message="tns:ListCodeSystemsInTaxonomyResponse"/>
+<operation name="ListDomainValues">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListDomainValuesRequest" message="tns:ListDomainValues"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListDomainValuesResponse" message="tns:ListDomainValuesResponse"/>
 </operation>
-<operation name="ReturnConceptValueSetMembership">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptValueSetMembershipRequest" message="tns:ReturnConceptValueSetMembership"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptValueSetMembershipResponse" message="tns:ReturnConceptValueSetMembershipResponse"/>
+<operation name="ListValueSets">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetsRequest" message="tns:ListValueSets"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetsResponse" message="tns:ListValueSetsResponse"/>
 </operation>
 <operation name="ListCodeSystemConcepts">
 <input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemConceptsRequest" message="tns:ListCodeSystemConcepts"/>
 <output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemConceptsResponse" message="tns:ListCodeSystemConceptsResponse"/>
+</operation>
+<operation name="ReturnCodeSystemDetails">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnCodeSystemDetailsRequest" message="tns:ReturnCodeSystemDetails"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnCodeSystemDetailsResponse" message="tns:ReturnCodeSystemDetailsResponse"/>
 </operation>
 <operation name="ListValueSetContents">
 <input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetContentsRequest" message="tns:ListValueSetContents"/>
@@ -154,34 +220,58 @@
 <input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnVsConceptMetadataRequest" message="tns:ReturnVsConceptMetadata"/>
 <output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnVsConceptMetadataResponse" message="tns:ReturnVsConceptMetadataResponse"/>
 </operation>
-<operation name="ReturnConceptDetails">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptDetailsRequest" message="tns:ReturnConceptDetails"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptDetailsResponse" message="tns:ReturnConceptDetailsResponse"/>
-</operation>
-<operation name="ReturnConceptAssociationTypeDetails">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptAssociationTypeDetailsRequest" message="tns:ReturnConceptAssociationTypeDetails"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptAssociationTypeDetailsResponse" message="tns:ReturnConceptAssociationTypeDetailsResponse"/>
-</operation>
-<operation name="ListDomainValues">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListDomainValuesRequest" message="tns:ListDomainValues"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListDomainValuesResponse" message="tns:ListDomainValuesResponse"/>
-</operation>
 <operation name="ListDomains">
 <input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListDomainsRequest" message="tns:ListDomains"/>
 <output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListDomainsResponse" message="tns:ListDomainsResponse"/>
-</operation>
-<operation name="ListValueSets">
-<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetsRequest" message="tns:ListValueSets"/>
-<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetsResponse" message="tns:ListValueSetsResponse"/>
 </operation>
 <operation name="ListCodeSystems">
 <input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsRequest" message="tns:ListCodeSystems"/>
 <output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsResponse" message="tns:ListCodeSystemsResponse"/>
 </operation>
+<operation name="ListMetadataParameter">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListMetadataParameterRequest" message="tns:ListMetadataParameter"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListMetadataParameterResponse" message="tns:ListMetadataParameterResponse"/>
+</operation>
+<operation name="ListConceptAssociationTypes">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListConceptAssociationTypesRequest" message="tns:ListConceptAssociationTypes"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListConceptAssociationTypesResponse" message="tns:ListConceptAssociationTypesResponse"/>
+</operation>
+<operation name="ReturnConceptValueSetMembership">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptValueSetMembershipRequest" message="tns:ReturnConceptValueSetMembership"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptValueSetMembershipResponse" message="tns:ReturnConceptValueSetMembershipResponse"/>
+</operation>
+<operation name="ListCodeSystemsInTaxonomy">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsInTaxonomyRequest" message="tns:ListCodeSystemsInTaxonomy"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListCodeSystemsInTaxonomyResponse" message="tns:ListCodeSystemsInTaxonomyResponse"/>
+</operation>
+<operation name="ReturnConceptAssociationTypeDetails">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptAssociationTypeDetailsRequest" message="tns:ReturnConceptAssociationTypeDetails"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ReturnConceptAssociationTypeDetailsResponse" message="tns:ReturnConceptAssociationTypeDetailsResponse"/>
+</operation>
+<operation name="ListValueSetContentsByTermOrCode">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetContentsByTermOrCodeRequest" message="tns:ListValueSetContentsByTermOrCode"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetContentsByTermOrCodeResponse" message="tns:ListValueSetContentsByTermOrCodeResponse"/>
+</operation>
+<operation name="ListGloballySearchedConcepts">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListGloballySearchedConceptsRequest" message="tns:ListGloballySearchedConcepts"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListGloballySearchedConceptsResponse" message="tns:ListGloballySearchedConceptsResponse"/>
+</operation>
+<operation name="checkListCodeSystemsPubRunning">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/checkListCodeSystemsPubRunningRequest" message="tns:checkListCodeSystemsPubRunning"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/checkListCodeSystemsPubRunningResponse" message="tns:checkListCodeSystemsPubRunningResponse"/>
+</operation>
+<operation name="getListCodeSystemsPubReturn">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/getListCodeSystemsPubReturnRequest" message="tns:getListCodeSystemsPubReturn"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/getListCodeSystemsPubReturnResponse" message="tns:getListCodeSystemsPubReturnResponse"/>
+</operation>
+<operation name="ListValueSetsPub">
+<input wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetsPubRequest" message="tns:ListValueSetsPub"/>
+<output wsam:Action="http://search.ws.terminologie.fhdo.de/Search/ListValueSetsPubResponse" message="tns:ListValueSetsPubResponse"/>
+</operation>
 </portType>
 <binding name="SearchPortBinding" type="tns:Search">
 <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-<operation name="ReturnCodeSystemDetails">
+<operation name="ListCodeSystemsPub">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -190,7 +280,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListConceptAssociationTypes">
+<operation name="isListValueSetsPubRunning">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -199,7 +289,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListMetadataParameter">
+<operation name="getListValueSetsPubRespone">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -208,7 +298,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListValueSetContentsByTermOrCode">
+<operation name="isListGloballySearchedConceptsRunning">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -217,7 +307,25 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListGloballySearchedConcepts">
+<operation name="ListGloballySearchedConceptsPub">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="getListGloballySearchedConceptsResponse">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ReturnConceptDetails">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -235,7 +343,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListCodeSystemsInTaxonomy">
+<operation name="ListDomainValues">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -244,7 +352,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ReturnConceptValueSetMembership">
+<operation name="ListValueSets">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -254,6 +362,15 @@
 </output>
 </operation>
 <operation name="ListCodeSystemConcepts">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ReturnCodeSystemDetails">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -280,7 +397,52 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ReturnConceptDetails">
+<operation name="ListDomains">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ListCodeSystems">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ListMetadataParameter">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ListConceptAssociationTypes">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ReturnConceptValueSetMembership">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ListCodeSystemsInTaxonomy">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -298,7 +460,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListDomainValues">
+<operation name="ListValueSetContentsByTermOrCode">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -307,7 +469,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListDomains">
+<operation name="ListGloballySearchedConcepts">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -316,7 +478,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListValueSets">
+<operation name="checkListCodeSystemsPubRunning">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -325,7 +487,16 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="ListCodeSystems">
+<operation name="getListCodeSystemsPubReturn">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="ListValueSetsPub">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>

@@ -30,25 +30,23 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 import java.util.Set;
 
 /**
- *
+ * 3.2.20 CHECKED
+ * TODO Javadoc
  * @author Mathias Aschhoff
  */
 public class UpdateCodeSystemVersionStatus
 {
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
   public UpdateCodeSystemVersionStatusResponseType UpdateCodeSystemVersionStatus(UpdateCodeSystemVersionStatusRequestType parameter)
   {
-    if (logger.isInfoEnabled())
-    {
-      logger.info("====== UpdateCodeSystemVersionStatus gestartet ======");
-    }
-
+    logger.info("====== UpdateCodeSystemVersionStatus started ======");
+    
     UpdateCodeSystemVersionStatusResponseType response = new UpdateCodeSystemVersionStatusResponseType();
     response.setReturnInfos(new ReturnType());
 
-    // Login-Informationen auswerten (gilt für jeden Webservice)    
+    // Check login    
     //3.2.17 added second check
     if (parameter != null && !parameter.getLoginAlreadyChecked())
     {
@@ -56,24 +54,24 @@ public class UpdateCodeSystemVersionStatus
         return response;
     }
 
-    //Parameter prüfen
+    //Check parameters
     if (validateParameter(parameter, response) == false)
     {
-      return response; // Fehler bei den Parametern
+      return response; // Parameter check failed
     }
     
     try
     {
-      // CodeSystem-Version aus Parameter auslesen     
+      // Reading code system version from parameters     
       CodeSystemVersion csv = (CodeSystemVersion) parameter.getCodeSystem().getCodeSystemVersions().toArray()[0];
 
-      // Hibernate-Block, Session öffnen
+      // Opening hibernate session
       org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
       hb_session.getTransaction().begin();
 
       try
       {
-        // Status ändern und in DB speichern
+        // Changing status and saving in DB
         CodeSystemVersion csv_db = (CodeSystemVersion) hb_session.get(CodeSystemVersion.class, csv.getVersionId());
         csv_db.setStatus(csv.getStatus());
         hb_session.update(csv_db);
@@ -83,18 +81,18 @@ public class UpdateCodeSystemVersionStatus
       }
       catch (Exception e)
       {
-        hb_session.getTransaction().rollback();
-        // Fehlermeldung an den Aufrufer weiterleiten
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus', Hibernate: " + e.getLocalizedMessage());
+            if(!hb_session.getTransaction().wasRolledBack())
+                hb_session.getTransaction().rollback();
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus', Hibernate: " + e.getLocalizedMessage());
 
-        logger.error("Fehler bei 'UpdateCodeSystemVersionStatus', Hibernate: " + e.getLocalizedMessage());
-        e.printStackTrace();
+            logger.error("Hibernate-error at 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
       }
       finally
       {
-        hb_session.close();
+          if(hb_session.isOpen())
+            hb_session.close();
       }
       response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
       response.getReturnInfos().setStatus(ReturnType.Status.OK);
@@ -102,13 +100,11 @@ public class UpdateCodeSystemVersionStatus
     }
     catch (Exception e)
     {
-      // Fehlermeldung an den Aufrufer weiterleiten
       response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
       response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
 
-      logger.error("Fehler bei 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
-      e.printStackTrace();
+      logger.error("Error at 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
     }
     
     return response;

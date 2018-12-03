@@ -58,21 +58,45 @@ import org.apache.log4j.Logger;
 @WebService(serviceName = "Administration")
 public class Administration
 {
+    final private static Logger logger = Logger4j.getInstance().getLogger();
+    //3.2.21
+    @Resource
+    private ImportCodeSystemResponseType pubImportCodeSystemResponse;
     //3.2.20
     @Resource
-    public boolean importRunning;
+    private boolean importRunning;
+    // Mit Hilfe des WebServiceContext lässt sich die ClientIP bekommen.
+    @Resource
+    private WebServiceContext webServiceContext;
     
-  private static Logger logger = Logger4j.getInstance().getLogger();
+    //3.2.21
+    /**
+     * Web service operation
+     * @param parameter
+   */
+    @WebMethod(operationName = "ImportCodeSystemPub")
+    public void ImportCodeSystemPub(@WebParam(name = "parameter") ImportCodeSystemRequestType parameter)
+    {
+        importRunning = true;
+        SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+
+        ImportCodeSystemNew nics = new ImportCodeSystemNew();
+        pubImportCodeSystemResponse = nics.ImportCodeSystem(parameter);
+        importRunning = false;
+    }
     
-  //3.2.20
-  @WebMethod(operationName = "checkImportRunning")
-  public boolean checkImportRunning(){
-      return importRunning;
-  }
+    //3.2.21
+    @WebMethod(operationName = "getPubImportResponse")
+    public ImportCodeSystemResponseType getPubImportResponse(){
+        return pubImportCodeSystemResponse;
+    }
+      
+    //3.2.20
+    @WebMethod(operationName = "checkImportRunning")
+    public boolean checkImportRunning(){
+        return importRunning;
+    }
   
-  // Mit Hilfe des WebServiceContext lässt sich die ClientIP bekommen.
-  @Resource
-  private WebServiceContext webServiceContext;
   /**
    * Web service operation
    */
@@ -103,22 +127,13 @@ public class Administration
   @WebMethod(operationName = "ImportCodeSystem")
   public ImportCodeSystemResponseType ImportCodeSystem(@WebParam(name = "parameter") ImportCodeSystemRequestType parameter)
   {
-      //3.2.20 next line
-      importRunning = true;
       SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
     
-    
-       //preparation for new and more stable imports
+      //preparation for new and more stable imports
       ImportCodeSystemNew nics = new ImportCodeSystemNew();
       ImportCodeSystemResponseType response = nics.ImportCodeSystem(parameter);
-      //3.2.20 next line
-      importRunning = false;
+      
       return response;
-    
-    /*
-    ImportCodeSystem ics = new ImportCodeSystem();
-    return ics.ImportCodeSystem(parameter);
-      */
   }
   
   /**
@@ -263,6 +278,30 @@ public class Administration
     return ics.ImportCodeSystemCancel(parameter);
   }
   
+    //3.2.21 start
+    @Resource
+    private boolean importValueSetPubRunning;
+    @Resource
+    private ImportValueSetResponseType importValueSetPubResponse;
+    @WebMethod(operationName = "isImportValueSetPubRunning")
+    public boolean isImportValueSetPubRunning(){
+        return importValueSetPubRunning;
+    }
+    @WebMethod(operationName = "getImportValueSetPubResponse")
+    public ImportValueSetResponseType getImportValueSetPubResponse(){
+        return importValueSetPubResponse;
+    }
+    @WebMethod(operationName = "ImportValueSetPub")
+    public void ImportValueSetPub(@WebParam(name = "parameter") ImportValueSetRequestType parameter)
+    {
+        importValueSetPubRunning = true;
+        SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+
+        ImportValueSetNew nics = new ImportValueSetNew();
+        importValueSetPubResponse = nics.ImportValueSet(parameter);
+        importValueSetPubRunning = false;
+    }
+    //3.2.21 end
   
   /**
    * Web service operation

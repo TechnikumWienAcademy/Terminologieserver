@@ -31,31 +31,32 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * TODO Javadoc
+ * TODO english translation
  * @author Mathias Aschhoff
  */
 public class UpdateValueSetStatus
 {
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
   public UpdateValueSetStatusResponseType updateValueSetStatus(UpdateValueSetStatusRequestType parameter)
   {
     if (logger.isInfoEnabled())
     {
-      logger.info("====== UpdateValueSetStatus gestartet ======");
+      logger.info("====== UpdateValueSetStatus started ======");
     }
 
     UpdateValueSetStatusResponseType response = new UpdateValueSetStatusResponseType();
     response.setReturnInfos(new ReturnType());
 
-    //Parameter prüfen
+    //Checking parameters
     if (validateParameter(parameter, response) == false)
     {
-      return response; // Fehler bei den Parametern
+      return response; // Parameter check failed
     }
 
-    // Login-Informationen auswerten (gilt für jeden Webservice)
+    // Check login
     //3.2.17 added second check
     if (parameter != null && !parameter.isLoginAlreadyChecked())
     {
@@ -65,23 +66,20 @@ public class UpdateValueSetStatus
 
     try
     {
-
-      //VSet VSetVersion
       ValueSet vs = parameter.getValueSet();
       ValueSetVersion vsv = null;
 
       if (vs.getValueSetVersions() != null && vs.getValueSetVersions().size() > 0)
         vsv = (ValueSetVersion) vs.getValueSetVersions().toArray()[0];
 
-      // Hibernate-Block, Session öffnen
+      // Opening hibernate session
       org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
       hb_session.getTransaction().begin();
       
       try
       {
         boolean changedVSStatus = false;
-        // VS und VSV aus DB auslesen, Status ändern und wieder speichern
-        
+        // Reading VS and VSV from DB, changing status and saving them again
         ValueSet vs_db = null;
         
         if(vs.getId() != null){
@@ -139,18 +137,19 @@ public class UpdateValueSetStatus
       }
       catch (Exception e)
       {
-        hb_session.getTransaction().rollback();
+          if(!hb_session.getTransaction().wasRolledBack())
+             hb_session.getTransaction().rollback();
         // Fehlermeldung an den Aufrufer weiterleiten
         response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
         response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         response.getReturnInfos().setMessage("Fehler bei 'UpdateValueSetStatus': " + e.getLocalizedMessage());
 
         logger.error("Fehler bei 'UpdateValueSetStatus' a: " + e.getLocalizedMessage());
-        e.printStackTrace();
       }
       finally
       {
-        hb_session.close();
+          if(hb_session.isOpen())
+            hb_session.close();
       }
     }
     catch (Exception e)

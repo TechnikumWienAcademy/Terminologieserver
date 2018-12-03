@@ -72,6 +72,31 @@ public class Search
   // Mit Hilfe des WebServiceContext lässt sich die ClientIP bekommen.
   @Resource
   private WebServiceContext webServiceContext;
+  //3.2.21 start
+  @Resource
+  private boolean listCodeSystemsPubRunning;
+  @Resource
+  private ListCodeSystemsResponseType listCodeSystemsPubReturn;
+  
+  @WebMethod(operationName = "checkListCodeSystemsPubRunning")
+  public boolean checkListCodeSystemsPubRunning(){
+      return listCodeSystemsPubRunning;
+  }
+  
+  @WebMethod(operationName= "getListCodeSystemsPubReturn")
+  public ListCodeSystemsResponseType getListCodeSystemsPubReturn(){
+      return listCodeSystemsPubReturn;
+  }
+  
+  @WebMethod(operationName = "ListCodeSystemsPub")
+  public void ListCodeSystemsPub(@WebParam(name = "parameter") ListCodeSystemsRequestType parameter)
+  {
+    if(parameter != null)
+      SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+    ListCodeSystems lcs = new ListCodeSystems();
+    listCodeSystemsPubReturn = lcs.ListCodeSystems(parameter);
+  }  
+  //3.2.21 end
   
   /**
    * <b>Liefert alle verfügbaren Vokabulare aus dem Terminologieserver.</b><br>
@@ -90,6 +115,33 @@ public class Search
     return lcs.ListCodeSystems(parameter);
   }
 
+  //3.2.21 start
+  @Resource
+  private boolean listValueSetsPubRunning;
+  @Resource
+  private ListValueSetsResponseType listValueSetsPubRespone;
+  
+  @WebMethod(operationName = "isListValueSetsPubRunning")
+  public boolean isListValueSetsPubRunning(){
+      return listValueSetsPubRunning;
+  }
+  
+  @WebMethod(operationName= "getListValueSetsPubRespone")
+  public ListValueSetsResponseType getListValueSetsPubRespone(){
+      return listValueSetsPubRespone;
+  }
+  
+  @WebMethod(operationName = "ListValueSetsPub")
+  public void ListValueSetsPub(@WebParam(name = "parameter") ListValueSetsRequestType parameter)
+  {
+    listValueSetsPubRunning = true;
+    if(parameter != null)
+      SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+    listValueSetsPubRespone = new ListValueSets().ListValueSets(parameter);
+    listValueSetsPubRunning = false;
+  }  
+  //3.2.21 end
+  
   /**
    * Web service operation
    */
@@ -250,6 +302,36 @@ public class Search
         return new ReturnConceptValueSetMembership().ReturnConceptValueSetMembership(parameter);
     }
 
+    
+    //3.2.21 start
+    @Resource
+    private boolean listGloballySearchedConceptsRunning;
+    @Resource
+    private ListGloballySearchedConceptsResponseType listGloballySearchedConceptsResponse;
+    
+    @WebMethod(operationName = "isListGloballySearchedConceptsRunning")
+    public boolean isListGloballySearchedConceptsRunning(){
+        return listGloballySearchedConceptsRunning;
+    }
+    
+    @WebMethod(operationName = "getListGloballySearchedConceptsResponse")
+    public ListGloballySearchedConceptsResponseType getListGloballySearchedConceptsResponse(){
+        return listGloballySearchedConceptsResponse;
+    }
+    
+    /**
+     * Web service operation
+     */
+    @WebMethod(operationName = "ListGloballySearchedConceptsPub")
+    public void ListGloballySearchedConceptsPub(@WebParam(name = "parameter") ListGloballySearchedConceptsRequestType parameter) {
+        listGloballySearchedConceptsRunning = true;
+        if(parameter != null)
+            SecurityHelper.applyIPAdress(parameter.getLogin(), webServiceContext);
+        listGloballySearchedConceptsResponse = new ListGloballySearchedConcepts().ListGloballySearchedConcepts(parameter, false);
+        listGloballySearchedConceptsRunning = false;
+    }
+    //3.2.21 end 
+    
     /**
      * Web service operation
      */

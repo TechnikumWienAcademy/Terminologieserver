@@ -1,4 +1,8 @@
-﻿Changelog 3.2.20
+﻿Changelog 3.2.21
+	-Bugfixes
+		.) EHTSOID-160: Die Kommunikation zwischen Pub und Collab wurde so verändert, dass es nicht mehr zu Socket-Exceptions kommen sollte.
+
+Changelog 3.2.20
 	-Bugfixes
 		.) EHTSOID-73: application/soap+xml sollte nun akzeptiert werden.
 		.) EHTSOID-158: Rollback-Fehlermeldungen werden nicht mehr angezeigt wenn sie nicht auftreten.

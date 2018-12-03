@@ -878,6 +878,8 @@ public class ProposalWorkflow
     }
 
     //3.2.17 added collabuserID parameter and collaborationSession 
+    //3.2.20 CHECKED
+    // TODO translate comments into english
     public ReturnType changeProposalStatus(Proposal proposal, long statusTo, String reason, Date discDateFrom, Date discDateTo, boolean isBatch, long collabUserID, String collabSessionID)
     {
         ReturnType returnInfos = new ReturnType();
@@ -893,11 +895,8 @@ public class ProposalWorkflow
         Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusTo);
         if (rel != null)
         {
-            if (logger.isDebugEnabled())
-            {
-                logger.debug("Statusänderung möglich");
-            }
-
+            logger.debug("Status change possible");
+            
             //3.2.17 AUSKOMMMENTIERT die überprüfung der rechte erfolgt nun schon im proposalstatuschange onokclicked()
             /*
             // 2. Rechte prüfen, ob angemeldeter Benutzer die Statusänderung durchführen darf
@@ -915,7 +914,7 @@ public class ProposalWorkflow
                 try
                 {
                     // Proposal ändern (Status + StatusDate)
-                    logger.debug("Ändere Status vom Vorschlag mit Proposal-ID: " + proposal.getId());
+                    logger.debug("Proposal-ID of proposal to be changed: " + proposal.getId());
                     Proposal proposal_db = (Proposal) hb_session.get(Proposal.class, proposal.getId());
 
                     //Matthias 16.04.2015
@@ -1033,11 +1032,11 @@ public class ProposalWorkflow
 
                         if (discDateFrom != null)
                         {
-                            logger.debug("Datum von: " + discDateFrom);
+                            logger.debug("Date from: " + discDateFrom);
                         }
                         else
                         {
-                            logger.debug("Datum von: null");
+                            logger.debug("Date from: null");
                         }
 
                         hb_session.update(proposal_db);
@@ -1119,6 +1118,7 @@ public class ProposalWorkflow
                             statusChangeSuccess = changeTerminologyServerStatus(rel.getStatusByStatusIdTo(), po, returnInfos, collabSessionID);
                             if (!statusChangeSuccess)
                             {
+                                logger.info("The status of a proposal object could not be changed");
                                 break;
                             }
                         }
@@ -1137,7 +1137,8 @@ public class ProposalWorkflow
                 finally
                 {
                     // Session schließen
-                    hb_session.close();
+                    if(hb_session.isOpen())
+                        hb_session.close();
                 }
 
                 returnInfos.setSuccess(true);
@@ -1184,15 +1185,15 @@ public class ProposalWorkflow
         int newStatus = 0;
         if (statusTo.getIsPublic())
         {
-            newStatus = 1; // Schwarz
+            newStatus = 1; // Black
         }
         else if (statusTo.getIsDeleted())
         {
-            newStatus = 2; // Durchgestrichen
+            newStatus = 2; // Strikethrough
         }
         else
         {
-            newStatus = 0; // Grau
+            newStatus = 0; // Grey
         }
 
         logger.debug("Neuer Status: " + newStatus);
@@ -1200,12 +1201,12 @@ public class ProposalWorkflow
         {
             if (classname == PO_CLASSNAME.CODESYSTEM)
             {
-                // nichts, da es keinen Status für CodeSystem gibt (nur Version)
+                // nothing happens, only code system versions have a status, code systems do not
                 return true;
             }
             else if (classname == PO_CLASSNAME.CODESYSTEM_VERSION)
             {
-                // Status der Codesystem-Version ändern
+                // Change status of the code system version
                 UpdateCodeSystemVersionStatusRequestType request = new UpdateCodeSystemVersionStatusRequestType();
                 request.setLogin(new LoginType());
 
@@ -1224,7 +1225,7 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateCodeSystemVersionStatusResponse.Return ret = updateCodeSystemVersionStatus(request);
 
-                logger.debug("Ergebnis updateCodeSystemVersionStatus: " + ret.getReturnInfos().getMessage());
+                logger.debug("Result updateCodeSystemVersionStatus: " + ret.getReturnInfos().getMessage());
                 if (ret.getReturnInfos().getStatus() == Status.OK)
                 {
                     return true;
@@ -1255,7 +1256,7 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateConceptStatusResponse.Return ret = updateConceptStatus(request);
 
-                logger.debug("Ergebnis updateConceptStatus: " + ret.getReturnInfos().getMessage());
+                logger.debug("Result updateConceptStatus: " + ret.getReturnInfos().getMessage());
                 if ((ret.getReturnInfos().getStatus() == Status.OK))
                 {
                     return true;
@@ -1271,28 +1272,6 @@ public class ProposalWorkflow
             }
             else if (classname == PO_CLASSNAME.VALUESET)
             {
-                //Wäre gut wenn wir das analog zum CS halten und den status hier auch weglassen...
-
-                /*
-         // Status des Konzepts ändern
-         UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
-
-         request.setLogin(new LoginType());
-         request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
-
-         // Codesystem angeben
-         ValueSet vs = new ValueSet();
-         request.setValueSet(vs);
-         vs.setId(po.getClassId());
-         vs.setStatus(newStatus);
-
-         // Webservice aufrufen
-         UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
-
-         logger.debug("Ergebnis updateValueSetStatus: " + ret.getReturnInfos().getMessage());
-         if (ret.getReturnInfos().getStatus() == Status.OK)
-         {
-         }*/
                 return true;
             }
             else if (classname == PO_CLASSNAME.VALUESET_VERSION)
@@ -1317,7 +1296,7 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
 
-                logger.debug("Ergebnis updateValueSetVersionStatus: " + ret.getReturnInfos().getMessage());
+                logger.debug("Result updateValueSetVersionStatus: " + ret.getReturnInfos().getMessage());
                 if (ret.getReturnInfos().getStatus() == Status.OK)
                 {
                     return true;

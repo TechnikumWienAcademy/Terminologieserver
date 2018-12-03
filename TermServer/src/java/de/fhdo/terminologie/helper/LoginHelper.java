@@ -23,7 +23,6 @@ import de.fhdo.terminologie.db.HibernateUtil;
 import de.fhdo.terminologie.db.hibernate.Session;
 import de.fhdo.terminologie.db.hibernate.TermUser;
 import de.fhdo.terminologie.ws.idp.authorizationIDP.AuthorizationIDP;
-import de.fhdo.terminologie.ws.idp.authorizationIDP.AuthorizationIDP_Service;
 import de.fhdo.terminologie.ws.idp.authorizationIDP.GetLoginInfosResponse;
 import de.fhdo.terminologie.ws.idp.authorizationIDP.LoginRequestType;
 import de.fhdo.terminologie.ws.idp.authorizationIDP.Status;
@@ -37,17 +36,18 @@ import java.util.List;
 import javax.xml.ws.BindingProvider;
 
 /**
- *
+ * The LoginHelper is a singleton object.
  * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
  */
 public class LoginHelper
 {
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-    // Singleton-Muster
     private static LoginHelper instance;
+    final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private HashMap<String, LoginInfoType> userMap = new HashMap<String, LoginInfoType>();
 
     /**
+     * Return the singleton instance.
      * @return the instance
      */
     public static LoginHelper getInstance()
@@ -58,18 +58,28 @@ public class LoginHelper
         }
         return instance;
     }
-    private HashMap<String, LoginInfoType> userMap;
 
-    public LoginHelper()
-    {
-        userMap = new HashMap<String, LoginInfoType>();
-    }
-
+    /**
+     * Calls doLogin(login, returnType, loginRequired, null)
+     * TODO
+     * @param login 
+     * @param returnType 
+     * @param loginRequired 
+     * @return return value of doLogin(login, returnType, loginRequired, null)
+     */
     public boolean doLogin(LoginType login, ReturnType returnType, boolean loginRequired)
     {
         return doLogin(login, returnType, loginRequired, null);
     }
 
+    /**
+     * TODO
+     * @param login
+     * @param returnType
+     * @param loginRequired
+     * @param hb_session
+     * @return 
+     */
     public boolean doLogin(LoginType login, ReturnType returnType, boolean loginRequired, org.hibernate.Session hb_session)
     {
         boolean loggedIn = false;
@@ -86,7 +96,6 @@ public class LoginHelper
             }
         }
 
-        // Statusmeldung
         if (loggedIn == false && loginRequired)
         {
             returnType.setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
@@ -96,54 +105,53 @@ public class LoginHelper
         return loggedIn;
     }
 
+    /**
+     * TODO
+     * @param Login
+     * @return 
+     */
     public LoginInfoType getLoginInfos(LoginType Login)
     {
         return getLoginInfos(Login, null);
     }
 
     /**
-     * Überprüft anhand der Session-ID, ob der Benutzer angemeldet ist und ob
-     * die Session noch gültig ist-
-     *
-     * @param Login LoginType mit der Session-ID
-     * @return LoginInfoType bei Erfolg, sonst null
+     * Checks if the user is logged in and if the session is still valid, using the session-ID.
+     * TODO
+     * @param Login LoginType with session-ID
+     * @param session 
+     * @return LoginInfoType if successfull, else null
      */
     public LoginInfoType getLoginInfos(LoginType Login, org.hibernate.Session session)
     {
         if (Login == null || Login.getSessionID() == null || Login.getSessionID().length() == 0)
         {
-            logger.debug("Keine Session-ID angegeben!");
+            logger.debug("Session-ID missing");
             return null;
         }
         
         LoginRequestType request = new LoginRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.idp.authorizationIDP.LoginType());
-        logger.info("requested session id: " + Login.getSessionID());
+        logger.info("Requested session-id: " + Login.getSessionID());
         request.getLogin().setSessionID(Login.getSessionID());
         GetLoginInfosResponse.Return loginInfos = null;
         try
         {
-            //AuthorizationIDP_Service idpService = new AuthorizationIDP_Service();
             AuthorizationIDP port = WebServiceUrlHelper.getInstance().getAuthorizationIdpServicePort();
-            logger.info("WS Endpoint: " + ((BindingProvider) port).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
+            logger.info("WS endpoint: " + ((BindingProvider) port).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
             loginInfos = port.getLoginInfos(request);
-
         }
         catch (Exception e)
         {
-            System.err.println(e);
+            logger.info(e);
         }
 
         if (loginInfos.getReturnInfos().getStatus().equals(Status.OK))
         {
             LoginInfoType loginInfoType = new LoginInfoType();
-            //loginInfoType.setLastTimestamp(loginInfos.getReturnInfos().getLastTimeStamp());
-            //loginInfoType.setLastTimestamp(s_session.getLastTimestamp());
             loginInfoType.setLastIP(loginInfos.getReturnInfos().getLastIP());
-            //loginInfoType.setLastIP(s_session.getIpAddress());
 
             TermUser termUser = new TermUser();
-            //termUser.setActivationTime(loginInfos.getReturnInfos().getTermUser().getActivationTime());
             termUser.setId(loginInfos.getReturnInfos().getTermUser().getId());
             termUser.setIsAdmin(loginInfos.getReturnInfos().getTermUser().isIsAdmin());
             termUser.setName(loginInfos.getReturnInfos().getTermUser().getName());
@@ -154,115 +162,69 @@ public class LoginHelper
             loginType.setSessionID(Login.getSessionID());
 
             loginInfoType.setLogin(loginType);
-            //TODO map relevant info
-//			loginInfoType.getTermUser().setName();
-//			loginInfoType.setTermUser(s_session.getTermUser());
-//			loginInfoType.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
-//			loginInfoType.setLogin(new LoginType());
-//			loginInfoType.getLogin().setUsername(s_session.getTermUser().getName());
-//			loginInfoType.getLogin().setSessionID(s_session.getSessionId());
             return loginInfoType;
         }
 
         LoginInfoType loginInfoType = null;
 
-        boolean createHibernateSession = (session == null);
+        boolean hibernateSessionCreated = (session != null);
 
-        if (logger.isDebugEnabled())
+        logger.debug("Hibernate session created? " + hibernateSessionCreated);
+
+        if (Login.getSessionID() == null || Login.getSessionID().length() == 0)
         {
-            logger.debug("Überprüfe Session...");
-            logger.debug("createHibernateSession: " + createHibernateSession);
-        }
-
-        if (Login == null || Login.getSessionID() == null || Login.getSessionID().length() == 0)
-        {
-            logger.debug("Keine Session-ID angegeben!");
-
+            logger.debug("Session-ID missing");
             return null;
         }
 
-        long session_timeout = 30 * 60000; // 30 Minuten, TODO aus DB lesen
-
-        // Map vewenden (damit nicht für jede Aktion ein Datenbankaufruf stattfindet)
         if (userMap.containsKey(Login.getSessionID()))
         {
-            //LoginInfoType sessionInfo = userMap.get(Login.getSessionID());
             loginInfoType = userMap.get(Login.getSessionID());
-
-            // IP überprüfen (nur, falls angegeben)
-            //logger.debug("List-IP: " + loginInfoType.getLastIP());
+            
             if (Login.getIp() != null && Login.getIp().length() > 0)
             {
-                if (!(loginInfoType.getLastIP() != null
-                        && loginInfoType.getLastIP().equals(Login.getIp())))
+                if (!(loginInfoType.getLastIP() != null && loginInfoType.getLastIP().equals(Login.getIp())))
                 {
-                    // IP stimmt nicht überein
-                    if (logger.isDebugEnabled())
-                    {
-                        logger.debug("IP stimmt nicht überein (" + Login.getIp() + ")!");
-                    }
-
+                    logger.debug("IP does not match (" + Login.getIp() + ")");
                     return null;
                 }
             }
 
-            // Timeout überprüfen
+            // Check timeout
             long now = new java.util.Date().getTime();
             long timestamp = loginInfoType.getLastTimestamp().getTime();
-
+            //3.2.21 increased session timeout from 30 to 120
+            long session_timeout = 120 * 60000; // 120 minutes, TODO read from DB
+            
             if (now - session_timeout < timestamp)
             {
-                // OK
-                // Zeitstempel aktualisieren
+                //Refresh timestamp
                 loginInfoType.setLastTimestamp(new Date());
                 userMap.put(Login.getSessionID(), loginInfoType);
-
-                // Logintype zurückgeben (alles in Ordnung)
                 return loginInfoType;
             }
-            else // Timestamp abgelaufen
+            else
             {
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Zeitstempel abgelaufen! (wird im Debug-Modus ignoriert)");
-
-                    //TODO: Das hier kann später weider raus; dient nur dazu, dass im DebugModus der Zeitstempel nicht ablaufen kann
-                    // Logintype zurückgeben (Nur der Zeitstempel ist abgelaufen, das ist aber egal im DebugModus)        
-                    // Zeitstempel aktualisieren
-                    loginInfoType.setLastTimestamp(new Date());
-                    userMap.put(Login.getSessionID(), loginInfoType);
-
-                    // Logintype zurückgeben (alles in Ordnung)
-                    return loginInfoType;
-                }
-                else
-                {
-                    return null;
-                }
+                logger.debug("Login has timed out");
+                return null;
             }
         }
         else
         {
-            logger.debug("Session-ID nicht in userMap vorhanden");
+            logger.debug("Session-ID is missing from userMap");
         }
 
         // Session aus DB lesen und in Map speichern
-        // Hibernate-Block, Session öffnen
-        //org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
-        //org.hibernate.Transaction tx = hb_session.beginTransaction();
-        org.hibernate.Session hb_session = null;
-        //org.hibernate.Transaction tx = null;
+        org.hibernate.Session hb_session;
 
-        if (createHibernateSession)
-        {
-            hb_session = HibernateUtil.getSessionFactory().openSession();
-            //tx = hb_session.beginTransaction();
-        }
-        else
+        if (hibernateSessionCreated)
         {
             hb_session = session;
         }
-        //hb_session.getTransaction().begin();
+        else
+        {
+            hb_session = HibernateUtil.getSessionFactory().openSession();
+        }
         try
         {
             String hql = "select distinct s from Session s";
@@ -271,86 +233,66 @@ public class LoginHelper
             HQLParameterHelper parameterHelper = new HQLParameterHelper();
 
             parameterHelper.addParameter("s.", "sessionId", Login.getSessionID());
-            // TODO IP-Adresse überprüfen
-            /*if (!(loginInfoType.getLastIP() != null
-       && loginInfoType.getLastIP().equals(Login.getIp())))
-       {
-       // IP stimmt nicht überein
-       if (logger.isDebugEnabled())
-       logger.debug("IP stimmt nicht überein!");
 
-       //return null;
-       }
-       else*/
+            // Parameter hinzufügen (immer mit AND verbunden)
+            hql += parameterHelper.getWhere("");
+
+            logger.debug("HQL: " + hql);
+
+            // Query erstellen
+            org.hibernate.Query q = hb_session.createQuery(hql);
+
+            // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
+            parameterHelper.applyParameter(q);
+
+            List<Session> liste = q.list();
+
+            if (liste != null && liste.size() > 0)
             {
-                // TODO Session-Timeout überprüfen
+                logger.debug("Session exists");
 
-                // Parameter hinzufügen (immer mit AND verbunden)
-                hql += parameterHelper.getWhere("");
+                Session s_session = liste.get(0);
 
-                logger.debug("HQL: " + hql);
+                // Antwort erstellen
+                loginInfoType = new LoginInfoType();
+                loginInfoType.setLastTimestamp(s_session.getLastTimestamp());
+                loginInfoType.setLastIP(s_session.getIpAddress());
+                loginInfoType.setTermUser(s_session.getTermUser());
+                loginInfoType.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
+                loginInfoType.setLogin(new LoginType());
+                loginInfoType.getLogin().setUsername(s_session.getTermUser().getName());
+                loginInfoType.getLogin().setSessionID(s_session.getSessionId());
 
-                // Query erstellen
-                org.hibernate.Query q = hb_session.createQuery(hql);
-
-                // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
-                parameterHelper.applyParameter(q);
-
-                List<Session> liste = q.list();
-
-                if (liste != null && liste.size() > 0)
-                {
-                    logger.debug("Session existiert!");
-
-                    Session s_session = liste.get(0);
-
-                    // Antwort erstellen
-                    loginInfoType = new LoginInfoType();
-                    loginInfoType.setLastTimestamp(s_session.getLastTimestamp());
-                    loginInfoType.setLastIP(s_session.getIpAddress());
-                    loginInfoType.setTermUser(s_session.getTermUser());
-                    loginInfoType.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
-                    loginInfoType.setLogin(new LoginType());
-                    loginInfoType.getLogin().setUsername(s_session.getTermUser().getName());
-                    loginInfoType.getLogin().setSessionID(s_session.getSessionId());
-
-                    // in Map speichern
-                    userMap.put(Login.getSessionID(), loginInfoType);
-                }
+                // in Map speichern
+                userMap.put(Login.getSessionID(), loginInfoType);
             }
-
-            //if (createHibernateSession)
-            //  tx.commit();
         }
         catch (Exception e)
         {
-            // Fehlermeldung an den Aufrufer weiterleiten
-            logger.error("Fehler bei 'getLoginInfos', Hibernate: " + e.getLocalizedMessage());
+            logger.error("Error at 'getLoginInfos', Hibernate: " + e.getLocalizedMessage());
         }
         finally
         {
-            if (createHibernateSession)
+            if (hibernateSessionCreated)
             {
-                logger.debug("Schließe Hibernate-Session (LoginHelper.java)");
-                hb_session.close();
+                logger.debug("Closing hibernate session (LoginHelper.java)");
+                if(hb_session!=null)
+                    hb_session.close();
+                else
+                    logger.debug("Hibernate session has already been closed unexpectedly");
             }
         }
-
-
-        /*// Benutzer simulieren
-     loginInfoType = new LoginInfoType();
-     loginInfoType.setTermUser(new TermUser());
-     loginInfoType.getTermUser().setId(1l);
-     loginInfoType.getTermUser().setName("muetzner");
-     loginInfoType.setLogin(new LoginType());
-     loginInfoType.getLogin().setUsername("muetzner");*/
         return loginInfoType;
     }
 
+    /**
+     * TODO
+     * @param Login
+     * @return 
+     */
     public boolean isUserPermitted(LoginType Login)
     {
         LoginInfoType loginInfo = getLoginInfos(Login);
-
         return loginInfo != null;
     }
 }

@@ -97,12 +97,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * This class works like an interface between the webservices and the rest of the application.
+ * You can call webservices with three parameter sets.
+ * 1.: Just with the request parameter.
+ * 2.: With the request parameter and the host URL.
+ * 3.: With the request parameter, the host URL and the service URL.
+ * 
+ * All of the methods of this class work analogously.
+ * At first they check and transform the URL, so that it conforms to webservice format.
+ * Then they call the webservice and return the value which was returned by the webservice.
  * @author Becker
  */
 public class WebServiceHelper {
-    // Administration //////////////////////////////////////////////////////////
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
     
     public static ExportCodeSystemContentResponse.Return exportCodeSystemContent(ExportCodeSystemContentRequestType parameter){
         return exportCodeSystemContent(parameter, SessionHelper.getHostUrl());
@@ -114,19 +121,13 @@ public class WebServiceHelper {
         Administration_Service  service;
         Administration          port;
         try {
-            // urls ensprechend umwandeln            
+            //transform URLs            
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Administration_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";       
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Administration_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);        
         }        
         port = WebServiceUrlHelper.getInstance().getAdministrationServicePort();
         return port.exportCodeSystemContent(parameter);
@@ -141,20 +142,13 @@ public class WebServiceHelper {
     public static ActualProceedingsResponseType actualProceedings(ActualProceedingsRequestType parameter, String urlHost, String urlService) {                
         Administration_Service  service;
         Administration          port;
-        try {
-            // urls ensprechend umwandeln            
+        try { 
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Administration_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Administration_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);         
         }        
         port = WebServiceUrlHelper.getInstance().getAdministrationServicePort();
         return port.actualProceedings(parameter);
@@ -169,20 +163,13 @@ public class WebServiceHelper {
     public static ExportValueSetContentResponse.Return exportValueSetContent(ExportValueSetContentRequestType parameter, String urlHost, String urlService) {                
         Administration_Service  service;
         Administration          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {      
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Administration_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Administration_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getAdministrationServicePort();
         return port.exportValueSetContent(parameter);
@@ -198,20 +185,13 @@ public class WebServiceHelper {
     public static CreateConceptResponse.Return createConcept(CreateConceptRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);           
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.createConcept(parameter);
@@ -226,20 +206,13 @@ public class WebServiceHelper {
     public static RemoveValueSetContentResponseType removeValueSetContent(RemoveValueSetContentRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {        
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";         
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);        
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.removeValueSetContent(parameter);
@@ -254,20 +227,13 @@ public class WebServiceHelper {
     public static CreateValueSetContentResponse.Return createValueSetContent(CreateValueSetContentRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {     
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";    
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);       
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.createValueSetContent(parameter);
@@ -282,20 +248,13 @@ public class WebServiceHelper {
     public static CreateCodeSystemResponse.Return createCodeSystem(CreateCodeSystemRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {      
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";    
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.createCodeSystem(parameter);
@@ -310,20 +269,13 @@ public class WebServiceHelper {
     public static CreateValueSetResponse.Return createValueSet(CreateValueSetRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";       
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.createValueSet(parameter);
@@ -338,20 +290,13 @@ public class WebServiceHelper {
     public static MaintainCodeSystemVersionResponse.Return maintainCodeSystemVersion(MaintainCodeSystemVersionRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";         
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.maintainCodeSystemVersion(parameter);
@@ -366,20 +311,13 @@ public class WebServiceHelper {
     public static MaintainValueSetResponse.Return maintainValueSet(MaintainValueSetRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";      
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);           
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.maintainValueSet(parameter);
@@ -394,20 +332,13 @@ public class WebServiceHelper {
     public static MaintainConceptResponseType maintainConcept(MaintainConceptRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {        
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";    
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);        
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.maintainConcept(parameter);
@@ -422,20 +353,13 @@ public class WebServiceHelper {
     public static MaintainConceptValueSetMembershipResponse.Return maintainConceptValueSetMembership(MaintainConceptValueSetMembershipRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {    
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";      
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);        
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.maintainConceptValueSetMembership(parameter);
@@ -450,20 +374,13 @@ public class WebServiceHelper {
     public static UpdateCodeSystemVersionStatusResponse.Return updateCodeSystemVersionStatus(UpdateCodeSystemVersionStatusRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";          
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);       
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.updateCodeSystemVersionStatus(parameter);
@@ -478,20 +395,13 @@ public class WebServiceHelper {
     public static UpdateValueSetStatusResponse.Return updateValueSetStatus(UpdateValueSetStatusRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {          
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";           
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);           
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.updateValueSetStatus(parameter);
@@ -506,20 +416,13 @@ public class WebServiceHelper {
     public static UpdateConceptStatusResponse.Return updateConceptStatus(UpdateConceptStatusRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {         
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);       
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.updateConceptStatus(parameter);
@@ -534,20 +437,13 @@ public class WebServiceHelper {
     public static UpdateConceptValueSetMembershipStatusResponse.Return updateConceptValueSetMembershipStatus(UpdateConceptValueSetMembershipStatusRequestType parameter, String urlHost, String urlService) {                
         Authoring_Service  service;
         Authoring          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authoring_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authoring_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);       
         }        
         port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         return port.updateConceptValueSetMembershipStatus(parameter);
@@ -563,20 +459,13 @@ public class WebServiceHelper {
     public static LoginResponse.Return login(LoginRequestType parameter, String urlHost, String urlService ){    
     Authorization_Service  service;
     Authorization          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {          
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Authorization_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";       
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Authorization_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);       
         }        
         port = WebServiceUrlHelper.getInstance().getAuthorizationServicePort();
         return port.login(parameter);
@@ -592,20 +481,13 @@ public class WebServiceHelper {
     public static ListConceptAssociationsResponse.Return listConceptAssociations(ListConceptAssociationsRequestType parameter, String urlHost, String urlService) {                
         ConceptAssociations_Service  service;
         ConceptAssociations          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {    
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
             if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new ConceptAssociations_Service();            
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new ConceptAssociations_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);     
         }        
         port = WebServiceUrlHelper.getInstance().getConceptAssociationServicePort();
         return port.listConceptAssociations(parameter);
@@ -620,20 +502,13 @@ public class WebServiceHelper {
     public static CreateConceptAssociationResponse.Return createConceptAssociation(CreateConceptAssociationRequestType parameter, String urlHost, String urlService) {                
         ConceptAssociations_Service  service;
         ConceptAssociations          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new ConceptAssociations_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";      
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new ConceptAssociations_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getConceptAssociationServicePort();
         return port.createConceptAssociation(parameter);
@@ -649,20 +524,13 @@ public class WebServiceHelper {
     public static ListMetadataParameterResponse.Return listMetadataParameter(ListMetadataParameterRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {      
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";          
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);        
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listMetadataParameter(parameter);
@@ -677,20 +545,13 @@ public class WebServiceHelper {
     public static ListDomainValuesResponse.Return listDomainValues(ListDomainValuesRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {      
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";     
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);         
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listDomainValues(parameter);
@@ -705,21 +566,13 @@ public class WebServiceHelper {
     public static ListCodeSystemsInTaxonomyResponse.Return listCodeSystems(ListCodeSystemsInTaxonomyRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();    
-            
+            if(urlService.endsWith("/") == false)       urlService += "/";            
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);         
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listCodeSystemsInTaxonomy(parameter);
@@ -734,20 +587,13 @@ public class WebServiceHelper {
     public static ListValueSetsResponse.Return listValueSets(ListValueSetsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {           
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";         
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listValueSets(parameter);
@@ -762,20 +608,13 @@ public class WebServiceHelper {
     public static ListCodeSystemConceptsResponse.Return listCodeSystemConcepts(ListCodeSystemConceptsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {        
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";          
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);         
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listCodeSystemConcepts(parameter);
@@ -790,20 +629,13 @@ public class WebServiceHelper {
     public static ListGloballySearchedConceptsResponse.Return listGloballySearchedConcepts(ListGloballySearchedConceptsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {      
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";     
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);           
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listGloballySearchedConcepts(parameter);
@@ -818,20 +650,13 @@ public class WebServiceHelper {
     public static ListValueSetContentsResponse.Return listValueSetContents(ListValueSetContentsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {          
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listValueSetContents(parameter);
@@ -846,20 +671,13 @@ public class WebServiceHelper {
     public static ListValueSetContentsByTermOrCodeResponse.Return listValueSetContentsByTermOrCode(ListValueSetContentsByTermOrCodeRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {           
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);         
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.listValueSetContentsByTermOrCode(parameter);
@@ -874,20 +692,13 @@ public class WebServiceHelper {
     public static ReturnCodeSystemDetailsResponse.Return returnCodeSystemDetails(ReturnCodeSystemDetailsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {       
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";        
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);            
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.returnCodeSystemDetails(parameter);
@@ -902,20 +713,13 @@ public class WebServiceHelper {
     public static ReturnValueSetDetailsResponse.Return returnValueSetDetails(ReturnValueSetDetailsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {         
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";          
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);          
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.returnValueSetDetails(parameter);
@@ -930,20 +734,13 @@ public class WebServiceHelper {
     public static ReturnConceptDetailsResponse.Return returnConceptDetails(ReturnConceptDetailsRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {     
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";      
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);        
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.returnConceptDetails(parameter);
@@ -958,20 +755,13 @@ public class WebServiceHelper {
     public static ReturnConceptValueSetMembershipResponse.Return returnConceptValueSetMembership(ReturnConceptValueSetMembershipRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {         
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";         
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);           
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.returnConceptValueSetMembership(parameter);
@@ -986,52 +776,15 @@ public class WebServiceHelper {
     public static ReturnVsConceptMetadataResponse.Return returnVsConceptMetadata(ReturnVsConceptMetadataRequestType parameter, String urlHost, String urlService) {                
         Search_Service  service;
         Search          port;
-        try {
-            // urls ensprechend umwandeln            
+        try {           
             if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
             if(urlHost.endsWith("/") == false)          urlHost += "/";
             if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new Search_Service();            
+            if(urlService.endsWith("/") == false)       urlService += "/";           
         } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new Search_Service();            
+            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);       
         }        
         port = WebServiceUrlHelper.getInstance().getSearchServicePort();
         return port.returnVsConceptMetadata(parameter);
-    }           
-    /*
-    // Sso /////////////////////////////////////////////////////////////////////    
-    public static MPseudonymResponse.Return mPseudonym(MPseudonymRequestType parameter){
-        return mPseudonym(parameter, SessionHelper.getHostUrl());
-    }    
-    public static MPseudonymResponse.Return mPseudonym(MPseudonymRequestType parameter, String urlHost){
-        return mPseudonym(parameter, urlHost, SessionHelper.getServiceName());
-    }    
-    public static MPseudonymResponse.Return mPseudonym(MPseudonymRequestType parameter, String urlHost, String urlService) {                
-        SSo_Service  service;
-        SSo          port;
-        try {
-            // urls ensprechend umwandeln            
-            if(urlHost.startsWith("http://") == false)  urlHost = "http://" + urlHost;
-            if(urlHost.endsWith("/") == false)          urlHost += "/";
-            if(urlService.startsWith("/"))              urlService = urlService.substring(1);
-            if(urlService.endsWith("/") == false)       urlService += "/";
-            
-            // Service mit bestimmter URL ?ffnen
-            //service = new SSo_Service();            
-        } catch (Exception ex) {
-            Logger.getLogger(WebServiceHelper.class.getName()).log(Level.SEVERE, null, ex);
-            
-            // Standard Service ?ffnen
-            //service = new SSo_Service();            
-        }        
-        port = WebServiceUrlHelper.getInstance().getSsoServicePort();
-        return port.mPseudonym(parameter);
-    }      
-*/
+    }
 }

@@ -13,47 +13,17 @@
 <message name="UpdateCodeSystemVersionStatusResponse">
 <part name="parameters" element="tns:UpdateCodeSystemVersionStatusResponse"/>
 </message>
-<message name="CreateValueSetContent">
-<part name="parameters" element="tns:CreateValueSetContent"/>
-</message>
-<message name="CreateValueSetContentResponse">
-<part name="parameters" element="tns:CreateValueSetContentResponse"/>
-</message>
-<message name="RemoveTerminologyOrConcept">
-<part name="parameters" element="tns:RemoveTerminologyOrConcept"/>
-</message>
-<message name="RemoveTerminologyOrConceptResponse">
-<part name="parameters" element="tns:RemoveTerminologyOrConceptResponse"/>
-</message>
 <message name="CreateConceptAssociationType">
 <part name="parameters" element="tns:CreateConceptAssociationType"/>
 </message>
 <message name="CreateConceptAssociationTypeResponse">
 <part name="parameters" element="tns:CreateConceptAssociationTypeResponse"/>
 </message>
-<message name="RemoveValueSetContent">
-<part name="parameters" element="tns:RemoveValueSetContent"/>
+<message name="RemoveTerminologyOrConcept">
+<part name="parameters" element="tns:RemoveTerminologyOrConcept"/>
 </message>
-<message name="RemoveValueSetContentResponse">
-<part name="parameters" element="tns:RemoveValueSetContentResponse"/>
-</message>
-<message name="MaintainCodeSystemVersion">
-<part name="parameters" element="tns:MaintainCodeSystemVersion"/>
-</message>
-<message name="MaintainCodeSystemVersionResponse">
-<part name="parameters" element="tns:MaintainCodeSystemVersionResponse"/>
-</message>
-<message name="UpdateConceptStatus">
-<part name="parameters" element="tns:UpdateConceptStatus"/>
-</message>
-<message name="UpdateConceptStatusResponse">
-<part name="parameters" element="tns:UpdateConceptStatusResponse"/>
-</message>
-<message name="UpdateValueSetStatus">
-<part name="parameters" element="tns:UpdateValueSetStatus"/>
-</message>
-<message name="UpdateValueSetStatusResponse">
-<part name="parameters" element="tns:UpdateValueSetStatusResponse"/>
+<message name="RemoveTerminologyOrConceptResponse">
+<part name="parameters" element="tns:RemoveTerminologyOrConceptResponse"/>
 </message>
 <message name="MaintainConceptAssociationType">
 <part name="parameters" element="tns:MaintainConceptAssociationType"/>
@@ -72,6 +42,12 @@
 </message>
 <message name="MaintainValueSetConceptMetadataValueResponse">
 <part name="parameters" element="tns:MaintainValueSetConceptMetadataValueResponse"/>
+</message>
+<message name="MaintainCodeSystemVersion">
+<part name="parameters" element="tns:MaintainCodeSystemVersion"/>
+</message>
+<message name="MaintainCodeSystemVersionResponse">
+<part name="parameters" element="tns:MaintainCodeSystemVersionResponse"/>
 </message>
 <message name="UpdateConceptValueSetMembershipStatus">
 <part name="parameters" element="tns:UpdateConceptValueSetMembershipStatus"/>
@@ -97,6 +73,30 @@
 <message name="MaintainCodeSystemConceptMetadataValueResponse">
 <part name="parameters" element="tns:MaintainCodeSystemConceptMetadataValueResponse"/>
 </message>
+<message name="isCreateValueSetPubRunning">
+<part name="parameters" element="tns:isCreateValueSetPubRunning"/>
+</message>
+<message name="isCreateValueSetPubRunningResponse">
+<part name="parameters" element="tns:isCreateValueSetPubRunningResponse"/>
+</message>
+<message name="getCreateValueSetPubResponse">
+<part name="parameters" element="tns:getCreateValueSetPubResponse"/>
+</message>
+<message name="getCreateValueSetPubResponseResponse">
+<part name="parameters" element="tns:getCreateValueSetPubResponseResponse"/>
+</message>
+<message name="RemoveValueSetContent">
+<part name="parameters" element="tns:RemoveValueSetContent"/>
+</message>
+<message name="RemoveValueSetContentResponse">
+<part name="parameters" element="tns:RemoveValueSetContentResponse"/>
+</message>
+<message name="UpdateConceptStatus">
+<part name="parameters" element="tns:UpdateConceptStatus"/>
+</message>
+<message name="UpdateConceptStatusResponse">
+<part name="parameters" element="tns:UpdateConceptStatusResponse"/>
+</message>
 <message name="MaintainConcept">
 <part name="parameters" element="tns:MaintainConcept"/>
 </message>
@@ -108,6 +108,18 @@
 </message>
 <message name="CreateConceptResponse">
 <part name="parameters" element="tns:CreateConceptResponse"/>
+</message>
+<message name="UpdateValueSetStatus">
+<part name="parameters" element="tns:UpdateValueSetStatus"/>
+</message>
+<message name="UpdateValueSetStatusResponse">
+<part name="parameters" element="tns:UpdateValueSetStatusResponse"/>
+</message>
+<message name="CreateValueSetContent">
+<part name="parameters" element="tns:CreateValueSetContent"/>
+</message>
+<message name="CreateValueSetContentResponse">
+<part name="parameters" element="tns:CreateValueSetContentResponse"/>
 </message>
 <message name="MaintainValueSet">
 <part name="parameters" element="tns:MaintainValueSet"/>
@@ -127,38 +139,60 @@
 <message name="CreateCodeSystemResponse">
 <part name="parameters" element="tns:CreateCodeSystemResponse"/>
 </message>
+<message name="getCreateCodeSystemPubResponse">
+<part name="parameters" element="tns:getCreateCodeSystemPubResponse"/>
+</message>
+<message name="getCreateCodeSystemPubResponseResponse">
+<part name="parameters" element="tns:getCreateCodeSystemPubResponseResponse"/>
+</message>
+<message name="getCreateCodeSystemPubRunning">
+<part name="parameters" element="tns:getCreateCodeSystemPubRunning"/>
+</message>
+<message name="getCreateCodeSystemPubRunningResponse">
+<part name="parameters" element="tns:getCreateCodeSystemPubRunningResponse"/>
+</message>
+<message name="RemoveTerminologyOrConceptPub">
+<part name="parameters" element="tns:RemoveTerminologyOrConceptPub"/>
+</message>
+<message name="RemoveTerminologyOrConceptPubResponse">
+<part name="parameters" element="tns:RemoveTerminologyOrConceptPubResponse"/>
+</message>
+<message name="getRemoveTerminologyOrConceptPubRunning">
+<part name="parameters" element="tns:getRemoveTerminologyOrConceptPubRunning"/>
+</message>
+<message name="getRemoveTerminologyOrConceptPubRunningResponse">
+<part name="parameters" element="tns:getRemoveTerminologyOrConceptPubRunningResponse"/>
+</message>
+<message name="getRemoveTerminologyOrConceptPubResponse">
+<part name="parameters" element="tns:getRemoveTerminologyOrConceptPubResponse"/>
+</message>
+<message name="getRemoveTerminologyOrConceptPubResponseResponse">
+<part name="parameters" element="tns:getRemoveTerminologyOrConceptPubResponseResponse"/>
+</message>
+<message name="CreateCodeSystemPub">
+<part name="parameters" element="tns:CreateCodeSystemPub"/>
+</message>
+<message name="CreateCodeSystemPubResponse">
+<part name="parameters" element="tns:CreateCodeSystemPubResponse"/>
+</message>
+<message name="CreateValueSetPub">
+<part name="parameters" element="tns:CreateValueSetPub"/>
+</message>
+<message name="CreateValueSetPubResponse">
+<part name="parameters" element="tns:CreateValueSetPubResponse"/>
+</message>
 <portType name="Authoring">
 <operation name="UpdateCodeSystemVersionStatus">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateCodeSystemVersionStatusRequest" message="tns:UpdateCodeSystemVersionStatus"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateCodeSystemVersionStatusResponse" message="tns:UpdateCodeSystemVersionStatusResponse"/>
 </operation>
-<operation name="CreateValueSetContent">
-<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateValueSetContentRequest" message="tns:CreateValueSetContent"/>
-<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateValueSetContentResponse" message="tns:CreateValueSetContentResponse"/>
-</operation>
-<operation name="RemoveTerminologyOrConcept">
-<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveTerminologyOrConceptRequest" message="tns:RemoveTerminologyOrConcept"/>
-<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveTerminologyOrConceptResponse" message="tns:RemoveTerminologyOrConceptResponse"/>
-</operation>
 <operation name="CreateConceptAssociationType">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateConceptAssociationTypeRequest" message="tns:CreateConceptAssociationType"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateConceptAssociationTypeResponse" message="tns:CreateConceptAssociationTypeResponse"/>
 </operation>
-<operation name="RemoveValueSetContent">
-<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveValueSetContentRequest" message="tns:RemoveValueSetContent"/>
-<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveValueSetContentResponse" message="tns:RemoveValueSetContentResponse"/>
-</operation>
-<operation name="MaintainCodeSystemVersion">
-<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainCodeSystemVersionRequest" message="tns:MaintainCodeSystemVersion"/>
-<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainCodeSystemVersionResponse" message="tns:MaintainCodeSystemVersionResponse"/>
-</operation>
-<operation name="UpdateConceptStatus">
-<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateConceptStatusRequest" message="tns:UpdateConceptStatus"/>
-<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateConceptStatusResponse" message="tns:UpdateConceptStatusResponse"/>
-</operation>
-<operation name="UpdateValueSetStatus">
-<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateValueSetStatusRequest" message="tns:UpdateValueSetStatus"/>
-<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateValueSetStatusResponse" message="tns:UpdateValueSetStatusResponse"/>
+<operation name="RemoveTerminologyOrConcept">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveTerminologyOrConceptRequest" message="tns:RemoveTerminologyOrConcept"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveTerminologyOrConceptResponse" message="tns:RemoveTerminologyOrConceptResponse"/>
 </operation>
 <operation name="MaintainConceptAssociationType">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainConceptAssociationTypeRequest" message="tns:MaintainConceptAssociationType"/>
@@ -171,6 +205,10 @@
 <operation name="MaintainValueSetConceptMetadataValue">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainValueSetConceptMetadataValueRequest" message="tns:MaintainValueSetConceptMetadataValue"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainValueSetConceptMetadataValueResponse" message="tns:MaintainValueSetConceptMetadataValueResponse"/>
+</operation>
+<operation name="MaintainCodeSystemVersion">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainCodeSystemVersionRequest" message="tns:MaintainCodeSystemVersion"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainCodeSystemVersionResponse" message="tns:MaintainCodeSystemVersionResponse"/>
 </operation>
 <operation name="UpdateConceptValueSetMembershipStatus">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateConceptValueSetMembershipStatusRequest" message="tns:UpdateConceptValueSetMembershipStatus"/>
@@ -188,6 +226,22 @@
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainCodeSystemConceptMetadataValueRequest" message="tns:MaintainCodeSystemConceptMetadataValue"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainCodeSystemConceptMetadataValueResponse" message="tns:MaintainCodeSystemConceptMetadataValueResponse"/>
 </operation>
+<operation name="isCreateValueSetPubRunning">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/isCreateValueSetPubRunningRequest" message="tns:isCreateValueSetPubRunning"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/isCreateValueSetPubRunningResponse" message="tns:isCreateValueSetPubRunningResponse"/>
+</operation>
+<operation name="getCreateValueSetPubResponse">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getCreateValueSetPubResponseRequest" message="tns:getCreateValueSetPubResponse"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getCreateValueSetPubResponseResponse" message="tns:getCreateValueSetPubResponseResponse"/>
+</operation>
+<operation name="RemoveValueSetContent">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveValueSetContentRequest" message="tns:RemoveValueSetContent"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveValueSetContentResponse" message="tns:RemoveValueSetContentResponse"/>
+</operation>
+<operation name="UpdateConceptStatus">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateConceptStatusRequest" message="tns:UpdateConceptStatus"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateConceptStatusResponse" message="tns:UpdateConceptStatusResponse"/>
+</operation>
 <operation name="MaintainConcept">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainConceptRequest" message="tns:MaintainConcept"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainConceptResponse" message="tns:MaintainConceptResponse"/>
@@ -195,6 +249,14 @@
 <operation name="CreateConcept">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateConceptRequest" message="tns:CreateConcept"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateConceptResponse" message="tns:CreateConceptResponse"/>
+</operation>
+<operation name="UpdateValueSetStatus">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateValueSetStatusRequest" message="tns:UpdateValueSetStatus"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/UpdateValueSetStatusResponse" message="tns:UpdateValueSetStatusResponse"/>
+</operation>
+<operation name="CreateValueSetContent">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateValueSetContentRequest" message="tns:CreateValueSetContent"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateValueSetContentResponse" message="tns:CreateValueSetContentResponse"/>
 </operation>
 <operation name="MaintainValueSet">
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/MaintainValueSetRequest" message="tns:MaintainValueSet"/>
@@ -208,28 +270,38 @@
 <input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateCodeSystemRequest" message="tns:CreateCodeSystem"/>
 <output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateCodeSystemResponse" message="tns:CreateCodeSystemResponse"/>
 </operation>
+<operation name="getCreateCodeSystemPubResponse">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getCreateCodeSystemPubResponseRequest" message="tns:getCreateCodeSystemPubResponse"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getCreateCodeSystemPubResponseResponse" message="tns:getCreateCodeSystemPubResponseResponse"/>
+</operation>
+<operation name="getCreateCodeSystemPubRunning">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getCreateCodeSystemPubRunningRequest" message="tns:getCreateCodeSystemPubRunning"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getCreateCodeSystemPubRunningResponse" message="tns:getCreateCodeSystemPubRunningResponse"/>
+</operation>
+<operation name="RemoveTerminologyOrConceptPub">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveTerminologyOrConceptPubRequest" message="tns:RemoveTerminologyOrConceptPub"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/RemoveTerminologyOrConceptPubResponse" message="tns:RemoveTerminologyOrConceptPubResponse"/>
+</operation>
+<operation name="getRemoveTerminologyOrConceptPubRunning">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getRemoveTerminologyOrConceptPubRunningRequest" message="tns:getRemoveTerminologyOrConceptPubRunning"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getRemoveTerminologyOrConceptPubRunningResponse" message="tns:getRemoveTerminologyOrConceptPubRunningResponse"/>
+</operation>
+<operation name="getRemoveTerminologyOrConceptPubResponse">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getRemoveTerminologyOrConceptPubResponseRequest" message="tns:getRemoveTerminologyOrConceptPubResponse"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/getRemoveTerminologyOrConceptPubResponseResponse" message="tns:getRemoveTerminologyOrConceptPubResponseResponse"/>
+</operation>
+<operation name="CreateCodeSystemPub">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateCodeSystemPubRequest" message="tns:CreateCodeSystemPub"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateCodeSystemPubResponse" message="tns:CreateCodeSystemPubResponse"/>
+</operation>
+<operation name="CreateValueSetPub">
+<input wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateValueSetPubRequest" message="tns:CreateValueSetPub"/>
+<output wsam:Action="http://authoring.ws.terminologie.fhdo.de/Authoring/CreateValueSetPubResponse" message="tns:CreateValueSetPubResponse"/>
+</operation>
 </portType>
 <binding name="AuthoringPortBinding" type="tns:Authoring">
 <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
 <operation name="UpdateCodeSystemVersionStatus">
-<soap:operation soapAction=""/>
-<input>
-<soap:body use="literal"/>
-</input>
-<output>
-<soap:body use="literal"/>
-</output>
-</operation>
-<operation name="CreateValueSetContent">
-<soap:operation soapAction=""/>
-<input>
-<soap:body use="literal"/>
-</input>
-<output>
-<soap:body use="literal"/>
-</output>
-</operation>
-<operation name="RemoveTerminologyOrConcept">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -247,34 +319,7 @@
 <soap:body use="literal"/>
 </output>
 </operation>
-<operation name="RemoveValueSetContent">
-<soap:operation soapAction=""/>
-<input>
-<soap:body use="literal"/>
-</input>
-<output>
-<soap:body use="literal"/>
-</output>
-</operation>
-<operation name="MaintainCodeSystemVersion">
-<soap:operation soapAction=""/>
-<input>
-<soap:body use="literal"/>
-</input>
-<output>
-<soap:body use="literal"/>
-</output>
-</operation>
-<operation name="UpdateConceptStatus">
-<soap:operation soapAction=""/>
-<input>
-<soap:body use="literal"/>
-</input>
-<output>
-<soap:body use="literal"/>
-</output>
-</operation>
-<operation name="UpdateValueSetStatus">
+<operation name="RemoveTerminologyOrConcept">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -302,6 +347,15 @@
 </output>
 </operation>
 <operation name="MaintainValueSetConceptMetadataValue">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="MaintainCodeSystemVersion">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -346,6 +400,42 @@
 <soap:body use="literal"/>
 </output>
 </operation>
+<operation name="isCreateValueSetPubRunning">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="getCreateValueSetPubResponse">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="RemoveValueSetContent">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="UpdateConceptStatus">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
 <operation name="MaintainConcept">
 <soap:operation soapAction=""/>
 <input>
@@ -356,6 +446,24 @@
 </output>
 </operation>
 <operation name="CreateConcept">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="UpdateValueSetStatus">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="CreateValueSetContent">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>
@@ -383,6 +491,69 @@
 </output>
 </operation>
 <operation name="CreateCodeSystem">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="getCreateCodeSystemPubResponse">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="getCreateCodeSystemPubRunning">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="RemoveTerminologyOrConceptPub">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="getRemoveTerminologyOrConceptPubRunning">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="getRemoveTerminologyOrConceptPubResponse">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="CreateCodeSystemPub">
+<soap:operation soapAction=""/>
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+<operation name="CreateValueSetPub">
 <soap:operation soapAction=""/>
 <input>
 <soap:body use="literal"/>

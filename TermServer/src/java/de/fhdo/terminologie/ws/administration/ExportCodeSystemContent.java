@@ -19,13 +19,11 @@
  */
 package de.fhdo.terminologie.ws.administration;
 
-import de.fhdo.terminologie.helper.LoginHelper;
 import de.fhdo.terminologie.ws.administration._export.ExportCSV;
 import de.fhdo.terminologie.ws.administration._export.ExportClaml;
 import de.fhdo.terminologie.ws.administration._export.ExportCodeSystemSVS;
 import de.fhdo.terminologie.ws.administration.types.ExportCodeSystemContentRequestType;
 import de.fhdo.terminologie.ws.administration.types.ExportCodeSystemContentResponseType;
-import de.fhdo.terminologie.ws.types.LoginInfoType;
 import de.fhdo.terminologie.ws.types.ReturnType;
 
 /**
@@ -35,22 +33,22 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 public class ExportCodeSystemContent
 {
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
   /**
-   * Erstellt eine neue Domäne mit den angegebenen Parametern
+   * Creates a new domain with the given parameters.
    *
    * @param parameter
-   * @return Antwort des Webservices
+   * @return Return value of the webservice
    */
   public ExportCodeSystemContentResponseType ExportCodeSystemContent(ExportCodeSystemContentRequestType parameter)
   {
     if (logger.isInfoEnabled())
     {  
-        logger.info("====== ExportCodeSystemContent gestartet, ID: " + parameter.getCodeSystem().getCurrentVersionId() + ", Name: " + parameter.getCodeSystem().getName() + ", Version: " + parameter.getCodeSystem().getCurrentVersionId() +  " ======");
+        logger.info("====== ExportCodeSystemContent started, ID: " + parameter.getCodeSystem().getCurrentVersionId() + ", name: " + parameter.getCodeSystem().getName() + ", version: " + parameter.getCodeSystem().getCurrentVersionId() +  " ======");
     }
     
-    // Return-Informationen anlegen
+    // Create return information
     ExportCodeSystemContentResponseType response = new ExportCodeSystemContentResponseType();
     response.setReturnInfos(new ReturnType());
     
@@ -67,27 +65,13 @@ public class ExportCodeSystemContent
         return response;
     }
 
-    // Parameter prüfen
+    // Check parameters
     if (validateParameter(parameter, response) == false)
     {
         StaticExportStatus.decreaseAvtiveSessions();
-        return response; // Fehler bei den Parametern
+        //response is set during validateParameter
+        return response; // Parameter check failed
     }
-
-    // Login-Informationen auswerten (gilt für jeden Webservice)
-    boolean loggedIn = false;
-    LoginInfoType loginInfoType = null;
-    //3.2.17 added check for alreadylogged in
-    if (parameter != null && !parameter.getLoginAlreadyChecked() && parameter.getLogin() != null)
-    {
-        loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
-        loggedIn = loginInfoType != null;
-    }
-
-    if (logger.isDebugEnabled())
-      logger.debug("Benutzer ist eingeloggt: " + loggedIn);
-
-    loggedIn = true;
 
     if (parameter == null || parameter.getExportInfos() == null || parameter.getExportInfos().getFormatId() == null)
     {
@@ -102,36 +86,28 @@ public class ExportCodeSystemContent
 
     if (formatId == ExportCodeSystemContentRequestType.EXPORT_CLAML_ID)
     {
-      try
-      {
-        ExportClaml exportClaML = new ExportClaml();
-        //3.2.17 check if paramter for alreadyloggedin has to be set
-        response = exportClaML.export(parameter);
-
-        /*response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-         response.getReturnInfos().setStatus(ReturnType.Status.OK);
-         response.getReturnInfos().setMessage("ClaML-Export abgeschlossen.");
-         response.getReturnInfos().setCount(exportClaML.getCountImported());*/
-      }
-      catch (Exception e)
-      {
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-        response.getReturnInfos().setMessage("Fehler beim ClaML-Export: " + e.getLocalizedMessage());
-
-        e.printStackTrace();
-      }
+        try
+        {
+            logger.info("DABACA starting CLAMLexport");
+            ExportClaml exportClaML = new ExportClaml();
+            response = exportClaML.export(parameter);
+        }
+        catch (Exception e)
+        {
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
+            response.getReturnInfos().setMessage("Fehler beim ClaML-Export: " + e.getLocalizedMessage());
+        }
     }
     else if (formatId == ExportCodeSystemContentRequestType.EXPORT_CSV_ID)
     {
       try
       {
         ExportCSV exportCSV = new ExportCSV(parameter);
+        String exportResponseString = exportCSV.exportCSV(response);
 
-        String s = exportCSV.exportCSV(response);
-
-        if (s.length() == 0)
+        if (exportResponseString.length() == 0)
         {
           response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
           response.getReturnInfos().setStatus(ReturnType.Status.OK);
@@ -142,7 +118,7 @@ public class ExportCodeSystemContent
           response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
           response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
           response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-          response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + s);
+          response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + exportResponseString);
         }
       }
       catch (Exception e)
@@ -151,8 +127,6 @@ public class ExportCodeSystemContent
         response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
         response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + e.getLocalizedMessage());
-
-        e.printStackTrace();
       }
     }
     else if (formatId == ExportCodeSystemContentRequestType.EXPORT_SVS_ID)
@@ -160,10 +134,9 @@ public class ExportCodeSystemContent
       try
       {
         ExportCodeSystemSVS exportSVS = new ExportCodeSystemSVS(parameter);
+        String exportResponseString = exportSVS.exportSVS(response);
 
-        String s = exportSVS.exportSVS(response);
-
-        if (s.length() == 0)
+        if (exportResponseString.length() == 0)
         {
           response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
           response.getReturnInfos().setStatus(ReturnType.Status.OK);
@@ -174,7 +147,7 @@ public class ExportCodeSystemContent
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-            response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + s);
+            response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + exportResponseString);
         }
       }
       catch (Exception e)
@@ -183,8 +156,6 @@ public class ExportCodeSystemContent
         response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
         response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + e.getLocalizedMessage());
-
-        e.printStackTrace();
       }
     }
     else
@@ -193,42 +164,39 @@ public class ExportCodeSystemContent
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
       response.getReturnInfos().setMessage("Das Export-Format mit folgender ID ist unbekannt: " + formatId + "\n" + ExportCodeSystemContentRequestType.getPossibleFormats());
     }
-
     StaticExportStatus.decreaseAvtiveSessions();
     return response;
-
   }
 
   /**
-   * Prüft die Parameter anhand der Cross-Reference
-   *
+   * Checks the parameters with the cross-reference.
+   * TODO
    * @param Request
    * @param Response
-   * @return false, wenn fehlerhafte Parameter enthalten sind
+   * @return false, if the parameters are invalid
    */
   private boolean validateParameter(ExportCodeSystemContentRequestType parameter, ExportCodeSystemContentResponseType response)
   {
-    String s = "";
+    String responseString = "";
     if(parameter.getCodeSystem() == null)
     {
-      s = "Es muss ein Codesystem mitgegeben werden.";
+      responseString = "Es muss ein Codesystem mitgegeben werden.";
     }
     else
     {
-      if(parameter.getCodeSystem().getId() == null || parameter.getCodeSystem().getId().longValue() == 0)
+      if(parameter.getCodeSystem().getId() == null || parameter.getCodeSystem().getId() == 0)
       {
-        s = "Es muss eine ID für ein Codesystem mitgegeben werden.";
+        responseString = "Es muss eine ID für ein Codesystem mitgegeben werden.";
       }
     }
 
-    if(s.length() > 0)
+    if(responseString.length() > 0)
     {
       response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-      response.getReturnInfos().setMessage(s);
+      response.getReturnInfos().setMessage(responseString);
       return false;
     }
-    
 
     return true;
   }

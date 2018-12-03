@@ -42,7 +42,7 @@ import java.util.LinkedHashSet;
 public class ListCodeSystems
 {
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
     /**
      * Listet Vokabulare des Terminologieservers auf
