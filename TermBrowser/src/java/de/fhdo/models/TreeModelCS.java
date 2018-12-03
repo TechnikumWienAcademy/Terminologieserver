@@ -31,33 +31,45 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.zkoss.zk.ui.Desktop;
 import types.termserver.fhdo.de.CodeSystem;
 import types.termserver.fhdo.de.CodeSystemVersion;
 import types.termserver.fhdo.de.DomainValue;
 
 /**
- *
- * @author Robert Mützner
+ * This class builds and offers the tree model, which is used to display the sarch results.
+ * @author Robert Mützner, bachinger
  */
 public class TreeModelCS {
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-    private static Desktop desktop;
-//    private static TreeModelCS instance  = null;  
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static ArrayList<CodeSystemVersion> csvList = new ArrayList<CodeSystemVersion>();
     private static TreeModel   treeModel = null;
-    private static ArrayList<CodeSystemVersion> csvList = new ArrayList<CodeSystemVersion>();
-
+    private static Desktop desktop;
+    
+    /**
+     * Gets the CSV-list.
+     * TODO: What is the CSV-list used for?
+     * @return the CSV-list
+     */
     public static ArrayList<CodeSystemVersion> getCsvList() {
         return csvList;
     }   
 
+    /**
+     * Calls the createModel() function to rebuild the tree model.
+     * @param d the ZK-framework-desktop
+     */
     public static void reloadData(Desktop d) {
         createModel(d);        
     }         
     
+    /**
+     * Creates the tree model, checks if the user is logged in in the beginning to
+     * ensure that, depending on the login, all the data or only parts of it are shown.
+     * @param d the ZK-framework-desktop
+     */
     private static void createModel(Desktop d) {
-        logger.info("--- TreeModelCS, initData -------------------");
+        LOGGER.info("===== createModel started =====");
                        
         desktop = d;
         try {       
@@ -65,10 +77,10 @@ public class TreeModelCS {
             
             ListCodeSystemsInTaxonomyRequestType parameter = new ListCodeSystemsInTaxonomyRequestType();            
             
-            // login
+            //Check login
             if (SessionHelper.isCollaborationActive())
             {
-              // Kollaborationslogin verwenden (damit auch nicht-aktive Begriffe angezeigt werden können)
+              //Use collabuser so that non-active concepts can be shown
               parameter.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
               parameter.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
             }
@@ -80,7 +92,7 @@ public class TreeModelCS {
             
             if(parameter.getLogin() != null)
             {
-                logger.info("SESSION ID :" + parameter.getLogin().getSessionID());
+                LOGGER.info("Session-ID: " + parameter.getLogin().getSessionID());
             }
             Return response = WebServiceHelper.listCodeSystems(parameter);
             
@@ -90,87 +102,82 @@ public class TreeModelCS {
                 //provideOrderChoosen by AdminSettings
                 Map<Integer,DomainValue> mapDomVal = new HashMap<Integer, DomainValue>();
                 
-                // Domain Values mit untergeordneten DV,CS und CSVs
-								int maxOrderNumber = -1;
-                for(DomainValue dv : response.getDomainValue()){
-										
+                //Domain values with underlying domain-values, code-systems and code-system-versions
+		int maxOrderNumber = -1;
+                for(DomainValue dv : response.getDomainValue()){			
                     if(dv.getOrderNo() != null){
                         int orderNumber = dv.getOrderNo();
                         mapDomVal.put(orderNumber, dv);
-                        if (orderNumber > maxOrderNumber){
-                                maxOrderNumber = orderNumber;
-                        }
-                    }else{
-                        mapDomVal.put(maxOrderNumber+1, dv);
+                        if (orderNumber > maxOrderNumber)
+                            maxOrderNumber = orderNumber;
                     }
+                    else
+                        mapDomVal.put(maxOrderNumber+1, dv);
                 }
                 
                 Collection<DomainValue> domainValues = mapDomVal.values();
 
-                for (DomainValue entrie : domainValues){
-                        list.add(createTreeNode(entrie));
-                }
-						
+                for (DomainValue entry : domainValues){
+                        list.add(createTreeNode(entry));
+                }			
                 TreeNode tn_root = new TreeNode(null, list);
                 treeModel = new TreeModel(tn_root);       
-            }           
-
+            }      
         } catch (Exception e) {
-            // Bei Fehler, leere Liste zurück geben
+            //Return an empty list if there is an error
             treeModel = new TreeModel(new TreeNode(null, new LinkedList()));
-            logger.error("Fehler in TreeModelCS, initData():" + e.getMessage());
-            
-            e.printStackTrace();
+            LOGGER.error("There was an error initializing the tree-data: " + e.getMessage());
         }
     }
 
+    /**
+     * Create a single tree node for the model, using domain-values and code-systems.
+     * @param x the object for which a node is created
+     * @return the created tree node
+     */
     private static TreeNode createTreeNode(Object x) {        
         TreeNode tn = new TreeNode(x);
 
         if(x instanceof CodeSystem)
         {    
             CodeSystem cs = (CodeSystem)x;
+            LOGGER.debug("Creating code-system tree node: " + cs.getName());
             
-            logger.debug("createTreeNode: " + cs.getName());
-            
-            // Kinder (CodeSystemVersions) suchen und dem CodeSystem hinzufügen            
+            // Add children (code-system versions)            
             for(CodeSystemVersion csv : cs.getCodeSystemVersions()){
-                //logger.debug("Version: " + csv.getName());
-                
                 csv.setCodeSystem(cs);
-                
-                // liste von CSV aufbauen
+                LOGGER.debug("Version: " + csv.getName());
                 csvList.add(csv);
-
-                // CSV in das CS einh?ngen
                 tn.add(new TreeNode(csv));
-            }                                 
+            }
         }
         else if (x instanceof DomainValue)
         {
             DomainValue dv = (DomainValue)x;
+            LOGGER.debug("Creating domain-value tree node: " + dv.getAttribut1Classname());
             
-            // Gibts DomainValues im DV? Wenn ja, einf?gen  
+            // Add Children (domain-values and code-systems)
             for(DomainValue dv2 : dv.getDomainValuesForDomainValueId2()){
                 tn.add(createTreeNode(dv2));
             }
-            
-            // Gibts CSs im DV? Wenn ja, einf?gen
             for(CodeSystem cs : dv.getCodeSystems()){
                 tn.add(createTreeNode(cs));
             }                             
         }
         else
-            return null;    // Kein DV oder CS
+            return null;
         
         return tn;
     }
 
-    public static TreeModel getTreeModel(Desktop d) {        
+    /**
+     * Get the currently active tree model, if one exists. If not create a new one.
+     * @param d the ZK-framework-desktop
+     * @return the currently active tree model
+     */
+    public static TreeModel getTreeModel(Desktop d) {     
         if(treeModel == null || desktop == null || desktop != d)
-            createModel(d);            
-        
-				createModel(d);
+            createModel(d);
         return treeModel;
     }   
 }
