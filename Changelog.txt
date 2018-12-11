@@ -1,4 +1,12 @@
-﻿Changelog 3.2.21
+﻿Changelog 3.2.23
+	-Änderungen
+		.) Zusätzliche Log-Meldungen bei der Freigabe eingebaut.
+
+Changelog 3.2.22
+	-Änderungen
+		.) Zusätzliche Log-Meldungen bei der Freigabe eingebaut.
+
+Changelog 3.2.21
 	-Bugfixes
 		.) EHTSOID-160: Die Kommunikation zwischen Pub und Collab wurde so verändert, dass es nicht mehr zu Socket-Exceptions kommen sollte.
 

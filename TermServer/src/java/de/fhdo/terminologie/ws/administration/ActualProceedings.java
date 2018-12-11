@@ -81,7 +81,6 @@ public class ActualProceedings
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.OK);
             response.getReturnInfos().setMessage("Sie müssen mit Administrationsrechten am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
-            logger.info("DABACA 1");
             return response;
         }*/
         

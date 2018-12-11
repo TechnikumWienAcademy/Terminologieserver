@@ -48,7 +48,7 @@ public class Definitions /* Test */ {
     public final static String DEFAULT_PROJECT = "http://localhost:8080/TermBrowser/";
 
     public static String getSwVersion() {
-        return "3.2.21";
+        return "3.2.23";
     }
 
     public static enum STATUS_CODES {

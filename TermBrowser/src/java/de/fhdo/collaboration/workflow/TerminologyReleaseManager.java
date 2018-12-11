@@ -34,7 +34,6 @@ import de.fhdo.terminologie.ws.search.ListValueSetContentsResponse;
 import de.fhdo.terminologie.ws.searchPub.GetListGloballySearchedConceptsResponseResponse;
 import de.fhdo.terminologie.ws.searchPub.GetListValueSetsPubResponeResponse;
 import de.fhdo.terminologie.ws.searchPub.ListGloballySearchedConceptsRequestType;
-import de.fhdo.terminologie.ws.searchPub.ListGloballySearchedConceptsResponse;
 import types.termserver.fhdo.de.CodeSystem;
 import de.fhdo.terminologie.ws.searchPub.Status;
 import java.io.File;
@@ -99,7 +98,7 @@ public class TerminologyReleaseManager
      */
     private boolean isPubPlattformAliveAndUserLoggedIn()
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.isPubPlattformAliveAndUserLoggedIn gestartet");
+        logger.info("+++++ isPubPlattformAliveAndUserLoggedIn started +++++");
         //3.2.17 auskommentiert
         /*LoginRequestType request = new LoginRequestType();
         request.setLogin(new LoginType());
@@ -109,10 +108,12 @@ public class TerminologyReleaseManager
 
         if (port_authorizationPub == null)
         {
-            logger.debug("PubServicePort ist null");
+            logger.debug("PubServicePort is null");
+            logger.info("----- isPubPlattformAliveAndUserLoggedIn finished (001) -----");
             return false;
         }
         //3.2.17
+        logger.info("----- isPubPlattformAliveAndUserLoggedIn finished (002) -----");
         return true;
 
         //3.2.17 auskommentiert
@@ -140,18 +141,19 @@ public class TerminologyReleaseManager
 
     private boolean areSessionIdsSet()
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.areSessionIdsSet gestartet");
+        logger.info("+++++ areSessionIdsSet started +++++");
         if ((this.sessionId != null) && (this.pubSessionId != null))
         {
+            logger.info("----- areSessionIdsSet finished (001) -----");
             return true;
         }
-
+        logger.info("----- areSessionIdsSet finished (002) -----");
         return false;
     }
 
     private ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po)
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.transferTerminologyToPublicServer started");
+        logger.info("+++++ transferTerminologyToPublicServer started +++++");
         //initially set return value
         ReturnType ret = new ReturnType();
         ret.setSuccess(false);
@@ -165,6 +167,7 @@ public class TerminologyReleaseManager
                 logger.debug("Check failed, pub-platform is unreachable or user is not logged in");
                 ret.setSuccess(false);
                 ret.setMessage("Verbindung zur Publikationsplattform konnte nicht hergestellt werden.");
+                logger.info("----- transferTerminologyToPublicServer finished (001) -----");
                 return ret;
             }
             logger.debug("Check successful, pub-platform is reachable and user is logged in");
@@ -180,6 +183,7 @@ public class TerminologyReleaseManager
                 ret.setMessage("SessionIDs sind nicht gesetzt.");
                 logger.info("TermBrowser: Collaboration Session: " + this.sessionId);
                 logger.info("TermBrowser: Pub Session: " + this.pubSessionId);
+                logger.info("----- transferTerminologyToPublicServer finished (002) -----");
                 return ret;
             }
             logger.debug("Check successful, SessionIDs are set");
@@ -187,7 +191,6 @@ public class TerminologyReleaseManager
             //start with transfer
             if (po.getClassname().equals("CodeSystemVersion"))
             {
-                logger.info("DABACA - getcodesystem to export will be started now");
                 CodeSystem csToExport = this.getCodeSystemToExport(po.getProposal().getVocabularyIdTwo(), po.getProposal().getVocabularyId());
 
                 //check if CS was found on Collab plattform
@@ -199,10 +202,10 @@ public class TerminologyReleaseManager
                             + ", CSV ID: "
                             + po.getProposal().getVocabularyId()
                             + "CodeSystem: " + po.getProposal().getVocabularyName());
+                    logger.info("----- transferTerminologyToPublicServer finished (003) -----");
                     return ret;
                 }
 
-                logger.info("DABACA - getcodesystem from pub will be started now");
                 List<de.fhdo.terminologie.ws.searchPub.CodeSystem> result = this.getTargetCodeSystemFromPub(csToExport.getName());
 
                 boolean exists = false;
@@ -270,10 +273,10 @@ public class TerminologyReleaseManager
                 {
                     ret.setSuccess(false);
                     ret.setMessage("CodeSystem konnte auf der Publikationsplattform nicht gefunden werden. (" + csToExport.getName() + ")");
+                    logger.info("----- transferTerminologyToPublicServer finished (004) -----");
                     return ret;
                 }
 
-                logger.info("DABACA GET EXPORTED CODE SYSTEM WILL BE STARTED NOW");
                 ExportType exportedCodeSystem = this.getExportedCodeSystem(csToExport);
 
                 if (exportedCodeSystem == null)
@@ -284,6 +287,7 @@ public class TerminologyReleaseManager
                             + ", CSV ID: "
                             + po.getProposal().getVocabularyId()
                             + "CodeSystem: " + po.getProposal().getVocabularyName());
+                    logger.info("----- transferTerminologyToPublicServer finished (005) -----");
                     return ret;
                 }
 
@@ -298,12 +302,14 @@ public class TerminologyReleaseManager
                 {
                     ret.setSuccess(true);
                     ret.setMessage(ret_import.getMessage());
+                    logger.info("----- transferTerminologyToPublicServer finished (006) -----");
                     return ret;
                 }
                 else
                 {
                     ret.setSuccess(false);
                     ret.setMessage(ret_import.getMessage());
+                    logger.info("----- transferTerminologyToPublicServer finished (007) -----");
                     return ret;
                 }
             }
@@ -320,6 +326,7 @@ public class TerminologyReleaseManager
                             + ",\nVSV ID: "
                             + po.getProposal().getVocabularyId()
                             + "\nValueSet: " + po.getProposal().getVocabularyName());
+                    logger.info("----- transferTerminologyToPublicServer finished (008) -----");
                     return ret;
                 }
                 
@@ -346,10 +353,10 @@ public class TerminologyReleaseManager
                     }
                     
                     ret.setMessage(message);
+                    logger.info("----- transferTerminologyToPublicServer finished (009) -----");
                     return ret;
                 }
 
-                //ANKER
                 List<de.fhdo.terminologie.ws.searchPub.ValueSet> result = this.getTargetValueSetFromPub(vsToExport.getName());
 
                 boolean exists = false;
@@ -412,6 +419,7 @@ public class TerminologyReleaseManager
                 {
                     ret.setSuccess(false);
                     ret.setMessage("ValueSet konnte auf der Publikationsplattform nicht gefunden werden. (" + vsToExport.getName() + ")");
+                    logger.info("----- transferTerminologyToPublicServer finished (010) -----");
                     return ret;
                 }
 
@@ -425,6 +433,7 @@ public class TerminologyReleaseManager
                             + ",\n VSV ID: "
                             + po.getProposal().getVocabularyId()
                             + "\nValueSet: " + po.getProposal().getVocabularyName());
+                    logger.info("----- transferTerminologyToPublicServer finished (011) -----");
                     return ret;
                 }
 
@@ -439,12 +448,14 @@ public class TerminologyReleaseManager
                 {
                     ret.setSuccess(true);
                     ret.setMessage(ret_import.getMessage());
+                    logger.info("----- transferTerminologyToPublicServer finished (012) -----");
                     return ret;
                 }
                 else
                 {
                     ret.setSuccess(false);
                     ret.setMessage(ret_import.getMessage());
+                    logger.info("----- transferTerminologyToPublicServer finished (013) -----");
                     return ret;
                 }
 
@@ -462,6 +473,7 @@ public class TerminologyReleaseManager
                             + ",\n CSV ID: "
                             + po.getProposal().getVocabularyId()
                             + "\nCodeSystem: " + po.getProposal().getVocabularyName());
+                    logger.info("----- transferTerminologyToPublicServer finished (014) -----");
                     return ret;
                 }
 
@@ -513,12 +525,14 @@ public class TerminologyReleaseManager
                     {
                         ret.setSuccess(true);
                         ret.setMessage("CodeSystem successfully created.");
+                        logger.info("----- transferTerminologyToPublicServer finished (015) -----");
                         return ret;
                     }
                     else
                     {
                         ret.setSuccess(false);
                         ret.setMessage("CodeSystem konnte auf Publikationsumgebung nicht erstellt werden.");
+                        logger.info("----- transferTerminologyToPublicServer finished (016) -----");
                         return ret;
                     }
                 }
@@ -526,6 +540,7 @@ public class TerminologyReleaseManager
                 {
                     ret.setSuccess(true);
                     ret.setMessage("CodeSystem already exists.");
+                    logger.info("----- transferTerminologyToPublicServer finished (017) -----");
                     return ret;
                 }
             }
@@ -542,6 +557,7 @@ public class TerminologyReleaseManager
                             + ", VSV ID: "
                             + po.getProposal().getVocabularyId()
                             + "ValueSet: " + po.getProposal().getVocabularyName());
+                    logger.info("----- transferTerminologyToPublicServer finished (018) -----");
                     return ret;
                 }
 
@@ -592,12 +608,14 @@ public class TerminologyReleaseManager
                     {
                         ret.setSuccess(true);
                         ret.setMessage("ValueSet successfully created.");
+                        logger.info("----- transferTerminologyToPublicServer finished (019) -----");
                         return ret;
                     }
                     else
                     {
                         ret.setSuccess(false);
                         ret.setMessage("ValueSet konnte auf Publikationsumgebung nicht erstellt werden.");
+                        logger.info("----- transferTerminologyToPublicServer finished (020) -----");
                         return ret;
                     }
                 }
@@ -605,6 +623,7 @@ public class TerminologyReleaseManager
                 {
                     ret.setSuccess(true);
                     ret.setMessage("ValueSet already exists.");
+                    logger.info("----- transferTerminologyToPublicServer finished (021) -----");
                     return ret;
                 }
             }
@@ -622,7 +641,7 @@ public class TerminologyReleaseManager
             ret.setSuccess(false);
             ret.setMessage("An Error occured.");
         }
-
+        logger.info("----- transferTerminologyToPublicServer finished (022) -----");
         return ret;
     }
 
@@ -637,7 +656,7 @@ public class TerminologyReleaseManager
      */
     private CodeSystem getCodeSystemToExport(Long codesystemId, Long codesystemVersionId) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.getCodeSystemToExport started");
+        logger.info("+++++ getCodeSystemToExport started +++++");
         logger.info("TermBrowser: TRANSFER: Trying to find CodeSystem and Version in collab plattform");
         logger.info("TermBrowser: CS ID: " + codesystemId);
         logger.info("TermBrowser: CSV ID: " + codesystemVersionId);
@@ -651,8 +670,6 @@ public class TerminologyReleaseManager
         //3.2.17
         request_search.setLoginAlreadyChecked(true);
         
-        logger.info("DABACA - starting listcodesystems now");
-        logger.info("DABACA - NOT YET CHECKED");
         de.fhdo.terminologie.ws.search.ListCodeSystemsResponse.Return resp = port_search.listCodeSystems(request_search);
         
         if ((resp.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.search.Status.OK)
@@ -677,20 +694,24 @@ public class TerminologyReleaseManager
                     CodeSystem cs = resp.getCodeSystem().get(0);
                     cs.getCodeSystemVersions().clear();
                     cs.getCodeSystemVersions().add(csv_search);
+                    logger.info("----- getCodeSystemToExport finished (001) -----");
                     return cs;
                 }
                 else
                 {
+                    logger.info("----- getCodeSystemToExport finished (002) -----");
                     return new CodeSystem();
                 }
             }
             else
             {
+                logger.info("----- getCodeSystemToExport finished (003) -----");
                 return resp.getCodeSystem().get(0);
             }
         }
         else
         {
+            logger.info("----- getCodeSystemToExport finished (004) -----");
             return new CodeSystem();
         }
     }
@@ -706,7 +727,7 @@ public class TerminologyReleaseManager
      */
     private ExportType getExportedCodeSystem(CodeSystem codesystem) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.getExportedCodeSystem started");
+        logger.info("+++++ getExportedCodeSystem started +++++");
         Long codesystemId = codesystem.getId();
         Long codesystemVersionId = codesystem.getCodeSystemVersions().get(0).getVersionId();
 
@@ -793,7 +814,7 @@ public class TerminologyReleaseManager
             logger.info("TermBrowser: Calling export service");
             response = WebServiceHelper.exportCodeSystemContent(req_export_cs);
         }
-
+        logger.info("----- getExportedCodeSystem finished (001) -----");
         return response.getExportInfos();
     }
 
@@ -805,7 +826,7 @@ public class TerminologyReleaseManager
      * */
     private List<de.fhdo.terminologie.ws.searchPub.CodeSystem> getTargetCodeSystemFromPub(String codesystemName) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.getTargetCodeSystemFromPub started");
+        logger.info("+++++ getTargetCodeSystemFromPub started +++++");
         final de.fhdo.terminologie.ws.searchPub.Search port_searchPub = WebServiceUrlHelper.getInstance().getSearchPubServicePort();
         //3.2.21
         //de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType request_searchPub = new de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType();
@@ -846,12 +867,17 @@ public class TerminologyReleaseManager
         }
         //3.2.21 end
 
-        if (respSearchPub.getReturnInfos().getStatus().equals(Status.OK))
+        if (respSearchPub!=null
+                && respSearchPub.getReturnInfos()!=null 
+                && respSearchPub.getReturnInfos().getStatus()!=null 
+                && respSearchPub.getReturnInfos().getStatus().equals(Status.OK))
         {
+            logger.info("----- getTargetCodeSystemFromPub finished (001) -----");
             return respSearchPub.getCodeSystem();
         }
         else
         {
+            logger.info("----- getTargetCodeSystemFromPub finished (002) -----");
             return new ArrayList<de.fhdo.terminologie.ws.searchPub.CodeSystem>();
         }
     }
@@ -861,7 +887,7 @@ public class TerminologyReleaseManager
     
     private de.fhdo.terminologie.ws.administrationPub.ReturnType importCodeSystem(CodeSystemVersion csv, ExportType exportedCs) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.importCodeSystem gestartet");
+        logger.info("+++++ importCodeSystem started +++++");
         //de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
         // Login
         de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType request = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
@@ -949,12 +975,13 @@ public class TerminologyReleaseManager
         catch(Exception e){
             logger.info("Exception caught while importing CodeSystem on pub and communicating back to collab");
         }
+        logger.info("----- importCodeSystem finished (001) -----");
         return ret_importThread.getReturnInfos();
     }
 
     private void createTempCodeSystemVersionOnPub(CodeSystem cs)
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.createTempCodeSystemVersionOnPub gestartet");
+        logger.info("+++++ createTempCodeSystemVersionOnPub started +++++");
         final de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType request = new de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
@@ -986,27 +1013,33 @@ public class TerminologyReleaseManager
         final de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
         GetCreateCodeSystemPubResponseResponse.Return ret_pub = null;
         try{
+            //DABACA DEBUG MELDUNGEN ENTFERNEN
+            logger.debug("Initializing thread");
             Thread thread = new Thread(){
               @Override
               public void run(){
                   port.createCodeSystemPub(request);
               }
             };
+            logger.debug("Starting thread");
             thread.start();
 
             boolean createRunning = true;
             int counter = 1;
+            logger.debug("Starting createRunning");
             while(createRunning){
                 Thread.sleep(2*1000);
+                logger.debug("Checking running import");
                 createRunning = adminPort.checkImportRunning();
                 logger.info("Pub-createCodeSystem running for " + counter*2 + " seconds");
                 counter++;
             }
+            logger.debug("Getting response");
             ret_pub = port.getCreateCodeSystemPubResponse();
-
+            logger.debug("Got response");
         }
         catch(Exception e){
-            logger.info("Exception caught while remove CodeSystem on pub and communicating back to collab");
+            logger.info("Exception caught while creating code-system on pub and communicating back to collab");
         }
         //3.2.21 end
         
@@ -1015,12 +1048,13 @@ public class TerminologyReleaseManager
             targetCS = new de.fhdo.terminologie.ws.searchPub.CodeSystem();
             targetCS.setId(ret_pub.getCodeSystem().getId());
         }
+        logger.info("----- createTempCodeSystemVersionOnPub finished (001) -----");
     }
 
     de.fhdo.terminologie.ws.authoringPub.Authoring removeTMPport;
     private void removeTempCodeSystemVersion()
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.removeTempCodeSystemVersion started");
+        logger.info("+++++ removeTempCodeSystemVersion started +++++");
         for (de.fhdo.terminologie.ws.searchPub.CodeSystemVersion v : targetCS.getCodeSystemVersions())
         {
             if (v.getName().equals("Temp_import"))
@@ -1068,7 +1102,7 @@ public class TerminologyReleaseManager
 
                 }
                 catch(Exception e){
-                    logger.info("Exception caught while remove CodeSystem on pub and communicating back to collab");
+                    logger.info("Exception caught while removing code-system on pub and communicating back to collab");
                 }
                 //3.2.21 end
                 
@@ -1082,11 +1116,12 @@ public class TerminologyReleaseManager
                 }
             }
         }
+        logger.info("----- removeTempCodeSystemVersion finished (001) -----");
     }
 
     private void removeTempValueSetVersion()
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.removeTempValueSetVersion gestartet");
+        logger.info("+++++ removeTempValueSetVersion started +++++");
         for (de.fhdo.terminologie.ws.searchPub.ValueSetVersion v : targetVS.getValueSetVersions())
         {
             if (v.getName().equals("Temp_import"))
@@ -1135,7 +1170,7 @@ public class TerminologyReleaseManager
 
                 }
                 catch(Exception e){
-                    logger.info("Exception caught while remove CodeSystem on pub and communicating back to collab");
+                    logger.info("Exception caught while removing terminology or concept on pub and communicating back to collab");
                 }
                 //3.2.21 end
                 
@@ -1149,11 +1184,12 @@ public class TerminologyReleaseManager
                 }
             }
         }
+        logger.info("----- removeTempValueSetVersion finished (001) -----");
     }
 
     private ValueSet getValueSetToExport(String valuesetName, Long valuesetVersionId) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.getValueSetToExport gestartet");
+        logger.info("+++++ getValueSetToExport started +++++");
         logger.info("TermBrowser: TRANSFER: Trying to find ValueSet and Version in collab plattform");
         logger.info("TermBrowser: VS ID: " + valuesetName);
         logger.info("TermBrowser: VSV ID: " + valuesetVersionId);
@@ -1194,15 +1230,18 @@ public class TerminologyReleaseManager
                     ValueSet vs = ret_vs.getValueSet().get(0);
                     vs.getValueSetVersions().clear();
                     vs.getValueSetVersions().add(vsv_search);
+                    logger.info("----- getValueSetToExport finished (001) -----");
                     return vs;
                 }
                 else
                 {
+                    logger.info("----- getValueSetToExport finished (002) -----");
                     return new ValueSet();
                 }
             }
             else
             {
+                logger.info("----- getValueSetToExport finished (003) -----");
                 return ret_vs.getValueSet().get(0);
             }
         }
@@ -1228,15 +1267,18 @@ public class TerminologyReleaseManager
                             ValueSet vs = v;
                             vs.getValueSetVersions().clear();
                             vs.getValueSetVersions().add(vsv_search);
+                            logger.info("----- getValueSetToExport finished (004) -----");
                             return vs;
                         }
                         else
                         {
+                            logger.info("----- getValueSetToExport finished (005) -----");
                             return new ValueSet();
                         }
                     }
                     else
                     {
+                        logger.info("----- getValueSetToExport finished (006) -----");
                         return ret_vs.getValueSet().get(0);
                     }
                 }
@@ -1244,15 +1286,17 @@ public class TerminologyReleaseManager
         }
         else
         {
+            logger.info("----- getValueSetToExport finished (007) -----");
             return new ValueSet();
         }
         
+        logger.info("----- getValueSetToExport finished (008) -----");
         return new ValueSet();
     }
 
     private ExportType getExportedValueSet(ValueSet valueSet) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.getExportedValueSet gestartet");
+        logger.info("+++++ getExportedValueSet started +++++");
         Long valuesetId = valueSet.getId();
         Long valueSetVersionId = valueSet.getValueSetVersions().get(0).getVersionId();
 
@@ -1286,7 +1330,7 @@ public class TerminologyReleaseManager
         eParameterType.setTranslations(false);
         req_export_vs.setExportParameter(eParameterType);
 
-        logger.debug("TermBrowser: Export-Service-Aufruf...");
+        logger.debug("TermBrowser - calling export-service");
 
         //3.2.17
         req_export_vs.setLoginAlreadyChecked(true);
@@ -1294,6 +1338,7 @@ public class TerminologyReleaseManager
         // WS-Aufruf
         ExportValueSetContentResponse.Return response = WebServiceHelper.exportValueSetContent(req_export_vs);
 
+        logger.info("----- getExportedValueSet finished (001) -----");
         return response.getExportInfos();
     }
 
@@ -1306,7 +1351,7 @@ public class TerminologyReleaseManager
      */
     private ArrayList<String> areValueSetContentsPresentOnPubPlattform(ValueSet valueSet)
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.areValueSetContentsPresentOnPubPlattform gestartet");
+        logger.info("+++++ areValueSetContentsPresentOnPubPlattform started +++++");
         ArrayList<String> missingEntries = new ArrayList<String>();
         
         ListValueSetContentsRequestType requestVsContent = new ListValueSetContentsRequestType();
@@ -1390,12 +1435,13 @@ public class TerminologyReleaseManager
             }
             while (it.hasNext());
         }
+        logger.info("----- areValueSetContentsPresentOnPubPlatform finished (001) -----");
         return missingEntries;
     }
 
     private List<de.fhdo.terminologie.ws.searchPub.ValueSet> getTargetValueSetFromPub(String valuesetName) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.getTargetValueSetFromPub gestartet");
+        logger.info("+++++ getTargetValueSetFromPub started +++++");
         final de.fhdo.terminologie.ws.searchPub.Search port_searchPub = WebServiceUrlHelper.getInstance().getSearchPubServicePort();
         final de.fhdo.terminologie.ws.searchPub.ListValueSetsRequestType request_searchPub = new de.fhdo.terminologie.ws.searchPub.ListValueSetsRequestType();
         request_searchPub.setLogin(new de.fhdo.terminologie.ws.searchPub.LoginType());
@@ -1436,18 +1482,19 @@ public class TerminologyReleaseManager
         
         if (respSearchPub.getReturnInfos().getStatus().equals(Status.OK))
         {
-
+            logger.info("----- getTargetValueSetFromPub finished (001) -----");
             return respSearchPub.getValueSet();
         }
         else
         {
+            logger.info("----- getTargetValueSetFromPub finished (002) -----");
             return new ArrayList<de.fhdo.terminologie.ws.searchPub.ValueSet>();
         }
     }
 
     private de.fhdo.terminologie.ws.administrationPub.ReturnType importValueSet(ValueSetVersion vsv, ExportType exportedVs) throws ServerSOAPFaultException
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.importValueSet gestartet");
+        logger.info("+++++ importValueSet started +++++");
         final de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
         // Login
         final de.fhdo.terminologie.ws.administrationPub.ImportValueSetRequestType request = new de.fhdo.terminologie.ws.administrationPub.ImportValueSetRequestType();
@@ -1500,12 +1547,13 @@ public class TerminologyReleaseManager
         }
         //3.2.21 end        
         
+        logger.info("----- importValueSet finished (001) -----");
         return response.getReturnInfos();
     }
 
     private void createTempValueSetVersionOnPub(ValueSet vs)
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.createTempValueSetVersionOnPub gestartet");
+        logger.info("+++++ createTempValueSetVersionOnPub started +++++");
         final de.fhdo.terminologie.ws.authoringPub.CreateValueSetRequestType request = new de.fhdo.terminologie.ws.authoringPub.CreateValueSetRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
@@ -1559,11 +1607,12 @@ public class TerminologyReleaseManager
             this.targetVS = new de.fhdo.terminologie.ws.searchPub.ValueSet();
             this.targetVS.setId(ret_pub.getValueSet().getId());
         }
+        logger.info("----- createTempValueSetVersionOnPub finished (001) -----");
     }
     
     public ReturnType initTransfer(Set<Proposalobject> proposalObjects, Statusrel rel)
     {
-        logger.info("TermBrowser: TerminologyReleaseManager.initTransfer started");
+        logger.info("+++++ initTransfer started +++++");
         ReturnType transfer_success = new ReturnType();
         transfer_success.setSuccess(false);
 
@@ -1572,6 +1621,7 @@ public class TerminologyReleaseManager
             if(proposalObjects.isEmpty())
             {
                 transfer_success.setMessage("Error: Empty set of Proposalobjects.");
+                logger.info("----- initTransfer finished (001) -----");
                 return transfer_success;
             }
             
@@ -1631,16 +1681,18 @@ public class TerminologyReleaseManager
                 if (!transfer_success.isSuccess())
                 {
                     //3.2.20 changed from debug to info
-                    logger.info("A ProposalObject could not be successfully transferred to the public server");
+                    logger.info("A ProposalObject could not be  transferred to the public server");
                     break;
                 }
             }
+            logger.info("----- initTransfer finished (002) -----");
             return transfer_success;
         }
         catch (Exception ex)
         {
             transfer_success.setSuccess(false);
             transfer_success.setMessage(ex.getMessage());
+            logger.info("----- initTransfer finished (003) -----");
             return transfer_success;
         }
     }

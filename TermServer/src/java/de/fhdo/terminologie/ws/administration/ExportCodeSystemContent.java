@@ -88,7 +88,6 @@ public class ExportCodeSystemContent
     {
         try
         {
-            logger.info("DABACA starting CLAMLexport");
             ExportClaml exportClaML = new ExportClaml();
             response = exportClaML.export(parameter);
         }

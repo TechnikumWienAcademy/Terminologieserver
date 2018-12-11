@@ -235,7 +235,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         {
             try
             {
-                if(!hb_session.getTransaction().wasRolledBack()){
+                if(hb_session.isOpen() && hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasRolledBack()){
                     hb_session.getTransaction().rollback();
                     logger.info("[ImportClaml.java] Rollback durchgeführt!");
                 }
