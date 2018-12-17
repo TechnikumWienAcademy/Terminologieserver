@@ -21,10 +21,13 @@ import de.fhdo.terminologie.ws.administration.ExportParameterType;
 import de.fhdo.terminologie.ws.administration.ExportType;
 import de.fhdo.terminologie.ws.administration.ExportValueSetContentRequestType;
 import de.fhdo.terminologie.ws.administration.ExportValueSetContentResponse;
+import de.fhdo.terminologie.ws.administrationPub.Administration;
 import de.fhdo.terminologie.ws.administrationPub.GetImportValueSetPubResponseResponse;
 import de.fhdo.terminologie.ws.administrationPub.GetPubImportResponseResponse;
+import de.fhdo.terminologie.ws.authoringPub.Authoring;
 import de.fhdo.terminologie.ws.authoringPub.GetCreateCodeSystemPubResponseResponse;
 import de.fhdo.terminologie.ws.authoringPub.GetCreateValueSetPubResponseResponse;
+import de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType;
 import de.fhdo.terminologie.ws.authorizationPub.Authorization;
 import de.fhdo.terminologie.ws.search.ListValueSetsRequestType;
 import de.fhdo.terminologie.ws.search.ListValueSetsResponse;
@@ -70,8 +73,6 @@ public class TerminologyReleaseManager
     private long importId;
     //3.2.17 added
     private boolean sessionIDsSet;
-    //3.2.20 added
-    private de.fhdo.terminologie.ws.administrationPub.Administration adminPort;
 
     public TerminologyReleaseManager()
     {
@@ -946,7 +947,7 @@ public class TerminologyReleaseManager
         requestThread.getImportInfos().setFilecontent(exportedCs.getFilecontent());
         requestThread.setImportId(this.importId);
         
-        adminPort = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
+        final Administration importPort = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
         GetPubImportResponseResponse.Return ret_importThread = null;
         try{
             //original line before 3.2.20
@@ -956,7 +957,7 @@ public class TerminologyReleaseManager
               public void run(){
                   //de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
                   //port.importCodeSystem(requestThread);
-                  adminPort.importCodeSystemPub(requestThread);
+                  importPort.importCodeSystemPub(requestThread);
               }
             };
             thread.start();
@@ -965,11 +966,11 @@ public class TerminologyReleaseManager
             int counter = 1;
             while(importRunning){
                 Thread.sleep(5*1000);
-                importRunning = adminPort.checkImportRunning();
+                importRunning = importPort.checkImportRunning();
                 logger.info("Pub-importCodeSystem running for " + counter*5 + " seconds");
                 counter++;
             }
-            ret_importThread = adminPort.getPubImportResponse();
+            ret_importThread = importPort.getPubImportResponse();
             
         }
         catch(Exception e){
@@ -1030,7 +1031,7 @@ public class TerminologyReleaseManager
             while(createRunning){
                 Thread.sleep(2*1000);
                 logger.debug("Checking running import");
-                createRunning = adminPort.checkImportRunning();
+                createRunning = port.getCreateCodeSystemPubRunning();
                 logger.info("Pub-createCodeSystem running for " + counter*2 + " seconds");
                 counter++;
             }
@@ -1051,7 +1052,6 @@ public class TerminologyReleaseManager
         logger.info("----- createTempCodeSystemVersionOnPub finished (001) -----");
     }
 
-    de.fhdo.terminologie.ws.authoringPub.Authoring removeTMPport;
     private void removeTempCodeSystemVersion()
     {
         logger.info("+++++ removeTempCodeSystemVersion started +++++");
@@ -1078,9 +1078,9 @@ public class TerminologyReleaseManager
                 //3.2.21 start
                 //de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
                 //de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType resp_remove = port.removeTerminologyOrConcept(req_remove);
-                                
-                removeTMPport = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
-                GetPubImportResponseResponse.Return resp_remove = null;
+                
+                final Authoring removeTMPport = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
+                RemoveTerminologyOrConceptResponseType resp_remove = null;
                 try{
                     Thread thread = new Thread(){
                       @Override
@@ -1094,11 +1094,11 @@ public class TerminologyReleaseManager
                     int counter = 1;
                     while(removalRunning){
                         Thread.sleep(2*1000);
-                        removalRunning = adminPort.checkImportRunning();
+                        removalRunning = removeTMPport.getRemoveTerminologyOrConceptPubRunning();
                         logger.info("Pub-removeTerminologyOrConcept running for " + counter*2 + " seconds");
                         counter++;
                     }
-                    resp_remove = adminPort.getPubImportResponse();
+                    resp_remove = removeTMPport.getRemoveTerminologyOrConceptPubResponse();
 
                 }
                 catch(Exception e){
@@ -1140,20 +1140,18 @@ public class TerminologyReleaseManager
                 req_remove.getDeleteInfo().setValueSet(vs_remove);
                 req_remove.getDeleteInfo().setType(de.fhdo.terminologie.ws.authoringPub.Type.VALUE_SET_VERSION);
 
-                final de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
+                final de.fhdo.terminologie.ws.authoringPub.Authoring removePort = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
 
                 //de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType resp_remove = port.removeTerminologyOrConcept(req_remove);
-                
                 //3.2.21 start
                 //de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
                 //de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType resp_remove = port.removeTerminologyOrConcept(req_remove);
-                                
-                GetPubImportResponseResponse.Return resp_remove = null;
+                RemoveTerminologyOrConceptResponseType resp_remove = null;
                 try{
                     Thread thread = new Thread(){
                       @Override
                       public void run(){
-                          port.removeTerminologyOrConcept(req_remove);
+                          removePort.removeTerminologyOrConcept(req_remove);
                       }
                     };
                     thread.start();
@@ -1162,11 +1160,11 @@ public class TerminologyReleaseManager
                     int counter = 1;
                     while(removalRunning){
                         Thread.sleep(2*1000);
-                        removalRunning = adminPort.checkImportRunning();
+                        removalRunning = removePort.getRemoveTerminologyOrConceptPubRunning();
                         logger.info("Pub-removeTerminologyOrConcept running for " + counter*2 + " seconds");
                         counter++;
                     }
-                    resp_remove = adminPort.getPubImportResponse();
+                    resp_remove = removePort.getRemoveTerminologyOrConceptPubResponse();
 
                 }
                 catch(Exception e){
@@ -1411,7 +1409,6 @@ public class TerminologyReleaseManager
                         counter++;
                     }
                     response = portSearchPub.getListGloballySearchedConceptsResponse();
-                    //resp_remove = adminPort.getPubImportResponse();
 
                 }
                 catch(Exception e){
@@ -1472,7 +1469,6 @@ public class TerminologyReleaseManager
                 counter++;
             }
             respSearchPub = port_searchPub.getListValueSetsPubRespone();
-            //resp_remove = adminPort.getPubImportResponse();
 
         }
         catch(Exception e){
