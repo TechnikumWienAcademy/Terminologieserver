@@ -1,4 +1,8 @@
-﻿Changelog 3.2.23
+﻿Changelog 3.2.24
+	-Änderungen
+		.) Mögliche Fehlerquellen bei der Freigabe entfernt.
+
+Changelog 3.2.23
 	-Änderungen
 		.) Zusätzliche Log-Meldungen bei der Freigabe eingebaut.
 

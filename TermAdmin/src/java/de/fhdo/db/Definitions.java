@@ -58,6 +58,6 @@ public class Definitions
   //public final static String TODO_ANWENDUNG_ADRESS = "http://193.25.22.68:8080/toDO/";
 
     public static String getSwVersion() {
-        return "3.2.23";
+        return "3.2.24";
     }
 }
