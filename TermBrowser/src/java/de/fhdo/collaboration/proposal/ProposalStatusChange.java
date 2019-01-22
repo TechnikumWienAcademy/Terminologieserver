@@ -159,7 +159,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                 }
                 else if (!transfer_success.isSuccess())
                 {
-                    logger.info(proposal.getVocabularyName()+ ": Proposal status change failed" +  transfer_success.getMessage());
+                    logger.info(proposal.getVocabularyName()+ ": Proposal status change failed " +  transfer_success.getMessage());
                     //3.2.17 commented out since this is done in the Executions.schedule
                     //Messagebox.show(transfer_success.getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
                     Executions.schedule(desk, listener, new Event("FAILURESPLIT" + transfer_success.getMessage()));

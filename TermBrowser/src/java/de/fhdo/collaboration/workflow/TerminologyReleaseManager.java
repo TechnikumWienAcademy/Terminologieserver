@@ -1677,7 +1677,7 @@ public class TerminologyReleaseManager
                 if (!transfer_success.isSuccess())
                 {
                     //3.2.20 changed from debug to info
-                    logger.info("A ProposalObject could not be  transferred to the public server");
+                    logger.info("A ProposalObject could not be transferred to the public server");
                     break;
                 }
             }
