@@ -69,7 +69,7 @@ public class ImportValueSetNew
                 if (loggedIn)
                 {
 
-                    if (loginInfoType.getTermUser().isIsAdmin())
+                    if (loginInfoType.getTermUser().isAdmin())
                     {
                         loggedIn = true;
                     }

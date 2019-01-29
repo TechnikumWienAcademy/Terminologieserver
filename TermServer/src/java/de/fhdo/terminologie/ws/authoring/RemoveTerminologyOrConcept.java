@@ -27,136 +27,118 @@ import de.fhdo.terminologie.ws.types.DeleteInfo.Type;
 import de.fhdo.terminologie.ws.types.ReturnType;
 
 /**
- *
- * @author Philipp Urbauer
+ * 3.2.26 complete check
+ * @author Philipp Urbauer, Dario Bachinger
  */
-public class RemoveTerminologyOrConcept
-{
+public class RemoveTerminologyOrConcept{
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-
-  public RemoveTerminologyOrConceptResponseType RemoveTerminologyOrConcept(RemoveTerminologyOrConceptRequestType parameter)
-  {
-    return RemoveTerminologyOrConcept(parameter, null);
-  }
-
-  /**
-   * Entfernt Konzepte aus einem Value Set
-   *
-   * @param parameter
-   * @return Antwort des Webservices
-   */
-  public RemoveTerminologyOrConceptResponseType RemoveTerminologyOrConcept(RemoveTerminologyOrConceptRequestType parameter, org.hibernate.Session session)
-  {
-    if (logger.isInfoEnabled())
-      logger.info("====== RemoveEntity gestartet ======");
-    
-    // Return-Informationen anlegen
-    RemoveTerminologyOrConceptResponseType response = new RemoveTerminologyOrConceptResponseType();
-    response.setReturnInfos(new ReturnType());
-
-    // Parameter prüfen
-    if (validateParameter(parameter, response) == false)
-    {
-      return response; // Fehler bei den Parametern
+    /**
+     * Calls the RemoveTerminologyOrConcept(parameter, null) function.
+     * @param parameter the parameter which is handed over to the called function
+     * @return the return value of the called function
+     */
+    public RemoveTerminologyOrConceptResponseType RemoveTerminologyOrConcept(RemoveTerminologyOrConceptRequestType parameter){
+        return RemoveTerminologyOrConcept(parameter, null);
     }
 
-    // Login-Informationen auswerten (gilt für jeden Webservice)    
-    //3.2.17 added
-    if (parameter != null && !parameter.isLoginAlreadyChecked())
-    {
-      if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
+    /**
+     * Removes a terminology or concept by calling the DeleteTermHelper.
+     * @param parameter containing the info about what to delete
+     * @param session the hibernate session, from which to delete
+     * @return a return response with info about the success or failure of the function
+     */
+    public RemoveTerminologyOrConceptResponseType RemoveTerminologyOrConcept(RemoveTerminologyOrConceptRequestType parameter, org.hibernate.Session session){
+        LOGGER.info("+++++ RemoveTerminologyOrConcept started +++++");
+        
+        //Creating return information
+        RemoveTerminologyOrConceptResponseType response = new RemoveTerminologyOrConceptResponseType();
+        response.setReturnInfos(new ReturnType());
+
+        //Checking parameters
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- RemoveTerminologyOrConcept finished (001) -----");
+            return response; //Faulty parameters
+        }
+    
+        //Checking login
+        //3.2.17 added second check
+        if (parameter != null && !parameter.isLoginAlreadyChecked())
+            if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
+                LOGGER.info("----- RemoveTerminologyOrConcept finished (002) -----");
+                return response;
+            }
+
+        String result;
+        Type typeToDelete = parameter.getDeleteInfo().getType();
+
+        //Execute delete
+        switch (typeToDelete) {
+        case CODE_SYSTEM: result = DeleteTermHelperWS.deleteCS_CSV(true, parameter.getDeleteInfo().getCodeSystem().getId(), null);
+        break;
+        case CODE_SYSTEM_VERSION: result = DeleteTermHelperWS.deleteCS_CSV(true, parameter.getDeleteInfo().getCodeSystem().getId(), parameter.getDeleteInfo().getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId());
+        break;
+        case VALUE_SET: result = DeleteTermHelperWS.deleteVS_VSV(true, parameter.getDeleteInfo().getValueSet().getId(), null);
+        break;
+        case VALUE_SET_VERSION: result = DeleteTermHelperWS.deleteVS_VSV(true, parameter.getDeleteInfo().getValueSet().getId(), parameter.getDeleteInfo().getValueSet().getValueSetVersions().iterator().next().getVersionId());
+        break;
+        case CODE_SYSTEM_ENTITY_VERSION: result = DeleteTermHelperWS.deleteCSEV(parameter.getDeleteInfo().getCodeSystemEntityVersion().getVersionId(),parameter.getDeleteInfo().getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId());
+        break;
+        default: result = "";
+        break;
+        }
+    
+        if(result.equals("") || result.contains("Ein Fehler ist aufgetreten")){   
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE); 
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+            response.getReturnInfos().setMessage(result);
+        }
+        else{
+            response.getReturnInfos().setStatus(ReturnType.Status.OK);
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+            response.getReturnInfos().setMessage(result);
+        }
+    
+        LOGGER.info("----- RemoveTerminologyOrConcept finished (003) -----");
         return response;
     }
 
-    String result = "";
-    Type t = parameter.getDeleteInfo().getType();
-
-    switch (t) {
-        case CODE_SYSTEM:
-                 
-                 result = DeleteTermHelperWS.deleteCS_CSV(true, parameter.getDeleteInfo().getCodeSystem().getId(), null);
-                 break;
-        case CODE_SYSTEM_VERSION:
-                 result = DeleteTermHelperWS.deleteCS_CSV(true, parameter.getDeleteInfo().getCodeSystem().getId(), parameter.getDeleteInfo().getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId());
-                 break;
-        case VALUE_SET:
-                 result = DeleteTermHelperWS.deleteVS_VSV(true, parameter.getDeleteInfo().getValueSet().getId(), null);
-                 break;
-        case VALUE_SET_VERSION:
-                 result = DeleteTermHelperWS.deleteVS_VSV(true, parameter.getDeleteInfo().getValueSet().getId(), parameter.getDeleteInfo().getValueSet().getValueSetVersions().iterator().next().getVersionId());
-                 break;
-        case CODE_SYSTEM_ENTITY_VERSION:
-                 result = DeleteTermHelperWS.deleteCSEV(parameter.getDeleteInfo().getCodeSystemEntityVersion().getVersionId(),parameter.getDeleteInfo().getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId());
-                 break;
-        default: 
-                 result = "";
-                 break;
-    }
-    
-    if(result.equals("") || result.contains("An Error occured:")){ //Error
-    
-        response.getReturnInfos().setMessage(result);
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-    
-    }else{//Success
-    
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-        response.getReturnInfos().setStatus(ReturnType.Status.OK);
-        response.getReturnInfos().setMessage(result);
-    }
-    
-    return response;
-  }
-
   /**
-   * Prüft die Parameter anhand der Cross-Reference
-   *
-   * @param Request
-   * @param Response
-   * @return false, wenn fehlerhafte Parameter enthalten sind
+   * Checks if all parameters are given to execute the deletion of a terminology or concept.
+   * @param Request the parameters which will be checked
+   * @param Response whether or not the check was okay
+   * @return true if all parameters are okay, false if any are missing
    */
-  private boolean validateParameter(RemoveTerminologyOrConceptRequestType Request, RemoveTerminologyOrConceptResponseType Response)
-  {
-    boolean erfolg = true;
-    String sErrorMessage = "";
+    private boolean validateParameter(RemoveTerminologyOrConceptRequestType Request, RemoveTerminologyOrConceptResponseType Response){
+        boolean erfolg = true;
+        String sErrorMessage = "";
 
-    if (Request == null)
-    {
-      sErrorMessage = "Kein Requestparameter angegeben!";
-      erfolg = false;
-    }
-    else
-    {
-      if (erfolg)
-      {
-        if (Request.getDeleteInfo() == null || Request.getLogin() == null)
-        {
-          sErrorMessage = "Weder DeleteInfo noch Login dürfen null sein!";
-          erfolg = false;
+        if (Request == null){
+            erfolg = false;
+            sErrorMessage = "Requestparameter darf nicht null sein!";
         }
-        else
-        {
-          if(erfolg){
-              if(Request.getDeleteInfo().getCodeSystem() == null && 
-                 Request.getDeleteInfo().getValueSet() == null && 
-                 Request.getDeleteInfo().getCodeSystemEntityVersion() == null){
-                  
-                  sErrorMessage = "Entweder CodeSystem, ValueSet oder CodeSystemEntityVersion dürfen nicht null sein!";
-                  erfolg = false;
-              }
-          }
+        else{
+            if (Request.getDeleteInfo() == null || Request.getLogin() == null){
+                erfolg = false;
+                sErrorMessage = "DeleteInfo und Login dürfen nicht null sein!";
+            }
+            else if(Request.getDeleteInfo().getCodeSystem() == null 
+            && Request.getDeleteInfo().getValueSet() == null 
+            && Request.getDeleteInfo().getCodeSystemEntityVersion() == null){  
+                erfolg = false;
+                sErrorMessage = "CodeSystem, ValueSet oder CodeSystemEntityVersion dürfen nicht null sein!";
+            }
+            else if(Request.getDeleteInfo().getType() == null){
+                erfolg = false;
+                sErrorMessage = "DeleteType darf nicht null sein.";
+            }
         }
-      }
-    }
 
-    if (erfolg == false)
-    {
-      Response.getReturnInfos().setMessage(sErrorMessage);
-      Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-      Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+        if (!erfolg){
+            Response.getReturnInfos().setMessage(sErrorMessage);
+            Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+        }
+        return erfolg;
     }
-    return erfolg;
-  }
 }

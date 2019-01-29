@@ -14,5 +14,8 @@
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/Definitions.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/ProposalWorkflow.java</file>
         </group>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/TerminologyReleaseManager.java</file>
+        </group>
     </open-files>
 </project-private>

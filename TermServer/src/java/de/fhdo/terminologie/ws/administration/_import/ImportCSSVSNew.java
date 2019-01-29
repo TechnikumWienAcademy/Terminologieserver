@@ -23,7 +23,7 @@ import de.fhdo.terminologie.helper.CODES;
 import de.fhdo.terminologie.helper.DeleteTermHelperWS;
 import de.fhdo.terminologie.helper.HQLParameterHelper;
 import de.fhdo.terminologie.ws.administration.StaticStatusList;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.logger;
+import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportException;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 import de.fhdo.terminologie.ws.administration.types.ImportCodeSystemRequestType;
@@ -76,19 +76,19 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
     @Override
     public void setImportData(ImportCodeSystemRequestType request)
     {
-        logger.info("setImportData started");
+        LOGGER.info("setImportData started");
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
-        this._codesystem = request.getCodeSystem();
-        this._fileContent = request.getImportInfos().getFilecontent();
+        this.codesystem = request.getCodeSystem();
+        this.fileContent = request.getImportInfos().getFilecontent();
     }
 
     @Override
     public void startImport() throws ImportException, ImportParameterValidationException
     {
-        logger.info("startImport started");
+        LOGGER.info("startImport started");
         //creating Hibernate Session and starting transaction
         try
         {
@@ -96,12 +96,12 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
         }
         catch (ImportParameterValidationException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw ex;
         }
 
-        this._status.setImportRunning(true);
-        StaticStatusList.addStatus(this.getImportId(), this._status);
+        this.status.setImportRunning(true);
+        StaticStatusList.addStatus(this.getImportId(), this.status);
 
         // Hibernate-Block, Session öffnen
         hb_session = HibernateUtil.getSessionFactory().openSession();
@@ -112,7 +112,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
         try
         {
-            logger.debug("Wandle zu InputStream um...");
+            LOGGER.debug("Wandle zu InputStream um...");
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -121,7 +121,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
             factory.setExpandEntityReferences(false);
 
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document svsDoc = builder.parse(new ByteArrayInputStream(this._fileContent));
+            Document svsDoc = builder.parse(new ByteArrayInputStream(this.fileContent));
             HashMap<String, String> codeListInfoMap = new HashMap<String, String>();
             ArrayList<HashMap<String, String>> conceptsList = new ArrayList<HashMap<String, String>>();
 
@@ -310,7 +310,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
                     // Parameter hinzufügen (immer mit AND verbunden)
                     hql += parameterHelper.getWhere("");
-                    logger.debug("HQL: " + hql);
+                    LOGGER.debug("HQL: " + hql);
 
                     // Query erstellen
                     org.hibernate.Query q = hb_session.createQuery(hql);
@@ -338,7 +338,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
                     headerMetadataIDs.put(mdText, mp.getId());
 
-                    logger.debug("Speicher/Verlinke Metadata-Parameter: " + mdText + " mit Codesystem-ID: " + mp.getCodeSystem().getId() + ", MD-ID: " + mp.getId());
+                    LOGGER.debug("Speicher/Verlinke Metadata-Parameter: " + mdText + " mit Codesystem-ID: " + mp.getCodeSystem().getId() + ", MD-ID: " + mp.getId());
                 }
 
                 //Adding Version Information 
@@ -417,7 +417,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                     csc.setMeaning(conceptDetails.get("deutsch"));
                     csc.setHints(conceptDetails.get("hinweise"));
 
-                    logger.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
+                    LOGGER.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
 
                     CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
                     membership.setIsMainClass(Boolean.TRUE);
@@ -465,8 +465,8 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                         if (response.getReturnInfos().getStatus() == ReturnType.Status.OK)
                         {
 
-                            _aktCount++;
-                            this.setCurrentCountInStatusList(_aktCount, this.getImportId());
+                            aktCount++;
+                            this.setCurrentCountInStatusList(aktCount, this.getImportId());
                             // Metadaten einfügen
                             String mdLevelValue = conceptDetails.get("level");//Achtung in Maps lowerCase
 
@@ -482,7 +482,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql);
+                                LOGGER.debug("HQL: " + hql);
 
                                 // Query erstellen
                                 org.hibernate.Query q = hb_session.createQuery(hql);
@@ -501,7 +501,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                                     lowestLevel = Integer.valueOf(mdLevelValue);
                                 }
 
-                                logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
 
                                 hb_session.update(valueList.get(0));
                             }
@@ -518,7 +518,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql);
+                                LOGGER.debug("HQL: " + hql);
 
                                 // Query erstellen
                                 org.hibernate.Query q = hb_session.createQuery(hql);
@@ -532,7 +532,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                                     valueList.get(0).setParameterValue(mdTypeValue);
                                 }
 
-                                logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
 
                                 hb_session.update(valueList.get(0));
                             }
@@ -550,7 +550,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql);
+                                LOGGER.debug("HQL: " + hql);
 
                                 // Query erstellen
                                 org.hibernate.Query q = hb_session.createQuery(hql);
@@ -564,7 +564,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                                     valueList.get(0).setParameterValue(mdRelationshipsValue);
                                 }
 
-                                logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
 
                                 hb_session.update(valueList.get(0));
                             }
@@ -578,11 +578,11 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                     else
                     {
                         countFehler++;
-                        logger.debug("Term ist nicht gegeben");
+                        LOGGER.debug("Term ist nicht gegeben");
                     }
 
                 }
-                if (_aktCount == 0)
+                if (aktCount == 0)
                 {
 
                     String resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
@@ -625,13 +625,13 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
             catch (Exception ex)
             {
                 //ex.printStackTrace();
-                logger.error(ex.getMessage());
+                LOGGER.error(ex.getMessage());
 
                 try
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-                        logger.info("[ImportSVS.java] Rollback durchgeführt!");
+                        LOGGER.info("[ImportSVS.java] Rollback durchgeführt!");
                     }
                         
                     String resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
@@ -640,8 +640,8 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                 catch (Exception exRollback)
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
-                        logger.info(exRollback.getMessage());
-                        logger.info("[ImportSVS.java] Rollback fehlgeschlagen!");
+                        LOGGER.info(exRollback.getMessage());
+                        LOGGER.info("[ImportSVS.java] Rollback fehlgeschlagen!");
                     }
                 }
             }
@@ -650,12 +650,12 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                 // Session schließen
                 hb_session.close();
                 StaticStatusList.getStatus(this.getImportId()).importRunning = false;
-                logger.info("Import CS SVS fertig");
+                LOGGER.info("Import CS SVS fertig");
             }
         }
         catch (Exception ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             
             throw new ImportException("Fehler beim Import: " + ex.getLocalizedMessage());
         }
@@ -667,7 +667,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
         catch (Exception ex)
         {
             s = "Fehler beim Import: " + ex.getLocalizedMessage();
-            logger.error(s);
+            LOGGER.error(s);
         }
 
     }
@@ -675,7 +675,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
     private boolean createCodeSystem(HashMap<String, String> codeListInfoMap) throws ImportException
     {
 
-        logger.debug("createCodeSystem...");
+        LOGGER.debug("createCodeSystem...");
         /*org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
         hb_session.getTransaction().begin();*/
 
@@ -685,7 +685,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
             onlyCSV = true;
             try
             {
-                logger.debug("ID ist angegeben");
+                LOGGER.debug("ID ist angegeben");
                 Date date = new java.util.Date();
 
                 CodeSystem cs_db = (CodeSystem) hb_session.get(CodeSystem.class, this.getCodeSystem().getId());
@@ -737,7 +737,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
             }
             catch (Exception ex)
             {
-                logger.error(ex);
+                LOGGER.error(ex);
                 throw new ImportException("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
 
             }
@@ -754,7 +754,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                 else
                 {
                     // Ã„nderungen nicht erfolgreich
-                    logger.warn("CSV konnte nicht gespeichert werden");
+                    LOGGER.warn("CSV konnte nicht gespeichert werden");
                     hb_session.getTransaction().rollback();
                 }
             }
@@ -764,7 +764,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
             onlyCSV = false;
             try
             {
-                logger.debug("ID ist angegeben");
+                LOGGER.debug("ID ist angegeben");
                 Date date = new java.util.Date();
 
                 //New CodeSystem
@@ -835,7 +835,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
             }
             catch (Exception ex)
             {
-                logger.error(ex);
+                LOGGER.error(ex);
                 throw new ImportException("CSV konnte nicht gespeichert werden");
             }
             finally
@@ -851,7 +851,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
                 else
                 {
                     // Ã„nderungen nicht erfolgreich
-                    logger.warn("CSV konnte nicht gespeichert werden");
+                    LOGGER.warn("CSV konnte nicht gespeichert werden");
                     hb_session.getTransaction().rollback();
                 }
             }
@@ -881,7 +881,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
 
             // Parameter hinzufügen (immer mit AND verbunden)
             hql += parameterHelper.getWhere("");
-            logger.debug("HQL: " + hql);
+            LOGGER.debug("HQL: " + hql);
 
             // Query erstellen
             org.hibernate.Query q = hb_session.createQuery(hql);
@@ -1027,7 +1027,7 @@ public class ImportCSSVSNew extends CodeSystemImport implements ICodeSystemImpor
         catch (Exception ex)
         {
             hb_session.getTransaction().rollback();
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException("Fehler bei initList(): " + ex.getMessage());
         }
         finally

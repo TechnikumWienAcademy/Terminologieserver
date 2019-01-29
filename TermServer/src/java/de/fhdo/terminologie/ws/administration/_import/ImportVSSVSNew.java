@@ -22,7 +22,7 @@ import de.fhdo.terminologie.helper.DateComparator;
 import de.fhdo.terminologie.helper.DeleteTermHelper;
 import de.fhdo.terminologie.helper.HQLParameterHelper;
 import de.fhdo.terminologie.ws.administration.StaticStatusList;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.logger;
+import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportException;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 import de.fhdo.terminologie.ws.administration.types.ImportValueSetRequestType;
@@ -62,19 +62,19 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
     @Override
     public void setImportData(ImportValueSetRequestType request)
     {
-        logger.info("setImportData started");
+        LOGGER.info("setImportData started");
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
         this._valueset = request.getValueSet();
-        this._fileContent = request.getImportInfos().getFilecontent();
+        this.fileContent = request.getImportInfos().getFilecontent();
     }
 
     @Override
     public void startImport() throws ImportException, ImportParameterValidationException
     {
-        logger.info("startImport started");
+        LOGGER.info("startImport started");
         //creating Hibernate Session and starting transaction
         try
         {
@@ -82,19 +82,19 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
         }
         catch (ImportParameterValidationException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw ex;
         }
 
-        this._status.setImportRunning(true);
-        StaticStatusList.addStatus(this.getImportId(), this._status);
+        this.status.setImportRunning(true);
+        StaticStatusList.addStatus(this.getImportId(), this.status);
         
         hb_session = HibernateUtil.getSessionFactory().openSession();
         boolean isElgaLaborparamter = false;
 
         try
         {
-            logger.debug("Wandle zu InputStream um...");
+            LOGGER.debug("Wandle zu InputStream um...");
 
             orderCVSM = this.getImportType().getOrder();
 
@@ -105,7 +105,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             factory.setExpandEntityReferences(false);
 
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document svsDoc = builder.parse(new ByteArrayInputStream(this._fileContent));
+            Document svsDoc = builder.parse(new ByteArrayInputStream(this.fileContent));
             HashMap<String, String> codeListInfoMap = new HashMap<String, String>();
             ArrayList<HashMap<String, String>> conceptsList = new ArrayList<HashMap<String, String>>();
 
@@ -300,7 +300,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                     // Parameter hinzufügen (immer mit AND verbunden)
                     hql += parameterHelper.getWhere("");
-                    logger.debug("HQL: " + hql);
+                    LOGGER.debug("HQL: " + hql);
 
                     // Query erstellen
                     org.hibernate.Query q = hb_session.createQuery(hql);
@@ -328,7 +328,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                     headerMetadataIDs.put(mdText, mp.getId());
 
-                    logger.debug("Speicher/Verlinke Metadata-Parameter: " + mdText + " mit ValueSet-ID: " + mp.getValueSet().getId() + ", MD-ID: " + mp.getId());
+                    LOGGER.debug("Speicher/Verlinke Metadata-Parameter: " + mdText + " mit ValueSet-ID: " + mp.getValueSet().getId() + ", MD-ID: " + mp.getId());
                 }
 
                 //ConceptLinking
@@ -403,13 +403,13 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                     // Version-ID muss anhand des Codes bestimmt werden
                     String code = conceptDetails.get("code");
 
-                    logger.debug("Entity zu Code '" + code + "' wird gesucht...");
+                    LOGGER.debug("Entity zu Code '" + code + "' wird gesucht...");
                     String oid = conceptDetails.get("codeSystem");
 
                     //Search for code in codesystemconcept and when found search for 
                     //codesystemconcept with correct oid
                     //-----------------
-                    logger.info("Query Code: " + code);
+                    LOGGER.info("Query Code: " + code);
 
                     //Matthias: try to improve performance
                     String hql = "select distinct csev from CodeSystemEntityVersion csev join fetch csev.codeSystemEntity cse join fetch cse.codeSystemVersionEntityMemberships csvem join fetch csvem.codeSystemVersion csv join fetch csev.codeSystemConcepts csc"
@@ -432,7 +432,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         }
 
                         // Version-ID gefunden, nun übergeben
-                        logger.debug("Version-ID anhand des Codes bestimmt: " + csevList.get(0).getVersionId());
+                        LOGGER.debug("Version-ID anhand des Codes bestimmt: " + csevList.get(0).getVersionId());
                         csev.setVersionId(csevList.get(0).getVersionId());
 
                         //Matthias, Translation for Laborparameter added
@@ -507,13 +507,13 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                             }
 
                             // Version-ID gefunden, nun übergeben
-                            logger.debug("Version-ID anhand des Codes bestimmt: " + csevList2.get(0).getVersionId());
+                            LOGGER.debug("Version-ID anhand des Codes bestimmt: " + csevList2.get(0).getVersionId());
                             csev.setVersionId(csevList2.get(0).getVersionId());
 
                         }
                         else
                         {
-                            logger.debug("Entity zu Code '" + code + "/" + adaptedCode + "' nicht gefunden!");
+                            LOGGER.debug("Entity zu Code '" + code + "/" + adaptedCode + "' nicht gefunden!");
                             throw new Exception("Entity zu Code '" + code + "/" + adaptedCode + "' nicht gefunden!");
                         }
                     }
@@ -528,7 +528,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                     {
                         hb_session.flush();
                         hb_session.clear();
-                        logger.info("Session flushed");
+                        LOGGER.info("Session flushed");
                     }
                 }
 
@@ -554,7 +554,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         if(this.getImportType().getRole() != null && this.getImportType().getRole().equals(CODES.ROLE_TRANSFER))
                         {
                             //Status bei Freigabe in log file ausgeben
-                            logger.info("Import progress: " + counter + "/" + this.getTotalCountInStatusList(this.getImportId()));
+                            LOGGER.info("Import progress: " + counter + "/" + this.getTotalCountInStatusList(this.getImportId()));
                         }
                         
                         HashMap<String, String> conceptDetails = (HashMap<String, String>) it.next();
@@ -563,7 +563,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         // Version-ID muss anhand des Codes bestimmt werden
                         String code = conceptDetails.get("code");
 
-                        logger.debug("Entity zu Code '" + code + "' wird gesucht...");
+                        LOGGER.debug("Entity zu Code '" + code + "' wird gesucht...");
                         String oid = conceptDetails.get("codeSystem");
 
                         //Matthias: try to improve poor performance of the following query
@@ -594,7 +594,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 Collections.sort(csevList, new DateComparator());
                             }
                             // Version-ID gefunden, nun übergeben
-                            logger.debug("Version-ID anhand des Codes bestimmt: " + csevList.get(0).getVersionId());
+                            LOGGER.debug("Version-ID anhand des Codes bestimmt: " + csevList.get(0).getVersionId());
 
                             // Metadaten einfügen
                             String mdLevelValue = conceptDetails.get("level");//Achtung in Maps lowerCase
@@ -605,14 +605,14 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
 
                                 HQLParameterHelper parameterHelper = new HQLParameterHelper();
-                                logger.info("MP.id=" + headerMetadataIDs.get("Level") + "\tCSEV.versiondId=" + csevList.get(0).getVersionId() + "\tVSMV.valuesetVersiondId=" + request.getValueSet().getValueSetVersions().iterator().next().getVersionId());
+                                LOGGER.info("MP.id=" + headerMetadataIDs.get("Level") + "\tCSEV.versiondId=" + csevList.get(0).getVersionId() + "\tVSMV.valuesetVersiondId=" + request.getValueSet().getValueSetVersions().iterator().next().getVersionId());
                                 parameterHelper.addParameter("mp.", "id", headerMetadataIDs.get("Level"));
                                 parameterHelper.addParameter("csev.", "versionId", csevList.get(0).getVersionId());
                                 parameterHelper.addParameter("vsmv.", "valuesetVersionId", request.getValueSet().getValueSetVersions().iterator().next().getVersionId());
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql2 += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql2);
+                                LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -657,7 +657,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql2 += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql2);
+                                LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -689,7 +689,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql2 += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql2);
+                                LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -720,7 +720,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql2 += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql2);
+                                LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -752,7 +752,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql2 += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql2);
+                                LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -778,7 +778,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                             // Version-ID muss anhand des Codes bestimmt werden
                             code = "_" + code;
 
-                            logger.debug("Entity zu Code '" + code + "' wird gesucht...");
+                            LOGGER.debug("Entity zu Code '" + code + "' wird gesucht...");
 
                             hql = "select distinct csev from CodeSystemEntityVersion csev join csev.codeSystemEntity cse join cse.codeSystemVersionEntityMemberships csvem join csvem.codeSystemVersion csv join csev.codeSystemConcepts csc"
                                     + " where csc.code=:code and"
@@ -801,7 +801,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     Collections.sort(csevList, new DateComparator());
                                 }
                                 // Version-ID gefunden, nun übergeben
-                                logger.debug("Version-ID anhand des Codes bestimmt: " + csevList.get(0).getVersionId());
+                                LOGGER.debug("Version-ID anhand des Codes bestimmt: " + csevList.get(0).getVersionId());
 
                                 // Metadaten einfügen
                                 String mdLevelValue = conceptDetails.get("level");//Achtung in Maps lowerCase
@@ -818,7 +818,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                     // Parameter hinzufügen (immer mit AND verbunden)
                                     hql2 += parameterHelper.getWhere("");
-                                    logger.debug("HQL: " + hql2);
+                                    LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -863,7 +863,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                     // Parameter hinzufügen (immer mit AND verbunden)
                                     hql2 += parameterHelper.getWhere("");
-                                    logger.debug("HQL: " + hql2);
+                                    LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -895,7 +895,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                     // Parameter hinzufügen (immer mit AND verbunden)
                                     hql2 += parameterHelper.getWhere("");
-                                    logger.debug("HQL: " + hql2);
+                                    LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -926,7 +926,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                     // Parameter hinzufügen (immer mit AND verbunden)
                                     hql2 += parameterHelper.getWhere("");
-                                    logger.debug("HQL: " + hql2);
+                                    LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -957,7 +957,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                                     // Parameter hinzufügen (immer mit AND verbunden)
                                     hql2 += parameterHelper.getWhere("");
-                                    logger.debug("HQL: " + hql2);
+                                    LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
@@ -978,7 +978,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                             else
                             {
 
-                                logger.debug("Entity zu Code '" + code + "' nicht gefunden!");
+                                LOGGER.debug("Entity zu Code '" + code + "' nicht gefunden!");
                                 throw new Exception("Entity zu Code '" + code + "' nicht gefunden!");
                             }
                         }
@@ -987,7 +987,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         {
                             hb_session.flush();
                             hb_session.clear();
-                            logger.info("Session flushed");
+                            LOGGER.info("Session flushed");
                         }
                     }
 
@@ -1019,13 +1019,13 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             catch (Exception ex)
             {
                 //ex.printStackTrace();
-                logger.error(ex.getMessage());
+                LOGGER.error(ex.getMessage());
 
                 try
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-                        logger.info("[ImportCSV.java] Rollback durchgeführt!");
+                        LOGGER.info("[ImportCSV.java] Rollback durchgeführt!");
                     }
                     
                     String resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
@@ -1034,8 +1034,8 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 catch (Exception exRollback)
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
-                        logger.info(exRollback.getMessage());
-                        logger.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+                        LOGGER.info(exRollback.getMessage());
+                        LOGGER.info("[ImportCSV.java] Rollback fehlgeschlagen!");
                         throw new ImportException("Rollback fehlgeschlagen! Fehler beim Import eines Value Sets: " + exRollback.getLocalizedMessage());
                     }
                 }
@@ -1049,7 +1049,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
         }
         catch (Exception ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException("Fehler beim Importieren von Value Set-Inhalten: " + ex.getLocalizedMessage());
         }
     }
@@ -1057,7 +1057,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
     private boolean createValueSet(HashMap<String, String> codeListInfoMap)
     {
 
-        logger.debug("createValueSet...");
+        LOGGER.debug("createValueSet...");
         org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
         hb_session.getTransaction().begin();
 
@@ -1068,7 +1068,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             onlyVSV = true;
             try
             {
-                logger.debug("ID ist angegeben");
+                LOGGER.debug("ID ist angegeben");
                 Date date = new java.util.Date();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -1113,7 +1113,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             catch (Exception ex)
             {
 
-                logger.error("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
+                LOGGER.error("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
                 return false;
 
             }
@@ -1127,7 +1127,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 else
                 {
                     // ÃƒÂ„nderungen nicht erfolgreich
-                    logger.warn("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
+                    LOGGER.warn("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
                     hb_session.getTransaction().rollback();
                 }
                 hb_session.close();
@@ -1139,7 +1139,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             onlyVSV = false;
             try
             {
-                logger.debug("ID ist angegeben");
+                LOGGER.debug("ID ist angegeben");
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = new java.util.Date();
 
@@ -1190,7 +1190,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             catch (Exception ex)
             {
 
-                logger.error("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
+                LOGGER.error("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
                 return false;
 
             }
@@ -1204,7 +1204,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 else
                 {
                     // Änderungen nicht erfolgreich
-                    logger.warn("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
+                    LOGGER.warn("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
                     hb_session.getTransaction().rollback();
                 }
                 hb_session.close();

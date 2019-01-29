@@ -6,7 +6,7 @@
 package de.fhdo.terminologie.ws.administration._import;
 
 import de.fhdo.terminologie.db.hibernate.ValueSet;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.logger;
+import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 
 /**
@@ -25,7 +25,7 @@ public class ValuesetImport extends AbstractImport
     @Override
     protected void validateParameters() throws ImportParameterValidationException
     {
-        logger.info("validateParameters started");
+        LOGGER.info("validateParameters started");
 
         try
         {

@@ -24,16 +24,16 @@ public abstract class AbstractImport
     private Long importId;
     private LoginType loginType;
     private ImportType importType;
-    protected ImportStatus _status;
-    protected static final Logger logger = Logger4j.getInstance().getLogger();
+    protected ImportStatus status;
+    protected static final Logger LOGGER = Logger4j.getInstance().getLogger();
     protected org.hibernate.Session hb_session;
-    protected int _aktCount;
-    protected byte[] _fileContent;
-    protected List<FilecontentListEntry> _fileContentList;
+    protected int aktCount;
+    protected byte[] fileContent;
+    protected List<FilecontentListEntry> fileContentList;
 
     public AbstractImport()
     {
-        this._status = new ImportStatus();
+        this.status = new ImportStatus();
     }
     
     public Long getImportId()
@@ -66,31 +66,31 @@ public abstract class AbstractImport
         this.importType = importType;
     }
     
+    /**
+     * Checks if the import parameters are valid and throws an exception otherwise.
+     * @throws ImportParameterValidationException 
+     */
     protected void validateParameters() throws ImportParameterValidationException
     {
-        //3.2.20
-        logger.debug("validateParameters-function started");
-        if(this.importId == null)
-        {
+        LOGGER.info("+++++ validateParameters started +++++");
+        
+        if(this.importId == null){
             throw new ImportParameterValidationException("ImportId must not be null.");
         }
         
-        if(this.loginType == null)
-        {
+        if(this.loginType == null){
             throw new ImportParameterValidationException("LoginType must not be null.");
         }
         
-        if(this.importType == null)
-        {
+        if(this.importType == null){
             throw new ImportParameterValidationException("ImportType must not be null.");
         }
         
-        if ((this._fileContent == null) && (this._fileContentList == null))
-        {
+        if ((this.fileContent == null) && (this.fileContentList == null)){
             throw new ImportParameterValidationException("Either Filecontent or FileContentList have to be set.");
         }
-        //3.2.20
-        logger.debug("validateParamters-function finished");
+        
+        LOGGER.debug("----- validateParamters finished (001) -----");
     }
     
     protected void setTotalCountInStatusList(int totalCount, Long importId)

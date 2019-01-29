@@ -19,7 +19,6 @@
  */
 package de.fhdo.terminologie.ws.administration;
 
-import de.fhdo.dortmund.DortmundHelper;
 import de.fhdo.terminologie.helper.LoginHelper;
 import de.fhdo.terminologie.ws.administration._import.ImportCSSVS;
 import de.fhdo.terminologie.ws.administration._import.ImportCSV_ELGA;
@@ -41,15 +40,11 @@ import de.fhdo.terminologie.ws.types.ReturnType;
  *
  * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
  */
-public class ImportCodeSystem
-{
+public class ImportCodeSystem{
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-
-  public ImportCodeSystemResponseType ImportCodeSystem(ImportCodeSystemRequestType parameter)
-  {
-    if (logger.isInfoEnabled())
-      logger.info("====== ImportCodeSystem gestartet ======");
+    public ImportCodeSystemResponseType ImportCodeSystem(ImportCodeSystemRequestType parameter){
+        LOGGER.info("+++++ ImportCodeSystem gestartet +++++");
 
     // Return-Informationen anlegen
     ImportCodeSystemResponseType response = new ImportCodeSystemResponseType();
@@ -82,7 +77,7 @@ public class ImportCodeSystem
       if (loggedIn)
       {
 
-        if (loginInfoType.getTermUser().isIsAdmin())
+        if (loginInfoType.getTermUser().isAdmin())
         {
           loggedIn = true;
         }
@@ -97,7 +92,7 @@ public class ImportCodeSystem
         loggedIn = parameter.isLoginAlreadyChecked();
     
     
-    logger.debug("Eingeloggt: " + loggedIn);
+    LOGGER.debug("Eingeloggt: " + loggedIn);
 
     if (loggedIn == false)
     {
@@ -146,20 +141,12 @@ public class ImportCodeSystem
         String s = "";
         int countImported = 0;
         
-        if (DortmundHelper.getInstance().isFhDortmund())
-        {
-          ImportCSV_FHDo importCSV = new ImportCSV_FHDo(parameter);
-
-          s = importCSV.importCSV(response);
-          countImported = importCSV.getCountImported();
-        }
-        else
-        {
+        
           ImportCSV_ELGA importCSV = new ImportCSV_ELGA(parameter);
 
           s = importCSV.importCSV(response);
           countImported = importCSV.getCountImported();
-        }
+        
 
         if (s.length() == 0)
         {
@@ -203,7 +190,7 @@ public class ImportCodeSystem
           response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
           response.getReturnInfos().setMessage("Fehler beim Import: " + s);
         }
-        logger.warn("LOINC Import-Ende");
+        LOGGER.warn("LOINC Import-Ende");
       }
       catch (Exception e)
       {
@@ -234,7 +221,7 @@ public class ImportCodeSystem
           response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
           response.getReturnInfos().setMessage("Fehler beim Import: " + s);
         }
-        logger.warn("LOINC-Associations Import-Ende");
+        LOGGER.warn("LOINC-Associations Import-Ende");
       }
       catch (Exception e)
       {

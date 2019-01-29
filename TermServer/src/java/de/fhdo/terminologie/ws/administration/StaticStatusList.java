@@ -19,38 +19,47 @@
  */
 package de.fhdo.terminologie.ws.administration;
 
-import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
+ * 3.2.26 checked
+ * This class holds the current status of all imports using a concurrent hashmap.
+ * @author Robert Mützner, Dario Bachinger
  */
-public class StaticStatusList
-{
-    private static HashMap<Long,ImportStatus> _statusList = new HashMap<Long, ImportStatus>();
+public class StaticStatusList{
     
-    public static void addStatus(Long importId, ImportStatus status)
-    {
-        //removing finished imports to release memory
-        for(Entry<Long, ImportStatus> entry : _statusList.entrySet())
-        {
-            if((!entry.getValue().importRunning) && (entry.getValue().getImportTotal() == entry.getValue().getImportCount()))
-            {
+    private static final ConcurrentHashMap<Long,ImportStatus> statusList = new ConcurrentHashMap<Long, ImportStatus>();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    
+    /**
+     * Deletes old status before returning the requested status.
+     * @param importId the ID of the status to be added
+     * @param status the status to be added
+     */
+    public static void addStatus(Long importId, ImportStatus status){
+        //Removing old finished imports
+        for(Entry<Long, ImportStatus> entry : statusList.entrySet()){
+            if((!entry.getValue().importRunning) && (entry.getValue().getImportTotal() == entry.getValue().getImportCount())){
                 try{
-                    _statusList.remove(entry.getKey());
+                    statusList.remove(entry.getKey());
                 }
-                catch(Exception e){}
+                catch(Exception e){
+                    LOGGER.info(e.getLocalizedMessage());
+                }
             }
         }
         
-        //adding new Status
-        _statusList.put(importId, status);
+        //Adding new status
+        statusList.put(importId, status);
     }
     
-    public static ImportStatus getStatus(Long importId)
-    {
-        return _statusList.get(importId);
+    /**
+     * Returns the status which is linked to the given ID.
+     * @param importId the ID of the status
+     * @return the status of the ID
+     */
+    public static ImportStatus getStatus(Long importId){
+        return statusList.get(importId);
     }
-    
 }

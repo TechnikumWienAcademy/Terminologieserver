@@ -6,7 +6,7 @@
 package de.fhdo.terminologie.ws.administration._import;
 
 import de.fhdo.terminologie.db.hibernate.CodeSystem;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.logger;
+import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 
 /**
@@ -15,41 +15,36 @@ import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidati
  */
 public abstract class CodeSystemImport extends AbstractImport
 {
-    protected CodeSystem _codesystem;
+    protected CodeSystem codesystem;
     
     public CodeSystemImport()
     {
         super();
     }
     
+    /**
+     * Calls the super.validateParameters
+     * @throws ImportParameterValidationException 
+     */
     @Override
-    protected void validateParameters() throws ImportParameterValidationException
-    {
-        logger.info("validateParameters-function started");
-
-        try
-        {
+    protected void validateParameters() throws ImportParameterValidationException{
+        try{
             super.validateParameters();
         }
-        catch(ImportParameterValidationException ex)
-        {
+        catch(ImportParameterValidationException ex){
             throw ex;
         }
 
-        if (this._codesystem == null)
-        {
+        if (this.codesystem == null){
             throw new ImportParameterValidationException("Codesystem must not be null.");
         }
-        
-        //3.2.20
-        logger.debug("validateParameters-function finished");
     }
     
     public CodeSystem getCodeSystem()
     {
-        if(this._codesystem != null)
+        if(this.codesystem != null)
         {
-            return this._codesystem;
+            return this.codesystem;
         }
         else
         {
@@ -59,6 +54,6 @@ public abstract class CodeSystemImport extends AbstractImport
     
     public void setCodeSystem(CodeSystem cs)
     {
-        this._codesystem = cs;
+        this.codesystem = cs;
     }
 }

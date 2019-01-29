@@ -78,7 +78,7 @@ public class ListCodeSystemsInTaxonomy
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
             if (loggedIn && loginInfoType!=null && loginInfoType.getTermUser()!=null)
-                isAdmin = loginInfoType.getTermUser().isIsAdmin();
+                isAdmin = loginInfoType.getTermUser().isAdmin();
         }
         LOGGER.debug("Is User logged in? " + loggedIn);
 

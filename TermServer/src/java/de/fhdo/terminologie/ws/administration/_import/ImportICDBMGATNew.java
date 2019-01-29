@@ -21,7 +21,7 @@ import de.fhdo.terminologie.db.hibernate.MetadataParameter;
 import de.fhdo.terminologie.helper.DeleteTermHelperWS;
 import de.fhdo.terminologie.helper.HQLParameterHelper;
 import de.fhdo.terminologie.ws.administration.StaticStatusList;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.logger;
+import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportException;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 import de.fhdo.terminologie.ws.administration.types.ImportCodeSystemRequestType;
@@ -66,19 +66,19 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
     @Override
     public void setImportData(ImportCodeSystemRequestType request)
     {
-        logger.info("setImportData started");
+        LOGGER.info("setImportData started");
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
-        this._codesystem = request.getCodeSystem();
-        this._fileContentList = request.getImportInfos().getFileContentList();
+        this.codesystem = request.getCodeSystem();
+        this.fileContentList = request.getImportInfos().getFileContentList();
     }
 
     @Override
     public void startImport() throws ImportException, ImportParameterValidationException
     {
-        logger.info("startImport started");
+        LOGGER.info("startImport started");
         //creating Hibernate Session and starting transaction
         try
         {
@@ -86,12 +86,12 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
         }
         catch (ImportParameterValidationException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw ex;
         }
 
-        this._status.setImportRunning(true);
-        StaticStatusList.addStatus(this.getImportId(), this._status);
+        this.status.setImportRunning(true);
+        StaticStatusList.addStatus(this.getImportId(), this.status);
 
         String s = "";
         Date date = new Date();
@@ -141,7 +141,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                 else
                 {
                     byte[] bytes = fle.getContent();
-                    logger.debug("wandle zu InputStream um...");
+                    LOGGER.debug("wandle zu InputStream um...");
                     InputStream is = new ByteArrayInputStream(bytes);
 
                     //csv = new CsvReader("C:\\Temp\\notfallrel_diagnosen.csv");							
@@ -165,7 +165,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     csv.setTextQualifier('"');
                     csv.setUseTextQualifier(true);
                     csv.readHeaders();
-                    logger.debug("Anzahl Header: " + csv.getHeaderCount());
+                    LOGGER.debug("Anzahl Header: " + csv.getHeaderCount());
 
                     if (fle.getCode() == 1
                             || //Dreisteller
@@ -284,7 +284,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
                     // Parameter hinzufügen (immer mit AND verbunden)
                     hql += parameterHelper.getWhere("");
-                    logger.debug("HQL: " + hql);
+                    LOGGER.debug("HQL: " + hql);
 
                     // Query erstellen
                     org.hibernate.Query q = hb_session.createQuery(hql);
@@ -312,7 +312,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
                     headerMetadataIDs.put(mdText, mp.getId());
 
-                    logger.debug("Speicher/Verlinke Metadata-Parameter: " + mdText + " mit Codesystem-ID: " + mp.getCodeSystem().getId() + ", MD-ID: " + mp.getId());
+                    LOGGER.debug("Speicher/Verlinke Metadata-Parameter: " + mdText + " mit Codesystem-ID: " + mp.getCodeSystem().getId() + ", MD-ID: " + mp.getId());
                 }
 
                 //Adding Version Information
@@ -443,7 +443,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     csc.setTerm(chapInfo[1]);
                     csc.setTermAbbrevation("");
 
-                    logger.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
+                    LOGGER.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
 
                     CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
                     membership.setIsMainClass(Boolean.TRUE);
@@ -508,7 +508,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     else
                     {
                         countFehler++;
-                        logger.debug("Term ist nicht gegeben");
+                        LOGGER.debug("Term ist nicht gegeben");
                     }
                 }
 
@@ -530,7 +530,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     csc.setTerm(chapInfo[1]);
                     csc.setTermAbbrevation("");
 
-                    logger.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
+                    LOGGER.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
 
                     CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
                     membership.setIsMainClass(Boolean.FALSE);
@@ -611,7 +611,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     else
                     {
                         countFehler++;
-                        logger.debug("Term ist nicht gegeben");
+                        LOGGER.debug("Term ist nicht gegeben");
                     }
                 }
 
@@ -633,7 +633,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     csc.setTerm(chapInfo[1]);
                     csc.setTermAbbrevation("");
 
-                    logger.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
+                    LOGGER.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
 
                     CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
                     membership.setIsMainClass(Boolean.FALSE);
@@ -713,12 +713,12 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                     else
                     {
                         countFehler++;
-                        logger.debug("Term ist nicht gegeben");
+                        LOGGER.debug("Term ist nicht gegeben");
                     }
                 }
 
                 //Add catalog
-                logger.debug("wandle zu InputStream um...");
+                LOGGER.debug("wandle zu InputStream um...");
                 InputStream iS = new ByteArrayInputStream(kapitelBytes);
 
                 //csv = new CsvReader("C:\\Temp\\notfallrel_diagnosen.csv");
@@ -728,7 +728,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                 csv.setUseTextQualifier(true);
 
                 csv.readHeaders();
-                logger.debug("Anzahl Header: " + csv.getHeaderCount());
+                LOGGER.debug("Anzahl Header: " + csv.getHeaderCount());
 
                 //Matthias: counter added to flush hibernate session regulary
                 int countEvery = 0;
@@ -758,7 +758,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                         csc.setTermAbbrevation("");
                         csc.setDescription(csv.get("Kurztext"));
 
-                        logger.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
+                        LOGGER.debug("Code: " + csc.getCode() + ", Term: " + csc.getTerm());
 
                         CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
                         membership.setIsMainClass(Boolean.FALSE);
@@ -957,7 +957,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
                                         // Parameter hinzufügen (immer mit AND verbunden)
                                         hql += parameterHelper.getWhere("");
-                                        logger.debug("HQL: " + hql);
+                                        LOGGER.debug("HQL: " + hql);
 
                                         // Query erstellen
                                         org.hibernate.Query q = hb_session.createQuery(hql);
@@ -971,7 +971,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                                             valueList.get(0).setParameterValue(metadataValue);
                                         }
 
-                                        logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                        LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
 
                                         hb_session.update(valueList.get(0));
                                     }
@@ -987,7 +987,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                         else
                         {
                             countFehler++;
-                            logger.debug("Term ist nicht gegeben");
+                            LOGGER.debug("Term ist nicht gegeben");
                         }
 
                     }
@@ -1133,7 +1133,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
                                 hql += parameterHelper.getWhere("");
-                                logger.debug("HQL: " + hql);
+                                LOGGER.debug("HQL: " + hql);
 
                                 // Query erstellen
                                 org.hibernate.Query q = hb_session.createQuery(hql);
@@ -1147,7 +1147,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                                     valueList.get(0).setParameterValue(metadataValue);
                                 }
 
-                                logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
 
                                 hb_session.update(valueList.get(0));
                             }
@@ -1156,7 +1156,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
                     if (countImported % 500 == 0)
                     {
-                        logger.info("C_: " + countImported);
+                        LOGGER.info("C_: " + countImported);
                     }
                     if (countEvery % 500 == 0)
                     {
@@ -1186,14 +1186,14 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
             catch (Exception ex)
             {
                 //ex.printStackTrace();
-                logger.error(ex.getMessage());
+                LOGGER.error(ex.getMessage());
                 s = "Fehler beim Import einer LeiKat-Datei: " + ex.getLocalizedMessage();
 
                 try
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-                        logger.info("[ImportLeiKat.java] Rollback durchgeführt!");
+                        LOGGER.info("[ImportLeiKat.java] Rollback durchgeführt!");
                     }
 
                     String resultStr = DeleteTermHelperWS.deleteCS_CSV(onlyCSV, csId, csvId);
@@ -1202,8 +1202,8 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                 catch (Exception exRollback)
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
-                        logger.info(exRollback.getMessage());
-                        logger.info("[ImportLeiKat.java] Rollback fehlgeschlagen!");
+                        LOGGER.info(exRollback.getMessage());
+                        LOGGER.info("[ImportLeiKat.java] Rollback fehlgeschlagen!");
                     }
                 }
             }
@@ -1217,7 +1217,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
         {
             //java.util.logging.Logger.getLogger(ImportCodeSystem.class.getName()).log(Level.SEVERE, null, ex);
             s = "Fehler beim Import: " + ex.getLocalizedMessage();
-            logger.error(s);
+            LOGGER.error(s);
             //ex.printStackTrace();
             throw new ImportException(s);
         }
@@ -1230,7 +1230,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
         catch (Exception ex)
         {
             s = "Fehler beim Import: " + ex.getLocalizedMessage();
-            logger.error(s);
+            LOGGER.error(s);
             throw new ImportException(s);
         }
     }
@@ -1252,7 +1252,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
         }
         this.setCodeSystem(resp.getCodeSystem());
 
-        logger.debug("Neue CodeSystem-ID: " + resp.getCodeSystem().getId());
+        LOGGER.debug("Neue CodeSystem-ID: " + resp.getCodeSystem().getId());
         //logger.debug("Neue CodeSystemVersion-ID: " + ((CodeSystemVersion) resp.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
         return true;
     }

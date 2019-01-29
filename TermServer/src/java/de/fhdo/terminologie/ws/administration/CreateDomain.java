@@ -73,7 +73,7 @@ public class CreateDomain
             
             if(loggedIn){
             
-                if(loginInfoType.getTermUser().isIsAdmin()){
+                if(loginInfoType.getTermUser().isAdmin()){
                     loggedIn = true;
                 }else{
                     loggedIn = false;
