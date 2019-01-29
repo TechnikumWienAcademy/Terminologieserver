@@ -103,41 +103,41 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         this._clamlClassMap = new ConcurrentHashMap<String, clamlBindingXSD.Class>();
         this._ccatresptHashmap = new HashMap();
         this._assoctypeHashmap  = new HashMap();
-        this._aktCount = 0;
+        this.aktCount = 0;
     }
 
     @Override
     public void setImportData(ImportCodeSystemRequestType request)
     {
-        logger.info("setImportData-function started");
+        LOGGER.info("setImportData-function started");
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
-        this._codesystem = request.getCodeSystem();
-        this._fileContent = request.getImportInfos().getFilecontent();
-        logger.debug("setImportData-function finished");
+        this.codesystem = request.getCodeSystem();
+        this.fileContent = request.getImportInfos().getFilecontent();
+        LOGGER.debug("setImportData-function finished");
     }
 
     @Override
     public void startImport() throws ImportException, ImportParameterValidationException
     {
-        logger.info("startImport-function started");
+        LOGGER.info("startImport-function started");
         //creating Hibernate Session and starting transaction
         try
         {
             //3.2.20 next line
-            logger.debug("Opening hibernate-session and validating parameters started");
+            LOGGER.debug("Opening hibernate-session and validating parameters started");
             this.hb_session = HibernateUtil.getSessionFactory().openSession();
             this.hb_session.getTransaction().begin();
             this.hb_session.setFlushMode(FlushMode.COMMIT);
             this.validateParameters();
             //3.2.20 next line
-            logger.debug("Opening hibernate-session and validating parameters finished");
+            LOGGER.debug("Opening hibernate-session and validating parameters finished");
         }
         catch (HibernateException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             this.rollbackHibernateTransaction();
             this.closeHibernateSession();
             throw new ImportException(ex.getLocalizedMessage());
@@ -145,37 +145,37 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         }
         catch (ImportParameterValidationException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             this.rollbackHibernateTransaction();
             this.closeHibernateSession();
             throw ex;
         }
         
         //adding status of import to statuslist
-        this._status.setImportRunning(true);
-        StaticStatusList.addStatus(this.getImportId(), this._status);
+        this.status.setImportRunning(true);
+        StaticStatusList.addStatus(this.getImportId(), this.status);
                
         try
         {
-            logger.debug("Opening file and creating ByteArrayInputStream");
-            InputStream is = new ByteArrayInputStream(this._fileContent);
+            LOGGER.debug("Opening file and creating ByteArrayInputStream");
+            InputStream is = new ByteArrayInputStream(this.fileContent);
 
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.parse(is);
             NodeList list = doc.getElementsByTagName("Class");
 
-            logger.info("Total of " + list.getLength() + " will be imported.");
+            LOGGER.info("Total of " + list.getLength() + " will be imported.");
             this.setTotalCountInStatusList(list.getLength(), this.getImportId());
 
-            logger.info("loadClamlXML()");
-            is = new ByteArrayInputStream(this._fileContent);
+            LOGGER.info("loadClamlXML()");
+            is = new ByteArrayInputStream(this.fileContent);
             this.loadClamlXML(is);
 
-            this._status = StaticStatusList.getStatus(this.getImportId());
+            this.status = StaticStatusList.getStatus(this.getImportId());
 
             //3.2.20 added wasrolledback
-            if (this._status != null && this._status.isCancel() && !hb_session.getTransaction().wasRolledBack())
+            if (this.status != null && this.status.isCancel() && !hb_session.getTransaction().wasRolledBack())
             {
                 hb_session.getTransaction().rollback();
             }
@@ -191,21 +191,21 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         }
         catch (HibernateException ex)
         {
-            logger.error("ImportClaml error: " + ex.getLocalizedMessage());
-            logger.error(ex);
+            LOGGER.error("ImportClaml error: " + ex.getLocalizedMessage());
+            LOGGER.error(ex);
 
             try
             {
                 if(!hb_session.getTransaction().wasRolledBack()){
                     hb_session.getTransaction().rollback();
-                    logger.info("[ImportClaml.java] Rollback durchgeführt!");
+                    LOGGER.info("[ImportClaml.java] Rollback durchgeführt!");
                 }
             }
             catch (Exception exRollback)
             {
                 if(!hb_session.getTransaction().wasRolledBack()){
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportSVS.java] Rollback fehlgeschlagen!");
+                    LOGGER.info(exRollback.getMessage());
+                    LOGGER.info("[ImportSVS.java] Rollback fehlgeschlagen!");
                 }
             }
             
@@ -213,22 +213,22 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         }
         catch (SAXException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (IOException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (ParserConfigurationException ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (Exception ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         finally
@@ -237,14 +237,14 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             {
                 if(hb_session.isOpen() && hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasRolledBack()){
                     hb_session.getTransaction().rollback();
-                    logger.info("[ImportClaml.java] Rollback durchgeführt!");
+                    LOGGER.info("[ImportClaml.java] Rollback durchgeführt!");
                 }
             }
             catch (Exception exRollback)
             {
                 if(!hb_session.getTransaction().wasRolledBack()){
-                    logger.info(exRollback.getMessage());
-                    logger.info("[ImportClaml.java] Rollback fehlgeschlagen!");
+                    LOGGER.info(exRollback.getMessage());
+                    LOGGER.info("[ImportClaml.java] Rollback fehlgeschlagen!");
                 }
             }
             //currentTask = "";
@@ -258,7 +258,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             
 
             //isRunning = false;
-            logger.info("ImportClaml fertig");
+            LOGGER.info("ImportClaml fertig");
         }
         
         //TODO create proposals here
@@ -269,7 +269,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
      */
     private void loadClamlXML(InputStream is) throws Exception
     {
-        logger.debug("Create JAXBContext");
+        LOGGER.debug("Create JAXBContext");
 
         clamlBindingXSD.Class clazz = null;
         clamlBindingXSD.Rubric rubi = null;
@@ -285,7 +285,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         XMLEventReader eventReader = inputFactory.createXMLEventReader(is);
 
         // Read the XML document
-        logger.debug("Analyze data");
+        LOGGER.debug("Analyze data");
 
         //Attribute für CreateCodeSystem
         String authority = "";
@@ -295,8 +295,8 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         
         while (eventReader.hasNext())
         {
-            this._status = StaticStatusList.getStatus(this.getImportId());
-            if (this._status != null && this._status.isCancel())
+            this.status = StaticStatusList.getStatus(this.getImportId());
+            if (this.status != null && this.status.isCancel())
             {
                 break;
             }
@@ -454,7 +454,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                             }
                             else
                             {
-                                logger.debug("kein Text, da End-Element");
+                                LOGGER.debug("kein Text, da End-Element");
                             }
                         }
                         continue;
@@ -554,7 +554,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
                     //Matthias: write clazz to map to be processed later
                     this._clamlClassMap.put(clazz.getCode(), clazz);
-                    logger.info("Concept reading: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
+                    LOGGER.info("Concept reading: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
 
                     /*
                     // Jetzt Konzept erstellen
@@ -574,7 +574,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     //CreateAssociationType (Unterklasse,Oberklasse)
                     this._assoctypeTaxonomy = this.CreateAssociationType("ist Oberklasse von", "ist Unterklasse von");
 
-                    logger.debug(this._ccatrespt.getReturnInfos().getMessage());
+                    LOGGER.debug(this._ccatrespt.getReturnInfos().getMessage());
                     if (this._ccatrespt.getReturnInfos().getStatus() == ReturnType.Status.OK)
                     {
                         // System.out.println("ID: " + ccatrespt.getEntity().getEntityVersionList().get(0).getId());
@@ -591,7 +591,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                             this._assoctypeHashmap.put(rk.getName(), assoctypeTemp);
                             // System.out.println("vorher");
 
-                            logger.debug(this._ccatrespt.getReturnInfos().getMessage());
+                            LOGGER.debug(this._ccatrespt.getReturnInfos().getMessage());
                             if (this._ccatrespt.getReturnInfos().getStatus() == ReturnType.Status.OK)
                             {
                                 //  System.out.println("ID: " + ccatrespt.getEntity().getEntityVersionList().get(0).getId());
@@ -624,7 +624,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             if (counter % 500 == 0)
             {
                 //Wichtig, sonst kommt es bei größeren Dateien zum Java-Heapspace-Fehler
-                logger.warn("Flushed: " + counter);
+                LOGGER.warn("Flushed: " + counter);
                 hb_session.flush();
                 //hb_session.clear();
 
@@ -643,14 +643,14 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     private void createCodeSystem(String title, String uid, String versionName, Date date, String authority, String description) throws Exception
     {
         //3.2.20
-        logger.debug("Creating CodeSystem, title = " + title + " uid = " + uid + " versionName = " + versionName + " date = " + date.toString() + " authority = " + authority + " description = " + description);
+        LOGGER.debug("Creating CodeSystem, title = " + title + " uid = " + uid + " versionName = " + versionName + " date = " + date.toString() + " authority = " + authority + " description = " + description);
         
         // Codesystem suchen, erst anlegen, wenn nicht vorhanden
         CreateCodeSystemRequestType request = new CreateCodeSystemRequestType();
 
-        if (this._codesystem.getId() > 0)
+        if (this.codesystem.getId() > 0)
         {
-            request.setCodeSystem(this._codesystem);
+            request.setCodeSystem(this.codesystem);
         }
         else
         {
@@ -723,16 +723,16 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         CreateCodeSystem ccs = new CreateCodeSystem();
         CreateCodeSystemResponseType resp = ccs.CreateCodeSystem(request, hb_session);
 
-        logger.debug(resp.getReturnInfos().getMessage());
+        LOGGER.debug(resp.getReturnInfos().getMessage());
 
         if (resp.getReturnInfos().getStatus() != ReturnType.Status.OK)
         {
             throw new Exception(resp.getReturnInfos().getMessage());
         }
-        this._codesystem = resp.getCodeSystem();
+        this.codesystem = resp.getCodeSystem();
 
-        logger.debug("Neue CodeSystem-ID: " + resp.getCodeSystem().getId());
-        logger.debug("Neue CodeSystemVersion-ID: " + ((CodeSystemVersion) resp.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
+        LOGGER.debug("Neue CodeSystem-ID: " + resp.getCodeSystem().getId());
+        LOGGER.debug("Neue CodeSystemVersion-ID: " + ((CodeSystemVersion) resp.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
 
         // Read existing metadata and add to map to avoid double entries
         String hql = "select distinct mp from MetadataParameter mp "
@@ -745,12 +745,12 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         {
             this._metaDataMap.put(mp.getParamName(), mp.getId());
             this._metadataParameterMap.put(mp.getId(), mp);
-            logger.debug("found metadata: " + mp.getParamName() + " with id: " + mp.getId());
+            LOGGER.debug("found metadata: " + mp.getParamName() + " with id: " + mp.getId());
             //3.2.20
             metadatacounter++;
         }
         //3.2.20
-        logger.debug("METADATA-COUNTER = " + metadatacounter);
+        LOGGER.debug("METADATA-COUNTER = " + metadatacounter);
     }
     
     private AssociationType CreateAssociationType(String forwardName, String reverseName)
@@ -820,7 +820,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             if (this._clamlClassMap.get(clazz.getCode()) != null)
             {
                 this.CreateSingleConcept(clazz);
-                logger.debug("Concept writing: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
+                LOGGER.debug("Concept writing: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
                 if (clazz.getMeta() != null && clazz.getMeta().size() > 0)
                 {
                     this.createMetaData(clazz);
@@ -831,7 +831,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         }
         catch (Exception ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
 
@@ -951,7 +951,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     
     private void createPrefferedTerm(String labelString, String code, clamlBindingXSD.Class clazz) throws Exception
     {
-        logger.debug("createPrefferedTerm mit Code: " + code + ", Text: " + labelString);
+        LOGGER.debug("createPrefferedTerm mit Code: " + code + ", Text: " + labelString);
 
         CreateConceptRequestType request = new CreateConceptRequestType();
 
@@ -1015,9 +1015,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         addAttributeMetadata(clazz, csev, csc);
 
-        logger.debug("isMainClass: " + csvem.getIsMainClass());
+        LOGGER.debug("isMainClass: " + csvem.getIsMainClass());
 
-        request.setCodeSystem(this._codesystem);
+        request.setCodeSystem(this.codesystem);
         request.setCodeSystemEntity(cse);
         request.setLogin(this.getLoginType());
 
@@ -1028,7 +1028,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         CreateConcept cc = new CreateConcept();
         this._ccsResponse = cc.CreateConcept(request, hb_session);
 
-        logger.debug("[ImportClaml.java]" + this._ccsResponse.getReturnInfos().getMessage());
+        LOGGER.debug("[ImportClaml.java]" + this._ccsResponse.getReturnInfos().getMessage());
         if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
         {
             if (clazz.getSuperClass() != null && clazz.getSuperClass().size() > 0)
@@ -1045,12 +1045,12 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 this._referenceMap.put(code, aktEntityVersionID);
             }
 
-            this._aktCount++;
-            this.setCurrentCountInStatusList(this._aktCount, this.getImportId());
+            this.aktCount++;
+            this.setCurrentCountInStatusList(this.aktCount, this.getImportId());
             if(this.getImportType().getRole() != null && this.getImportType().getRole().equals(CODES.ROLE_TRANSFER))
             {
                 //Status bei Freigabe in log file ausgeben
-                logger.info("Import progress: " + this._aktCount + "/" + this.getTotalCountInStatusList(this.getImportId()));
+                LOGGER.info("Import progress: " + this.aktCount + "/" + this.getTotalCountInStatusList(this.getImportId()));
             }
         }
         else
@@ -1061,7 +1061,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
     private void createNotPrefferdTerm(String labelString, String code, clamlBindingXSD.Class clazz, String rubKind) throws Exception
     {
-        logger.debug("createNotPrefferdTerm mit Code: " + code + ", Text: " + labelString);
+        LOGGER.debug("createNotPrefferdTerm mit Code: " + code + ", Text: " + labelString);
         //System.out.println("test4");
         CreateConceptRequestType request = new CreateConceptRequestType();
 
@@ -1094,7 +1094,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         addAttributeMetadata(clazz, csev, csc);
 
-        request.setCodeSystem(this._codesystem);
+        request.setCodeSystem(this.codesystem);
         request.setCodeSystemEntity(cse);
         request.setLogin(this.getLoginType());
 
@@ -1105,13 +1105,13 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         CreateConcept cc = new CreateConcept();
         this._ccsResponse = cc.CreateConcept(request, hb_session);
 
-        logger.debug("[ImportClaml.java]" + this._ccsResponse.getReturnInfos().getMessage());
+        LOGGER.debug("[ImportClaml.java]" + this._ccsResponse.getReturnInfos().getMessage());
         if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
         {
             this.createTerm2TermAssociation(code, clazz, rubKind);
             
-            this._aktCount++;
-            this.setCurrentCountInStatusList(this._aktCount, this.getImportId());
+            this.aktCount++;
+            this.setCurrentCountInStatusList(this.aktCount, this.getImportId());
 
         }
         else
@@ -1162,7 +1162,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 }
                 catch (Exception ex)
                 {
-                    logger.error(ex);
+                    LOGGER.error(ex);
                     throw new ImportException(ex.getLocalizedMessage());
                 }
             }
@@ -1212,10 +1212,10 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         CreateConceptAssociation cca = new CreateConceptAssociation();
         CreateConceptAssociationResponseType ccaresp = cca.CreateConceptAssociation(ccar, hb_session);
-        logger.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
+        LOGGER.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
         if (ccaresp.getReturnInfos().getStatus() == ReturnType.Status.OK)
         {
-            logger.debug("[ImportClaml.java] Create Association Erfolgreich");
+            LOGGER.debug("[ImportClaml.java] Create Association Erfolgreich");
 
         }
         else
@@ -1272,24 +1272,24 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         CreateConceptAssociationResponseType ccaresp = cca.CreateConceptAssociation(ccar, hb_session);
 
-        logger.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
+        LOGGER.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
         if (ccaresp.getReturnInfos().getStatus() == ReturnType.Status.OK)
         {
-            logger.debug("[ImportClaml.java] Create Association Erfolgreich");
+            LOGGER.debug("[ImportClaml.java] Create Association Erfolgreich");
 
         }
         else
         {
-            logger.error("Fehler");
+            LOGGER.error("Fehler");
         }
 
     }
     
     private void createMetaData(clamlBindingXSD.Class clazz)
     {
-        if (logger.isInfoEnabled())
+        if (LOGGER.isInfoEnabled())
         {
-            logger.debug("createMetaData gestartet");
+            LOGGER.debug("createMetaData gestartet");
         }
 
         for (Meta meta : clazz.getMeta())
@@ -1302,7 +1302,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     long metaDataID = insertMetaData(meta.getName(), meta.getValue(), clazz.getCode());
                     if (metaDataID > 0)
                     {
-                        logger.debug("[ImportClaml.java] Neues entity_version_parameter_value mit ID: " + metaDataID);
+                        LOGGER.debug("[ImportClaml.java] Neues entity_version_parameter_value mit ID: " + metaDataID);
                     }
                 }
             }
@@ -1317,7 +1317,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 long metaDataID = insertMetaData("ClaML_ClassKind", classKind, clazz.getCode());
                 if (metaDataID > 0)
                 {
-                    logger.debug("[ImportClaml.java] Neues entity_version_parameter_value mit ID: " + metaDataID);
+                    LOGGER.debug("[ImportClaml.java] Neues entity_version_parameter_value mit ID: " + metaDataID);
                 }
             }
         }
@@ -1328,7 +1328,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         this._metadataCounter++;
         if (this._metadataCounter % 500 == 0)
         {
-            logger.warn("Session flushed");
+            LOGGER.warn("Session flushed");
 
             hb_session.flush();
             //hb_session.clear();
@@ -1351,12 +1351,12 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             //Create metadata_parameter
             MetadataParameter mp = new MetadataParameter();
             mp.setParamName(name);
-            mp.setCodeSystem(this._codesystem);
+            mp.setCodeSystem(this.codesystem);
 
             hb_session.save(mp);
 
             metaDataID = mp.getId();
-            logger.debug("[ImportClaml.java] Neues metadata_parameter mit ID: " + metaDataID + " und name: " + name);
+            LOGGER.debug("[ImportClaml.java] Neues metadata_parameter mit ID: " + metaDataID + " und name: " + name);
 
             this._metaDataMap.put(name, metaDataID);
             this._metadataParameterMap.put(metaDataID, mp);
@@ -1390,7 +1390,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         //Create parameter_value
         if (metaDataID == 0)
         {
-            logger.warn("metaDataID ist 0 für: " + name);
+            LOGGER.warn("metaDataID ist 0 für: " + name);
         }
 
         String hql = "select distinct csmv from CodeSystemMetadataValue csmv";
@@ -1402,7 +1402,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         // Parameter hinzufügen (immer mit AND verbunden)
         hql += parameterHelper.getWhere("");
-        logger.debug("HQL: " + hql);
+        LOGGER.debug("HQL: " + hql);
 
         // Query erstellen
         org.hibernate.Query q = hb_session.createQuery(hql);

@@ -19,7 +19,7 @@ import de.fhdo.terminologie.db.hibernate.MetadataParameter;
 import de.fhdo.terminologie.helper.LastChangeHelper;
 import de.fhdo.terminologie.helper.SysParameter;
 import de.fhdo.terminologie.ws.administration.StaticStatusList;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.logger;
+import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportException;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 import de.fhdo.terminologie.ws.administration.types.ImportCodeSystemRequestType;
@@ -45,23 +45,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Level;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 
 /**
  *
- * @author puraner
+ * @author Stefan Puraner
  */
-public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImport
-{
+public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImport{
+    
     private Map<String, Long> codesMap;
     private Map<String, MetadataParameter> metadataParameterMap;
     private final Integer LOINC_NUM = 0;
     private int count = 0, countFehler = 0, newCount = 0;
     
-    //TODO move to configuration
-    private String[] metadataFields =
-    {
+    //TODO Move to configuration
+    private String[] metadataFields = {
         "COMPONENT",
         "PROPERTY",
         "TIME_ASPCT",
@@ -108,138 +107,117 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
         "STATUS",
     };
 
-    public ImportLOINCNew()
-    {
+    public ImportLOINCNew(){
         super();
     }
 
     @Override
-    public void setImportData(ImportCodeSystemRequestType request)
-    {
-        logger.info("setImportData started");
+    public void setImportData(ImportCodeSystemRequestType request){
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
-        this._codesystem = request.getCodeSystem();
-        this._fileContent = request.getImportInfos().getFilecontent();
+        this.codesystem = request.getCodeSystem();
+        this.fileContent = request.getImportInfos().getFilecontent();
     }
 
     @Override
-    public void startImport() throws ImportException, ImportParameterValidationException
-    {
-        logger.info("startImport started");
-        //creating Hibernate Session and starting transaction
-        try
-        {
+    public void startImport() throws ImportException, ImportParameterValidationException{
+        LOGGER.info("+++++ startImport started +++++");
+        
+        try{
             this.validateParameters();
         }
-        catch (ImportParameterValidationException ex)
-        {
-            logger.error(ex);
+        catch (ImportParameterValidationException ex){
+            LOGGER.error("Error [0020]: " + ex.getLocalizedMessage());
             throw ex;
         }
 
-        this._status.setImportRunning(true);
-        StaticStatusList.addStatus(this.getImportId(), this._status);
+        this.status.setImportRunning(true);
+        StaticStatusList.addStatus(this.getImportId(), this.status);
 
-        String path = SysParameter.instance().getStringValue("LoincCsvPath", null, null);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String LOINCpath = SysParameter.instance().getStringValue("LoincCsvPath", null, null);
+        SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         byte[] bytes = this.getImportType().getFilecontent();
-        if (!this.getImportType().getOrder())
-        {
-
-            ArrayList<String> errList = new ArrayList<String>();
-            String s = "";
-
+        
+        if (!this.getImportType().getOrder()){
+            ArrayList<String> errorList = new ArrayList<String>();
             codesMap = new HashMap<String, Long>();
-
-            CsvReader csv;
-            try
-            {
-
-                logger.debug("Wandle zu InputStream um...");
-                InputStream is = new ByteArrayInputStream(bytes);
-                csv = new CsvReader(is, Charset.forName("UTF-8"));
+            CsvReader CSV;
+            
+            try{
+                LOGGER.debug("Creating inputstream");
+                InputStream inputStream = new ByteArrayInputStream(bytes);
+                CSV = new CsvReader(inputStream, Charset.forName("UTF-8"));
 
                 int numberOfLines = -1;
 
-                while (csv.readRecord())
-                {
+                while (CSV.readRecord())
                     numberOfLines++;
-                }
                 
                 this.setTotalCountInStatusList(numberOfLines, this.getImportId());
-                is.close();
-                csv.close();
+                inputStream.close();
+                CSV.close();
 
-                is = new ByteArrayInputStream(bytes);
-                csv = new CsvReader(is, Charset.forName("UTF-8"));
+                inputStream = new ByteArrayInputStream(bytes);
+                CSV = new CsvReader(inputStream, Charset.forName("UTF-8"));
 
-                csv.setDelimiter(',');
-                csv.setTextQualifier('"');
-                csv.setUseTextQualifier(true);
+                CSV.setDelimiter(',');
+                CSV.setTextQualifier('"');
+                CSV.setUseTextQualifier(true);
 
-                csv.readHeaders();
-                logger.debug("Anzahl Header: " + csv.getHeaderCount());
+                CSV.readHeaders();
+                LOGGER.debug("Number of headers: " + CSV.getHeaderCount());
 
-                // Hibernate-Block, Session öffnen
                 hb_session = HibernateUtil.getSessionFactory().openSession();
                 hb_session.getTransaction().begin();
 
-                try // try-catch-Block zum Abfangen von Hibernate-Fehlern
-                {
-
-                    CodeSystem cs_db = null;
-                    //check if cs exists if yes => new version if not
-                    if (super.getCodeSystem().getId() != null)
-                    {
-                        cs_db = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
+                try{
+                    CodeSystem CS_DB = null;
+                    
+                    //Check if CS exists, if yes => new version
+                    if (super.getCodeSystem().getId() != null){
+                        CS_DB = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
                     }
 
-                    CodeSystemVersion csv2 = new CodeSystemVersion();
-                    csv2.setCodeSystem(cs_db);
+                    CodeSystemVersion newCS_Version = new CodeSystemVersion();
                     Date d = new Date();
-                    csv2.setInsertTimestamp(d);
-                    csv2.setName(super.getCodeSystem().getCodeSystemVersions().iterator().next().getName());
-                    csv2.setPreviousVersionId(cs_db.getCurrentVersionId());
-                    csv2.setStatus(Definitions.STATUS_CODES.INACTIVE.getCode());
-                    csv2.setStatusDate(d);
-                    csv2.setPreferredLanguageId(33l);
-                    csv2.setReleaseDate(d);
-                    csv2.setUnderLicence(false);
-                    csv2.setValidityRange(236l);
-                    csv2.setOid("2.16.840.1.113883.6.1");
-                    hb_session.save(csv2);
-                    cs_db.setCurrentVersionId(csv2.getVersionId());
-                    cs_db.getCodeSystemVersions().add(csv2);
-                    hb_session.update(cs_db);
+                    newCS_Version.setCodeSystem(CS_DB);
+                    newCS_Version.setInsertTimestamp(d);
+                    newCS_Version.setName(super.getCodeSystem().getCodeSystemVersions().iterator().next().getName());
+                    newCS_Version.setPreviousVersionId(CS_DB.getCurrentVersionId());
+                    newCS_Version.setStatus(Definitions.STATUS_CODES.INACTIVE.getCode());
+                    newCS_Version.setStatusDate(d);
+                    newCS_Version.setPreferredLanguageId(33l);
+                    newCS_Version.setReleaseDate(d);
+                    newCS_Version.setUnderLicence(false);
+                    newCS_Version.setValidityRange(236l);
+                    newCS_Version.setOid("2.16.840.1.113883.6.1");
+                    hb_session.save(newCS_Version);
                     
-                    cs_db.getCodeSystemVersions().clear();
-                    cs_db.getCodeSystemVersions().add(csv2);
+                    CS_DB.setCurrentVersionId(newCS_Version.getVersionId());
+                    CS_DB.getCodeSystemVersions().add(newCS_Version);
+                    hb_session.update(CS_DB);
                     
-                    CodeSystem cs = new CodeSystem();
-                    cs.setId(cs_db.getId());
-                    cs.setName(cs_db.getName());
-                    cs.setCodeSystemVersions(cs_db.getCodeSystemVersions());
-                    cs.setCurrentVersionId(cs_db.getCurrentVersionId());
+                    CodeSystem newCS = new CodeSystem();
+                    newCS.setId(CS_DB.getId());
+                    newCS.setName(CS_DB.getName());
+                    CS_DB.getCodeSystemVersions().clear();
+                    CS_DB.getCodeSystemVersions().add(newCS_Version);
+                    newCS.setCodeSystemVersions(CS_DB.getCodeSystemVersions());
+                    newCS.setCurrentVersionId(CS_DB.getCurrentVersionId());
                     
-                    this.setCodeSystem(cs);
+                    this.setCodeSystem(newCS);
 
-                    // Metadaten-Parameter lesen
+                    //Reading metadata-parameters
                     metadataParameterMap = new HashMap<String, MetadataParameter>();
-                    List<MetadataParameter> mpList = hb_session.createQuery("from MetadataParameter").list();
-                    for (int i = 0; i < mpList.size(); ++i)
-                    {
-                        metadataParameterMap.put(mpList.get(i).getParamName(), mpList.get(i));
-                    }
-
-                    logger.debug("Starte Import...");
-
+                    List<MetadataParameter> metadataParameterList = hb_session.createQuery("from MetadataParameter").list();
+                    for(MetadataParameter metadataParameter : metadataParameterList) 
+                        metadataParameterMap.put(metadataParameter.getParamName(), metadataParameter);
+                    
+                    LOGGER.debug("Starting import");
                     count = 0;
-                    while (csv.readRecord())
-                    {
+                    while (CSV.readRecord()){
                         count++;
                         this.setCurrentCountInStatusList(count, this.getImportId());
 
@@ -249,194 +227,171 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                         request.setCodeSystemEntity(new CodeSystemEntity());
                         request.getCodeSystemEntity().setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
 
-                        CodeSystemConcept csc = new CodeSystemConcept();
-                        csc.setIsPreferred(true);
+                        CodeSystemConcept CSconcept = new CodeSystemConcept();
+                        CSconcept.setIsPreferred(true);
 
-                        CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
-                        csev.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
-                        csev.setIsLeaf(true);
+                        CodeSystemEntityVersion CSentityVersion = new CodeSystemEntityVersion();
+                        CSentityVersion.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
+                        CSentityVersion.setIsLeaf(true);
 
-                        CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
-                        membership.setIsMainClass(Boolean.TRUE);
-                        membership.setIsAxis(Boolean.FALSE);
+                        CodeSystemVersionEntityMembership CSVmembership = new CodeSystemVersionEntityMembership();
+                        CSVmembership.setIsMainClass(Boolean.TRUE);
+                        CSVmembership.setIsAxis(Boolean.FALSE);
 
                         request.getCodeSystemEntity().setCodeSystemVersionEntityMemberships(new HashSet<CodeSystemVersionEntityMembership>());
-                        request.getCodeSystemEntity().getCodeSystemVersionEntityMemberships().add(membership);
+                        request.getCodeSystemEntity().getCodeSystemVersionEntityMemberships().add(CSVmembership);
 
-                        CreateConcept cc = new CreateConcept();
+                        CreateConcept createConcept = new CreateConcept();
 
-                        if (count % 200 == 0)
-                        {
-                            logger.debug("Lese Datensatz " + count + ", count: " + count);
-                        }
-
-                        //request.setCodeSystemEntity(new CodeSystemEntity());
-                        //request.getCodeSystemEntity().setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
-                        csc.setCode(csv.get(LOINC_NUM));
-                        csc.setTerm(csv.get("LONG_COMMON_NAME"));
-                        csc.setTermAbbrevation(csv.get("SHORTNAME"));
-
-                        //Matthias: change "|" to ":" for fully specified name
-                        csc.setDescription(csv.get("COMPONENT") + " : " + csv.get("PROPERTY") + " : "
-                                + csv.get("TIME_ASPCT") + " : " + csv.get("SYSTEM") + " : "
-                                + csv.get("SCALE_TYP") + " : " + csv.get("METHOD_TYP") + " : ");
-                        // Entity-Version erstellen
-                        if (csev.getCodeSystemConcepts() == null)
-                        {
-                            csev.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
-                        }
+                        if (count % 100 == 0)
+                            LOGGER.debug("Lines read: " + count);
+                        
+                        //Setting CSconcept data
+                        CSconcept.setCode(CSV.get(LOINC_NUM));
+                        CSconcept.setTerm(CSV.get("LONG_COMMON_NAME"));
+                        CSconcept.setTermAbbrevation(CSV.get("SHORTNAME"));
+                        CSconcept.setDescription(CSV.get("COMPONENT") + " : " + CSV.get("PROPERTY") + " : "
+                                + CSV.get("TIME_ASPCT") + " : " + CSV.get("SYSTEM") + " : "
+                                + CSV.get("SCALE_TYP") + " : " + CSV.get("METHOD_TYP") + " : ");
+                        
+                        if (CSentityVersion.getCodeSystemConcepts() == null)
+                            CSentityVersion.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
                         else
-                        {
-                            csev.getCodeSystemConcepts().clear();
-                        }
-                        csev.getCodeSystemConcepts().add(csc);
-                        csev.setEffectiveDate(parseDate(csv.get("DATE_LAST_CHANGED")));
-                        csev.setStatus(1); //Fix laut Mail vom 25.06.2014 13:48
+                            CSentityVersion.getCodeSystemConcepts().clear();
+                        
+                        //Adding CSconcept to CSentityVersion
+                        CSentityVersion.getCodeSystemConcepts().add(CSconcept);
+                        CSentityVersion.setEffectiveDate(parseDate(CSV.get("DATE_LAST_CHANGED")));
+                        CSentityVersion.setStatus(1);
 
-                        // Konzept speichern
-                        if (csc.getCode().length() > 0)
-                        {
-                            // Entity-Version dem Request hinzufügen
+                        //Save concept
+                        if(CSconcept.getCode().length() > 0){
+                            
                             request.getCodeSystemEntity().getCodeSystemEntityVersions().clear();
-                            request.getCodeSystemEntity().getCodeSystemEntityVersions().add(csev);
+                            request.getCodeSystemEntity().getCodeSystemEntityVersions().add(CSentityVersion);
 
-                            // Dienst aufrufen (Konzept einfügen)
-                            CreateConceptResponseType responseCC = cc.CreateConcept(request, hb_session);
+                            CreateConceptResponseType responseCC = createConcept.CreateConcept(request, hb_session);
 
-                            if (responseCC.getReturnInfos().getStatus() == ReturnType.Status.OK)
-                            {
+                            if (responseCC.getReturnInfos().getStatus() == ReturnType.Status.OK){
                                 if (responseCC.getCodeSystemEntity().getCurrentVersionId() > 0)
-                                {
-                                    codesMap.put(csc.getCode(), responseCC.getCodeSystemEntity().getCurrentVersionId());
-                                }
+                                    codesMap.put(CSconcept.getCode(), responseCC.getCodeSystemEntity().getCurrentVersionId());
 
-                                // Metadaten zu diesem Konzept speichern
-                                int mdCount = 0;
-
+                                //Saving concept's metadata
                                 CodeSystemEntityVersion csev_result = (CodeSystemEntityVersion) responseCC.getCodeSystemEntity().getCodeSystemEntityVersions().toArray()[0];
-                                mdCount = addMetadataToConcept(csv, csev_result.getVersionId(), hb_session, super.getCodeSystem().getId());
-
-                                //System.out.println(count);
+                                addMetadataToConcept(CSV, csev_result.getVersionId(), hb_session, super.getCodeSystem().getId());
                             }
-                            else
-                            {
+                            else{
                                 countFehler++;
-                                errList.add(String.valueOf(count));
-                                logger.info("Fehler bei CreateConcept: " + responseCC.getReturnInfos().getMessage());
-                                logger.info("Fehler bei CreateConcept: " + csc.getCode());
+                                errorList.add(String.valueOf(count));
+                                LOGGER.info("Failed to create concept [0030]: " + responseCC.getReturnInfos().getMessage());
+                                LOGGER.info("Failed code [0030]: " + CSconcept.getCode());
                             }
                         }
-                        else
-                        {
+                        else{
                             countFehler++;
-                            errList.add(String.valueOf(count));
-                            logger.info("Term ist nicht angegeben");
-                            logger.info(csc.getTerm());
+                            errorList.add(String.valueOf(count));
+                            LOGGER.info("Term is missing [0031]: " + CSconcept.getTerm());
                         }
 
-                        //Mimimum acceptable free memory you think your app needs 
-                        //long minRunningMemory = (1024 * 1024);
+                        //Freeing memory
                         Runtime runtime = Runtime.getRuntime();
-                        if (count % 200 == 0)
-                        {
-                            logger.debug("FreeMemory: " + runtime.freeMemory());
+                        if (count % 200 == 0){
+                            LOGGER.debug("FreeMemory: " + runtime.freeMemory());
 
-                            if (count % 1000 == 0)
-                            {
-                                // wichtig, sonst kommt es bei größeren Dateien zum Java-Heapspace-Fehler
+                            if (count % 1000 == 0){
                                 hb_session.flush();
                                 hb_session.clear();
                             }
                             if (count % 10000 == 0)
-                            {
-                                // sicherheitshalber aufrufen
                                 System.gc();
-                            }
                         }
                     }
 
-                    for (String str : errList)
-                    {
+                    for (String errorEntry : errorList)
+                        LOGGER.info("Failed importing line: " + errorEntry);
 
-                        logger.info("-----Zeile: " + str + "-----\n");
-                    }
-
-                    if (count == 0)
-                    {
-                        hb_session.getTransaction().rollback();
+                    if (count == 0){
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            hb_session.getTransaction().rollback();
                         throw new ImportException("Keine Konzepte importiert.");
                     }
-                    else
-                    {
-                        logger.debug("Import abgeschlossen, speicher Ergebnisse in DB (commit): " + count);
+                    else{
+                        LOGGER.debug("Import finished, number of read concepts: " + count);
                         hb_session.getTransaction().commit();
                     }
                 }
-                catch (Exception ex)
-                {
-                    ex.printStackTrace();
-                    logger.error("Fehler beim Import der LOINC-Datei: " + ex.getMessage());
-                    s = "Fehler beim Import der LOINC-Datei: " + ex.getLocalizedMessage();
-
-                    try
-                    {
+                catch (IOException ex){
+                    LOGGER.error("An error occured while importing the LOINC [0032]: " + ex.getLocalizedMessage());
+                    try{
                         if(!hb_session.getTransaction().wasRolledBack()){
                             hb_session.getTransaction().rollback();
-                            logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                            LOGGER.info("Rollback executed");
                         }
                     }
-                    catch (Exception exRollback)
-                    {
+                    catch (Exception exRollback){
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            LOGGER.info("Rollback failed [0033]: " + exRollback.getLocalizedMessage());
+                    }
+                } 
+                catch (HibernateException ex){
+                    LOGGER.error("An error occured while importing the LOINC [0034]: " + ex.getLocalizedMessage());
+                    try{
                         if(!hb_session.getTransaction().wasRolledBack()){
-                            logger.info(exRollback.getMessage());
-                            logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                            hb_session.getTransaction().rollback();
+                            LOGGER.info("Rollback executed");
                         }
                     }
-                    finally
-                    {
-                        throw new ImportException(s);
+                    catch (Exception exRollback){
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            LOGGER.info("Rollback failed [0035]: " + exRollback.getLocalizedMessage());
+                    }
+                } 
+                catch (ImportException ex){
+                    LOGGER.error("An error occured while importing the LOINC [0036]: " + ex.getLocalizedMessage());
+                    try{
+                        if(!hb_session.getTransaction().wasRolledBack()){
+                            hb_session.getTransaction().rollback();
+                            LOGGER.info("Rollback executed");
+                        }
+                    }
+                    catch (Exception exRollback){
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            LOGGER.info("Rollback failed [0037]: " + exRollback.getLocalizedMessage());
                     }
                 }
-                finally
-                {
-                    // Session schließen
-                    is.close();
-                    hb_session.close();
+                finally{
+                    inputStream.close();
+                    if(hb_session.isOpen())
+                        hb_session.close();
                 }
-
             }
-            catch (Exception ex)
-            {
-                //java.util.logging.Logger.getLogger(ImportCodeSystem.class.getName()).log(Level.SEVERE, null, ex);
-                s = "Fehler beim LOINC-Import: " + ex.getLocalizedMessage();
-                ex.printStackTrace();
-                throw new ImportException(s);
+            catch (IOException ex){
+                LOGGER.error("An error occured while importing the LOINC [0038]: " + ex.getLocalizedMessage());
+                throw new ImportException(ex.getLocalizedMessage());
+            } catch (HibernateException ex) {
+                LOGGER.error("An error occured while importing the LOINC [0039]: " + ex.getLocalizedMessage());
+                throw new ImportException(ex.getLocalizedMessage());
             }
 
-            logger.debug("ImportLOINC - fertig");
-
-            //Store actual "Version"
-            FileOutputStream fos;
-            try
-            {
-                fos = new FileOutputStream(path);
-                Writer out = new OutputStreamWriter(fos, "UTF8");
+            //Storing LOINC file
+            FileOutputStream outputStream;
+            try{
+                outputStream = new FileOutputStream(LOINCpath);
+                Writer out = new OutputStreamWriter(outputStream, "UTF8");
                 out.write(new String(bytes, "UTF-8"));
                 out.close();
             }
-            catch (FileNotFoundException ex)
-            {
-                logger.error(ex);
+            catch (FileNotFoundException ex){
+                LOGGER.error("Error [0040]: " + ex.getLocalizedMessage());
             }
-            catch (IOException ex)
-            {
-                logger.error(ex);
+            catch (IOException ex){
+                LOGGER.error("Error [0041]: " + ex.getLocalizedMessage());
             }
         }
-        else
-        { 
+        else{ 
+            //ANCHOR
             //Abgleich LOINC für Tab-Separated LOINC File!
-            System.out.println("LOINC Import-Update gestartet: " + sdf.format(new Date()));
+            System.out.println("LOINC Import-Update gestartet: " + dateformat.format(new Date()));
             //Get previous Version and actual Version as CSV
             String s = "";
             boolean err = false;
@@ -478,7 +433,7 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                 csvAct.setTextQualifier('"');
                 csvAct.setUseTextQualifier(true);
 
-                File file = new File(path);
+                File file = new File(LOINCpath);
                 FileInputStream fis = new FileInputStream(file);
                 byte bytesPrev[] = new byte[(int) file.length()];
                 fis.read(bytesPrev);
@@ -540,7 +495,7 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
 
                             if (csevList != null && csevList.size() > 1)
                             { //more codes found
-                                logger.info("Code mehrfach gefunden");
+                                LOGGER.info("Code mehrfach gefunden");
 
                                 List<CodeSystemEntityVersion> tempList = new ArrayList<CodeSystemEntityVersion>();
 
@@ -635,22 +590,22 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                                             }
                                         }
                                     }
-                                    logger.info("LOINC Konzept(" + actKey + ") update durchgefuehrt:  " + count);
+                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt:  " + count);
                                 }
                                 catch (Exception e)
                                 {
                                     countFehler++;
                                     errList.add(String.valueOf(newCount));
-                                    logger.debug("Fehler im Update-Import Loinc: Vergleich zweier Einträge fehlerhaft!");
-                                    logger.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
+                                    LOGGER.debug("Fehler im Update-Import Loinc: Vergleich zweier Einträge fehlerhaft!");
+                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
                                 }
                             }
                             else
                             {
                                 countFehler++;
                                 errList.add(String.valueOf(newCount));
-                                logger.debug("Code nicht gefunden!");
-                                logger.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
+                                LOGGER.debug("Code nicht gefunden!");
+                                LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
                             }
                         }
                         else
@@ -763,14 +718,14 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                                             }
                                         }
                                     }
-                                    logger.info("LOINC Konzept(" + actKey + ") update durchgefuehrt:  " + count);
+                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt:  " + count);
                                 }
                                 catch (Exception e)
                                 {
                                     countFehler++;
                                     errList.add(String.valueOf(newCount));
-                                    logger.debug("Fehler im Update-Import Loinc: Vergleich zweier Einträge fehlerhaft!");
-                                    logger.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
+                                    LOGGER.debug("Fehler im Update-Import Loinc: Vergleich zweier Einträge fehlerhaft!");
+                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
                                 }
                             }
                         }
@@ -856,22 +811,22 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                                     mdCount = addMetadataToConcept(csvAct, csev_result.getVersionId(), hb_session, super.getCodeSystem().getId());
 
                                     //System.out.println(count);
-                                    logger.info("LOINC Konzept(" + actKey + ") neu erstellt: " + count);
+                                    LOGGER.info("LOINC Konzept(" + actKey + ") neu erstellt: " + count);
                                 }
                                 else
                                 {
                                     countFehler++;
                                     errList.add(String.valueOf(newCount));
-                                    logger.debug("Konzept konnte nicht erstellt werden: " + responseCC.getReturnInfos().getMessage());
-                                    logger.info("LOINC Konzept(" + actKey + ") neu erstellt FEHLER: " + count);
+                                    LOGGER.debug("Konzept konnte nicht erstellt werden: " + responseCC.getReturnInfos().getMessage());
+                                    LOGGER.info("LOINC Konzept(" + actKey + ") neu erstellt FEHLER: " + count);
                                 }
                             }
                             else
                             {
                                 countFehler++;
                                 errList.add(String.valueOf(newCount));
-                                logger.debug("Term ist nicht angegeben");
-                                logger.info("LOINC Konzept(" + actKey + ") neu erstellt FEHLER: " + count);
+                                LOGGER.debug("Term ist nicht angegeben");
+                                LOGGER.info("LOINC Konzept(" + actKey + ") neu erstellt FEHLER: " + count);
                             }
                         }
                     }
@@ -881,7 +836,7 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                     Runtime runtime = Runtime.getRuntime();
                     if (count% 100 == 0)
                     {
-                        logger.debug("FreeMemory: " + runtime.freeMemory());
+                        LOGGER.debug("FreeMemory: " + runtime.freeMemory());
 
                         if (count % 1000 == 0)
                         {
@@ -897,8 +852,8 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 csvAct.close();
-                logger.debug("Update-Import abgeschlossen, speicher Ergebnisse in DB (commit): " + count);
-                logger.info("countFehler: " + countFehler);
+                LOGGER.debug("Update-Import abgeschlossen, speicher Ergebnisse in DB (commit): " + count);
+                LOGGER.info("countFehler: " + countFehler);
                 if (countFehler == 0)
                 {
                     //reload codesystem
@@ -930,7 +885,7 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                 }
                 else
                 {
-                    logger.info("countFehler: " + countFehler);
+                    LOGGER.info("countFehler: " + countFehler);
                     //response.getReturnInfos().setMessage("Update-Import abgeschlossen. Update bei " + count + " Konzept(en). " + newCount + " Konzepte wurden neu importiert. " + countFehler + " Fehler;" + "Daten auf Grund der Fehler nicht in der Datenbank gespeichert. ");
                 }
             }
@@ -943,14 +898,14 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-                        logger.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                        LOGGER.info("[ImportLOINC.java] Rollback durchgefuehrt!");
                     }
                 }
                 catch (Exception exRollback)
                 {
                     if(!hb_session.getTransaction().wasRolledBack()){
-                        logger.info(exRollback.getMessage());
-                        logger.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
+                        LOGGER.info(exRollback.getMessage());
+                        LOGGER.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
                     }
                 }
                 finally
@@ -965,165 +920,144 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                 hb_session.close();
             }
 
-            logger.debug("ImportLOINC - Update - fertig");
+            LOGGER.debug("ImportLOINC - Update - fertig");
 
-            logger.info("ImportLOINC - Update - fertig: " + sdf.format(new Date()));
+            LOGGER.info("ImportLOINC - Update - fertig: " + dateformat.format(new Date()));
             //Store actual "Version" only if no error occured!
             if (countFehler == 0 && !err)
             {
                 FileOutputStream fos;
                 try
                 {
-                    fos = new FileOutputStream(path);
+                    fos = new FileOutputStream(LOINCpath);
                     Writer out = new OutputStreamWriter(fos, "UTF8");
                     out.write(new String(bytes, "UTF-8"));
                     out.close();
                 }
                 catch (FileNotFoundException ex)
                 {
-                    logger.error(ex);
+                    LOGGER.error(ex);
                 }
                 catch (IOException ex)
                 {
-                    logger.error(ex);
+                    LOGGER.error(ex);
                 }
             }
         }
     }
     
     /**
-     *
-     *
-     * @param s Datensatz in der Schreibweise JJJJMMTT
-     * @return java.util.Date
+     * TODO
+     * @param tobeParsed
+     * @return 
      */
-    private java.util.Date parseDate(String s)
-    {
-        if (s == null || s.length() == 0)
-        {
-            logger.debug("Fehler beim Parsen des Datums: nicht angegeben");
+    private java.util.Date parseDate(String tobeParsed){
+        if (tobeParsed == null || tobeParsed.length() == 0){
+            LOGGER.debug("No date given to parse");
             return new java.util.Date();
         }
 
-        try
-        {
+        try{
             DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            return (Date) formatter.parse(s);
+            return (Date) formatter.parse(tobeParsed);
         }
-        catch (Exception e)
-        {
-            logger.warn("Fehler beim Parsen des Datums: " + s);
+        catch (Exception e){
+            LOGGER.warn("Error parsing " + tobeParsed + " " + e.getLocalizedMessage());
             return new java.util.Date();
         }
     }
     
     /**
-     * Fügt alle oben angegebenen Metadaten zum Konzept hinzu
-     *
+     * TODO
      * @param csv
-     * @param csevId Konzept-ID (Entity-Version-ID)
+     * @param csevId
      * @param hb_session
+     * @param csId
+     * @return 
      */
-    private int addMetadataToConcept(CsvReader csv, long csevId, org.hibernate.Session hb_session, Long csId)
-    {
-        int mdCount = 0;
-        try
-        {
-            for (int i = 0; i < metadataFields.length; ++i)
-            {
+    private int addMetadataToConcept(CsvReader csv, long csevId, org.hibernate.Session hb_session, Long csId){
+        int metadataCount = 0;
+        try{
+            for (int i = 0; i < metadataFields.length; ++i){
                 String content = csv.get(metadataFields[i]);
 
-                if (content != null && content.length() > 0)
-                {
-                    MetadataParameter mp = getMetadataParameter(metadataFields[i], hb_session, csId);
+                if (content != null && content.length() > 0){
+                    MetadataParameter metadataParameter = getMetadataParameter(metadataFields[i], hb_session, csId);
 
-                    if (mp != null && mp.getId() > 0)
-                    {
-                        CodeSystemMetadataValue mv = new CodeSystemMetadataValue();
-                        mv.setParameterValue(content);
+                    if (metadataParameter != null && metadataParameter.getId() > 0){
+                        CodeSystemMetadataValue metadataValue = new CodeSystemMetadataValue();
+                        metadataValue.setParameterValue(content);
 
-                        mv.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
-                        mv.getCodeSystemEntityVersion().setVersionId((Long) csevId);
+                        metadataValue.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
+                        metadataValue.getCodeSystemEntityVersion().setVersionId((Long) csevId);
 
-                        mv.setMetadataParameter(new MetadataParameter());
-                        mv.getMetadataParameter().setId(mp.getId());
+                        metadataValue.setMetadataParameter(new MetadataParameter());
+                        metadataValue.getMetadataParameter().setId(metadataParameter.getId());
 
-                        hb_session.save(mv);
+                        hb_session.save(metadataValue);
 
-                        mdCount++;
+                        metadataCount++;
                     }
                 }
-
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e){
+            LOGGER.error("Error [0040]: " + e.getLocalizedMessage());
         }
-        return mdCount;
+        return metadataCount;
     }
     
-    private MetadataParameter getMetadataParameter(String name, org.hibernate.Session hb_session, Long csId)
-    {
+    /**
+     * Gets the metadataparameter if it exists and creates it otherwise
+     * @param name the parameters name
+     * @param hb_session the hibernate session to be used
+     * @param csId the code-system's ID
+     * @return the metadataparameter
+     */
+    private MetadataParameter getMetadataParameter(String name, org.hibernate.Session hb_session, Long csId){
         if (metadataParameterMap.containsKey(name))
-        {
             return metadataParameterMap.get(name);
-        }
-        else
-        {
-            //Create metadata_parameter
-            MetadataParameter mp = new MetadataParameter();
-            mp.setParamName(name);
-            mp.setCodeSystem(new CodeSystem());
-            mp.getCodeSystem().setId(csId);
-            hb_session.save(mp);
-            metadataParameterMap.put(name, mp);
+        else{
+            //Creating metadata parameter
+            MetadataParameter metadataParameter = new MetadataParameter();
+            metadataParameter.setParamName(name);
+            metadataParameter.setCodeSystem(new CodeSystem());
+            metadataParameter.getCodeSystem().setId(csId);
+            hb_session.save(metadataParameter);
+            metadataParameterMap.put(name, metadataParameter);
 
-            logger.debug("MetadataParameter in DB hinzugefuegt: " + name);
-
-            return mp;
+            LOGGER.debug("Added metadataparameter to the database: " + name);
+            return metadataParameter;
         }
     }
     
-    public int getCountFehler()
-    {
+    /**
+     * Returns the countFehler
+     * @return the countFehler
+     */
+    public int getCountFehler(){
         return countFehler;
     }
     
-    public int getNewCount()
-    {
+    /**
+     * Returns the newCount
+     * @return the newCount
+     */
+    public int getNewCount(){
         return newCount;
     }
     
+    /**
+     * Fetches the code system of the class.
+     * @return the code system
+     */
     @Override
-    public CodeSystem getCodeSystem()
-    {
-        //method is needed to get CodeSystem for ImportCodeSystem.ImportCodeSystem
-        //because codesystem must not contain codesystemversions with information about codesystems
-        //otherwhise a xml circle would be created and an exception thrown
-        /*
-        hb_session = HibernateUtil.getSessionFactory().openSession();
+    public CodeSystem getCodeSystem(){
+        CodeSystem CS = super.getCodeSystem();
         
-        CodeSystem cs_db = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
-        Hibernate.initialize(cs_db);
+        for(CodeSystemVersion CSversion : CS.getCodeSystemVersions())
+            CSversion.setCodeSystem(new CodeSystem());
         
-        for(CodeSystemVersion version : cs_db.getCodeSystemVersions())
-        {
-            version.setCodeSystem(new CodeSystem());
-        }
-        
-        hb_session.close();
-        
-        return cs_db;
-        */
-        
-        
-        CodeSystem cs = super.getCodeSystem();
-        
-        for(CodeSystemVersion version : cs.getCodeSystemVersions())
-        {
-            version.setCodeSystem(new CodeSystem());
-        }
-        
-        return cs;
+        return CS;
     }
 }

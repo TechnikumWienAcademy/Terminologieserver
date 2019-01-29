@@ -21,11 +21,11 @@
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListDomainValues.java</file>
         </group>
         <group>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateCodeSystem.java</file>
             <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/TermServerServletContextListener.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/Authoring.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/AbstractImport.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/CodeSystemImport.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportLOINCNew.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/db/hibernate/CodeSystem.java</file>
         </group>
     </open-files>
 </project-private>

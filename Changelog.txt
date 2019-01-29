@@ -1,4 +1,10 @@
-﻿Changelog 3.2.25
+﻿Changelog 3.2.26
+	-Bugfixes
+		.) EHTSOID-191: Änderung beim Löschen von temporären Terminologien.
+	-Änderungen
+		.) Zusätzliche Log-Meldungen bei der Freigabe eingebaut.
+
+Changelog 3.2.25
 	-Änderungen
 		.) Zusätzliche Log-Meldungen bei der Freigabe eingebaut.
 
