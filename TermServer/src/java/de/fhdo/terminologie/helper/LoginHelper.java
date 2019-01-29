@@ -234,7 +234,7 @@ public class LoginHelper{
                 loginInfoType.setLastTimestamp(s_session.getLastTimestamp());
                 loginInfoType.setLastIP(s_session.getIpAddress());
                 loginInfoType.setTermUser(s_session.getTermUser());
-                loginInfoType.getTermUser().setIsAdmin(s_session.getTermUser().isAdmin());
+                loginInfoType.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
                 loginInfoType.setLogin(new LoginType());
                 loginInfoType.getLogin().setUsername(s_session.getTermUser().getName());
                 loginInfoType.getLogin().setSessionID(s_session.getSessionId());

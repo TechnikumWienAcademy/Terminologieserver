@@ -105,7 +105,7 @@ public class TermUser  implements java.io.Serializable {
     }
     
     @Column(name="isAdmin", nullable=false)
-    public boolean isAdmin() {
+    public boolean isIsAdmin() {
         return this.isAdmin;
     }
     

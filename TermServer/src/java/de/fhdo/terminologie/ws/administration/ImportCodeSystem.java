@@ -77,7 +77,7 @@ public class ImportCodeSystem{
       if (loggedIn)
       {
 
-        if (loginInfoType.getTermUser().isAdmin())
+        if (loginInfoType.getTermUser().isIsAdmin())
         {
           loggedIn = true;
         }

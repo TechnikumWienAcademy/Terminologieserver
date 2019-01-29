@@ -79,7 +79,7 @@ public class ListCodeSystems
             loggedIn = loginInfoType != null;
             if (loggedIn)
             {
-                isAdmin = loginInfoType.getTermUser().isAdmin();
+                isAdmin = loginInfoType.getTermUser().isIsAdmin();
             }
         }
 

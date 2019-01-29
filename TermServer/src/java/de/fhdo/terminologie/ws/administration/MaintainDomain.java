@@ -72,7 +72,7 @@ public class MaintainDomain
             loggedIn = loginInfoType != null;
             if(loggedIn){
             
-                if(loginInfoType.getTermUser().isAdmin()){
+                if(loginInfoType.getTermUser().isIsAdmin()){
                     loggedIn = true;
                 }else{
                     loggedIn = false;

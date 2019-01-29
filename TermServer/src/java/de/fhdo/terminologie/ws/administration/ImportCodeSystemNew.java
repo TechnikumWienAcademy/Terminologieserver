@@ -71,7 +71,7 @@ public class ImportCodeSystemNew{
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
 
-            if (loggedIn && !loginInfoType.getTermUser().isAdmin())
+            if (loggedIn && !loginInfoType.getTermUser().isIsAdmin())
                     loggedIn = false;
         }
         //3.2.17 added second check
