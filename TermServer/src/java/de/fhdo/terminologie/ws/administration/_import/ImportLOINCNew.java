@@ -388,369 +388,296 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                 LOGGER.error("Error [0041]: " + ex.getLocalizedMessage());
             }
         }
-        else{ 
-            //ANCHOR
-            //Abgleich LOINC für Tab-Separated LOINC File!
-            System.out.println("LOINC Import-Update gestartet: " + dateformat.format(new Date()));
-            //Get previous Version and actual Version as CSV
-            String s = "";
-            boolean err = false;
-            ArrayList<String> errList = new ArrayList<String>();
+        else{
+            LOGGER.info("LOINC update-import started");
+            
+            //Get previous version and current version as CSV
+            boolean error = false;
+            ArrayList<String> errorList = new ArrayList<String>();
             count = 0;
             countFehler = 0;
             newCount = 0;
-
             codesMap = new HashMap<String, Long>();
 
-            CsvReader csvAct;
-            CsvReader csvPrev;
-            HashMap<String, String> prevLoinc = new HashMap<String, String>();
-            // Hibernate-Block, Session öffnen
+            CsvReader currentCSVfile;
+            CsvReader previousCSVfile;
+            HashMap<String, String> previousLOINC = new HashMap<String, String>();
+            
             hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
 
-            try
-            {
-
-                InputStream isAct = new ByteArrayInputStream(bytes);
-                csvAct = new CsvReader(isAct, Charset.forName("UTF-8"));
+            try{
+                InputStream currentInputStream = new ByteArrayInputStream(bytes);
+                currentCSVfile = new CsvReader(currentInputStream, Charset.forName("UTF-8"));
                 
                 int numberOfLines = -1;
-
-                while (csvAct.readRecord())
-                {
+                while (currentCSVfile.readRecord())
                     numberOfLines++;
-                }
 
                 this.setTotalCountInStatusList(numberOfLines, this.getImportId());
-                isAct.close();
+                currentInputStream.close();
 
-                isAct = new ByteArrayInputStream(bytes);
-                csvAct = new CsvReader(isAct, Charset.forName("UTF-8"));
+                currentInputStream = new ByteArrayInputStream(bytes);
+                currentCSVfile = new CsvReader(currentInputStream, Charset.forName("UTF-8"));
                 
-                
-                csvAct.setDelimiter(',');
-                csvAct.setTextQualifier('"');
-                csvAct.setUseTextQualifier(true);
+                currentCSVfile.setDelimiter(',');
+                currentCSVfile.setTextQualifier('"');
+                currentCSVfile.setUseTextQualifier(true);
 
                 File file = new File(LOINCpath);
-                FileInputStream fis = new FileInputStream(file);
+                FileInputStream fileInputStream = new FileInputStream(file);
                 byte bytesPrev[] = new byte[(int) file.length()];
-                fis.read(bytesPrev);
-                InputStream isPrev = new ByteArrayInputStream(bytesPrev);
-                csvPrev = new CsvReader(isPrev, Charset.forName("UTF-8"));
-                csvPrev.setDelimiter(',');
-                csvPrev.setTextQualifier('"');
-                csvPrev.setUseTextQualifier(true);
+                fileInputStream.read(bytesPrev);
+                InputStream previousInputStream = new ByteArrayInputStream(bytesPrev);
+                previousCSVfile = new CsvReader(previousInputStream, Charset.forName("UTF-8"));
+                previousCSVfile.setDelimiter(',');
+                previousCSVfile.setTextQualifier('"');
+                previousCSVfile.setUseTextQualifier(true);
 
-                csvPrev.readHeaders();
+                previousCSVfile.readHeaders();
 
-                //Prepare HashMap to compare
-                while (csvPrev.readRecord())
-                {
-                    prevLoinc.put(csvPrev.get(LOINC_NUM), csvPrev.getRawRecord());
-                }
-                csvPrev.close();
+                //Preparing HashMap to compare
+                while (previousCSVfile.readRecord()) 
+                    previousLOINC.put(previousCSVfile.get(LOINC_NUM), previousCSVfile.getRawRecord());
+               
+                previousCSVfile.close();
 
-                csvAct.readHeaders();
+                currentCSVfile.readHeaders();
 
-                // Metadaten-Parameter lesen
+                //Reading metadata parameters
                 metadataParameterMap = new HashMap<String, MetadataParameter>();
-                List<MetadataParameter> mpList = hb_session.createQuery("from MetadataParameter mp join fetch mp.codeSystem cs where cs.name='LOINC'").list();
-                for (int i = 0; i < mpList.size(); ++i)
-                {
-                    metadataParameterMap.put(mpList.get(i).getParamName(), mpList.get(i));
-                }
+                List<MetadataParameter> metadataParameterList = hb_session.createQuery("from MetadataParameter mp join fetch mp.codeSystem cs where cs.name='LOINC'").list();
+                for (MetadataParameter metadataParameter : metadataParameterList) 
+                    metadataParameterMap.put(metadataParameter.getParamName(), metadataParameter);
 
-                CodeSystem cs_db = null;
-                //check if cs exists if yes => new version if not
+                CodeSystem CS_DB = null;
+                //Check if CS exists if yes => new version
                 if (super.getCodeSystem().getId() != null)
-                {
-                    cs_db = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
-                }
+                    CS_DB = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
 
-                this.setCodeSystem(cs_db);
+                this.setCodeSystem(CS_DB);
 
                 count = 0;
-                while (csvAct.readRecord())
-                {
+                while (currentCSVfile.readRecord()){
                     count++;
                     this.setCurrentCountInStatusList(count, this.getImportId());
                     
-                    String actKey = csvAct.get(LOINC_NUM);
+                    String currentKey = currentCSVfile.get(LOINC_NUM);
 
-                    if (prevLoinc.containsKey(actKey))
-                    { //Vorhanden => Check for update
+                    if (previousLOINC.containsKey(currentKey)){ 
+                        //Code exists, checking for updates
 
-                        String prevRaw = prevLoinc.get(actKey);
-                        String actRaw = csvAct.getRawRecord();
+                        String previousConcept = previousLOINC.get(currentKey);
+                        String currentConcept = currentCSVfile.getRawRecord();
 
-                        if (!prevRaw.equals(actRaw))
-                        { //Something has changed
+                        if (!previousConcept.equals(currentConcept)){ 
+                            //Something has changed
 
-                            String shortHqlString = "select distinct csev from CodeSystemEntityVersion csev join fetch csev.codeSystemConcepts csc where csc.code=:code";
-                            Query shortQ = hb_session.createQuery(shortHqlString);
-                            shortQ.setParameter("code", actKey);
-                            List<CodeSystemEntityVersion> csevList = shortQ.list();
+                            Query Q_CSEV_search = hb_session.createQuery("select distinct csev from CodeSystemEntityVersion csev join fetch csev.codeSystemConcepts csc where csc.code=:code");
+                            Q_CSEV_search.setParameter("code", currentKey);
+                            List<CodeSystemEntityVersion> CSEVList = Q_CSEV_search.list();
 
-                            if (csevList != null && csevList.size() > 1)
-                            { //more codes found
-                                LOGGER.info("Code mehrfach gefunden");
+                            if (CSEVList != null && CSEVList.size() > 1){
+                                LOGGER.info("Code found multiple times");
 
                                 List<CodeSystemEntityVersion> tempList = new ArrayList<CodeSystemEntityVersion>();
-
-                                for (CodeSystemEntityVersion csev : csevList)
-                                {
-                                    if (!csev.getCodeSystemMetadataValues().isEmpty())
-                                    {
-                                        if (csev.getCodeSystemMetadataValues().iterator().next().getMetadataParameter().getCodeSystem().getId() == super.getCodeSystem().getId())
-                                        {
-                                            tempList.add(csev);
-                                        }
-                                    }
+                                for (CodeSystemEntityVersion CSEV : CSEVList){
+                                    if (!CSEV.getCodeSystemMetadataValues().isEmpty())
+                                        if (CSEV.getCodeSystemMetadataValues().iterator().next().getMetadataParameter().getCodeSystem().getId().equals(super.getCodeSystem().getId()))
+                                            tempList.add(CSEV);
                                 }
-                                csevList = tempList;
-
+                                CSEVList = tempList;
                             }
 
-                            //Get CSEV and all Metadata for update
-                            if (csevList != null && !csevList.isEmpty())
-                            {
-                                CodeSystemEntityVersion csev_db = null;
-                                CodeSystemConcept csc_db = null;
-                                try
-                                {
-                                    //Update CSEV
-                                    csev_db = (CodeSystemEntityVersion) hb_session.load(CodeSystemEntityVersion.class, csevList.get(0).getVersionId());
-                                    csev_db.setEffectiveDate(parseDate(csvAct.get("DATE_LAST_CHANGED")));
-                                    csev_db.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+                            //Get CSEV and all metadata for update
+                            if (CSEVList != null && !CSEVList.isEmpty()){
+                                CodeSystemEntityVersion CSEV_DB;
+                                CodeSystemConcept CSC_DB;
+                                try{
+                                    //Updating CSEV
+                                    CSEV_DB = (CodeSystemEntityVersion) hb_session.load(CodeSystemEntityVersion.class, CSEVList.get(0).getVersionId());
+                                    CSEV_DB.setEffectiveDate(parseDate(currentCSVfile.get("DATE_LAST_CHANGED")));
+                                    CSEV_DB.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
 
-                                    hb_session.update(csev_db);
+                                    hb_session.update(CSEV_DB);
 
-                                    //Update CSC
-                                    csc_db = (CodeSystemConcept) hb_session.load(CodeSystemConcept.class, csevList.get(0).getCodeSystemConcepts().iterator().next().getCodeSystemEntityVersionId());
-                                    csc_db.setCode(actKey);
-                                    csc_db.setTerm(csvAct.get("LONG_COMMON_NAME"));
-                                    csc_db.setTermAbbrevation(csvAct.get("SHORTNAME"));
+                                    //Updating CSC
+                                    CSC_DB = (CodeSystemConcept) hb_session.load(CodeSystemConcept.class, CSEVList.get(0).getCodeSystemConcepts().iterator().next().getCodeSystemEntityVersionId());
+                                    CSC_DB.setCode(currentKey);
+                                    CSC_DB.setTerm(currentCSVfile.get("LONG_COMMON_NAME"));
+                                    CSC_DB.setTermAbbrevation(currentCSVfile.get("SHORTNAME"));
+                                    CSC_DB.setDescription(currentCSVfile.get("COMPONENT") + " : " + currentCSVfile.get("PROPERTY") + " : "
+                                            + currentCSVfile.get("TIME_ASPCT") + " : " + currentCSVfile.get("SYSTEM") + " : "
+                                            + currentCSVfile.get("SCALE_TYP") + " : " + currentCSVfile.get("METHOD_TYP") + " : ");
 
-                                    //Matthias: change "|" to ":" for fully specified name
-                                    csc_db.setDescription(csvAct.get("COMPONENT") + " : " + csvAct.get("PROPERTY") + " : "
-                                            + csvAct.get("TIME_ASPCT") + " : " + csvAct.get("SYSTEM") + " : "
-                                            + csvAct.get("SCALE_TYP") + " : " + csvAct.get("METHOD_TYP") + " : ");
+                                    hb_session.update(CSC_DB);
 
-                                    hb_session.update(csc_db);
+                                    //Updating metadata
+                                    HashMap<String, CodeSystemMetadataValue> CSMVList = new HashMap<String, CodeSystemMetadataValue>();
+                                    for (CodeSystemMetadataValue CSMV : CSEVList.get(0).getCodeSystemMetadataValues())
+                                        CSMVList.put(CSMV.getMetadataParameter().getParamName(), CSMV);
 
-                                    //Update Metadata
-                                    HashMap<String, CodeSystemMetadataValue> csmvList = new HashMap<String, CodeSystemMetadataValue>();
-                                    for (CodeSystemMetadataValue csmv : csevList.get(0).getCodeSystemMetadataValues())
-                                    {
-                                        csmvList.put(csmv.getMetadataParameter().getParamName(), csmv);
-                                    }
-
-                                    for (int i = 0; i < metadataFields.length; ++i)
-                                    {
-                                        String content = csvAct.get(metadataFields[i]);
-                                        CodeSystemMetadataValue csmv = csmvList.get(metadataFields[i]);
-                                        if (csmv != null)
-                                        { //Update
-                                            CodeSystemMetadataValue csmv_db = (CodeSystemMetadataValue) hb_session.load(CodeSystemMetadataValue.class, csmv.getId());
-                                            csmv_db.setParameterValue(content);
-                                            hb_session.update(csmv_db);
-                                        }
-                                        else //Noch nicht angelegt => Check if != ""
-                                        {
-                                            if (content.length() > 0)
-                                            {
-                                                //Neues CSMV plus link auf MP
-                                                CodeSystemMetadataValue mv = new CodeSystemMetadataValue();
-                                                mv.setParameterValue(content);
-
-                                                mv.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
-                                                mv.getCodeSystemEntityVersion().setVersionId((Long) csev_db.getVersionId());
-
-                                                mv.setMetadataParameter(new MetadataParameter());
-                                                MetadataParameter mp = null;
-                                                if (metadataParameterMap.containsKey(metadataFields[i]))
-                                                {
-                                                    mp = metadataParameterMap.get(metadataFields[i]);
+                                    for (String metadataField : metadataFields) {
+                                        String content = currentCSVfile.get(metadataField);
+                                        CodeSystemMetadataValue CSMV = CSMVList.get(metadataField);
+                                        if (CSMV != null) {
+                                            //Updating
+                                            CodeSystemMetadataValue CSMV_DB = (CodeSystemMetadataValue) hb_session.load(CodeSystemMetadataValue.class, CSMV.getId());
+                                            CSMV_DB.setParameterValue(content);
+                                            hb_session.update(CSMV_DB);
+                                        } 
+                                        else {
+                                            //Not yet created, check if != ""
+                                            if (content.length() > 0) {
+                                                //New CSMV and link to metadata parameter
+                                                CodeSystemMetadataValue metadataValue = new CodeSystemMetadataValue();
+                                                metadataValue.setParameterValue(content);
+                                                metadataValue.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
+                                                metadataValue.getCodeSystemEntityVersion().setVersionId(CSEV_DB.getVersionId());
+                                                metadataValue.setMetadataParameter(new MetadataParameter());
+                                                MetadataParameter metadataParameter;
+                                                if (metadataParameterMap.containsKey(metadataField))
+                                                    metadataParameter = metadataParameterMap.get(metadataField); 
+                                                else {
+                                                    //Creating metadata_parameter
+                                                    metadataParameter = new MetadataParameter();
+                                                    metadataParameter.setParamName(metadataField);
+                                                    metadataParameter.setCodeSystem(new CodeSystem());
+                                                    metadataParameter.getCodeSystem().setId(super.getCodeSystem().getId());
+                                                    
+                                                    hb_session.save(metadataParameter);
+                                                    metadataParameterMap.put(metadataField, metadataParameter);
                                                 }
-                                                else
-                                                {
-                                                    //Create metadata_parameter
-                                                    mp = new MetadataParameter();
-                                                    mp.setParamName(metadataFields[i]);
-                                                    mp.setCodeSystem(new CodeSystem());
-                                                    mp.getCodeSystem().setId(super.getCodeSystem().getId());
-                                                    hb_session.save(mp);
-                                                    metadataParameterMap.put(metadataFields[i], mp);
-                                                }
-                                                mv.getMetadataParameter().setId(mp.getId());
-
-                                                hb_session.save(mv);
+                                                
+                                                metadataValue.getMetadataParameter().setId(metadataParameter.getId());
+                                                hb_session.save(metadataValue);
                                             }
                                         }
                                     }
-                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt:  " + count);
+                                    LOGGER.info("LOINC concept (" + currentKey + ") update executed:  " + count);
                                 }
-                                catch (Exception e)
-                                {
+                                catch (Exception e){
                                     countFehler++;
-                                    errList.add(String.valueOf(newCount));
-                                    LOGGER.debug("Fehler im Update-Import Loinc: Vergleich zweier Einträge fehlerhaft!");
-                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
+                                    errorList.add(String.valueOf(newCount));
+                                    LOGGER.error("Error [0043], LOINC concept (" + currentKey + ") update failed comparing two entries (" + count + "): " + e.getLocalizedMessage());
                                 }
                             }
-                            else
-                            {
+                            else{
                                 countFehler++;
-                                errList.add(String.valueOf(newCount));
-                                LOGGER.debug("Code nicht gefunden!");
-                                LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
+                                errorList.add(String.valueOf(newCount));
+                                LOGGER.info("Error [0044], LOINC concept (" + currentKey + ") update failed, code not found (" + count + ")");
                             }
-                        }
-                        else
-                        {
-                            //System.out.println("LOINC Konzept(" + actKey + ") update nicht noetig:  " + countNr);
                         }
                     }
-                    else
-                    { //New entry!
+                    else{ 
+                        //New entry
+                        Query Q_CSconcept_search = hb_session.createQuery("select csc from CodeSystemConcept csc where csc.code=:code");
+                        Q_CSconcept_search.setParameter("code", currentKey);
+                        List<CodeSystemConcept> CSCList = Q_CSconcept_search.list();
 
-                        //Testing
-                        String hqlTest = "select csc from CodeSystemConcept csc";// join fetch csc.codeSystemEntityVersion csev";
-                        hqlTest += " where csc.code=:code";
-                        Query testQ = hb_session.createQuery(hqlTest);
-                        testQ.setParameter("code", actKey);
-                        //testQ.setReadOnly(true);
-                        List<CodeSystemConcept> cscList = testQ.list();
+                        if (CSCList != null && CSCList.size() > 0){
+                            //Found CSconcept in database
+                            String HQL_CSentityVersion_search = "select csev from CodeSystemEntityVersion csev join csev.codeSystemEntity cse join cse.codeSystemVersionEntityMemberships csvem join csvem.codeSystemVersion csv join csv.codeSystem cs";
+                            HQL_CSentityVersion_search += " where csev.versionId=:id AND cs.id=:csId";
+                            Query Q_CSentityVersion_search = hb_session.createQuery(HQL_CSentityVersion_search);
+                            Q_CSentityVersion_search.setParameter("id", CSCList.get(0).getCodeSystemEntityVersionId());
+                            Q_CSentityVersion_search.setParameter("csId", super.getCodeSystem().getId());
+                            List<CodeSystemEntityVersion> CSEVList = Q_CSentityVersion_search.list();
 
-                        if (cscList != null && cscList.size() > 0)
-                        {
-                            //found csc.code in db
-                            String hqlFindCS = "select csev from CodeSystemEntityVersion csev join csev.codeSystemEntity cse join cse.codeSystemVersionEntityMemberships csvem join csvem.codeSystemVersion csv join csv.codeSystem cs";
-                            hqlFindCS += " where csev.versionId=:id AND cs.id=:csId";
-                            Query qFindCS = hb_session.createQuery(hqlFindCS);
-                            //qFindCS.setReadOnly(true);
-                            qFindCS.setParameter("id", cscList.get(0).getCodeSystemEntityVersionId());
-                            qFindCS.setParameter("csId", super.getCodeSystem().getId());
-                            List<CodeSystemEntityVersion> csevList = qFindCS.list();
-                            boolean stop = true;
+                            if (CSEVList != null && !CSEVList.isEmpty()){
+                                //Updating instead
+                                CodeSystemEntityVersion CSEV_DB;
+                                CodeSystemConcept CSC_DB;
 
-                            if (csevList != null && !csevList.isEmpty())
-                            {
+                                try{
+                                    //Updating CSEV
+                                    CSEV_DB = CSEVList.get(0);
+                                    CSEV_DB.setEffectiveDate(parseDate(currentCSVfile.get("DATE_LAST_CHANGED")));
+                                    CSEV_DB.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
 
-                                //Update instead
-                                CodeSystemEntityVersion csev_db = null;
-                                CodeSystemConcept csc_db = null;
+                                    hb_session.update(CSEV_DB);
 
-                                try
-                                {
-                                    //Update CSEV
-                                    csev_db = csevList.get(0);
-                                    //csev_db = (CodeSystemEntityVersion)hb_session.load(CodeSystemEntityVersion.class, csevList.get(0).getVersionId());
-                                    csev_db.setEffectiveDate(parseDate(csvAct.get("DATE_LAST_CHANGED")));
-                                    csev_db.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+                                    //Updating CSC
+                                    CSC_DB = (CodeSystemConcept) hb_session.load(CodeSystemConcept.class, CSEVList.get(0).getCodeSystemConcepts().iterator().next().getCodeSystemEntityVersionId());
+                                    CSC_DB.setCode(currentKey);
+                                    CSC_DB.setTerm(currentCSVfile.get("LONG_COMMON_NAME"));
+                                    CSC_DB.setTermAbbrevation(currentCSVfile.get("SHORTNAME"));
+                                    CSC_DB.setDescription(currentCSVfile.get("COMPONENT") + " : " + currentCSVfile.get("PROPERTY") + " : "
+                                            + currentCSVfile.get("TIME_ASPCT") + " : " + currentCSVfile.get("SYSTEM") + " : "
+                                            + currentCSVfile.get("SCALE_TYP") + " : " + currentCSVfile.get("METHOD_TYP") + " : ");
 
-                                    hb_session.update(csev_db);
+                                    hb_session.update(CSC_DB);
 
-                                    //Update CSC
-                                    csc_db = (CodeSystemConcept) hb_session.load(CodeSystemConcept.class, csevList.get(0).getCodeSystemConcepts().iterator().next().getCodeSystemEntityVersionId());
-                                    csc_db.setCode(actKey);
-                                    csc_db.setTerm(csvAct.get("LONG_COMMON_NAME"));
-                                    csc_db.setTermAbbrevation(csvAct.get("SHORTNAME"));
+                                    //Updating Metadata
+                                    HashMap<String, CodeSystemMetadataValue> CSMVList = new HashMap<String, CodeSystemMetadataValue>();
+                                    for (CodeSystemMetadataValue CSMV : CSEVList.get(0).getCodeSystemMetadataValues())
+                                        CSMVList.put(CSMV.getMetadataParameter().getParamName(), CSMV);
 
-                                    //Matthias: change "|" to ":" for fully specified name
-                                    csc_db.setDescription(csvAct.get("COMPONENT") + " : " + csvAct.get("PROPERTY") + " : "
-                                            + csvAct.get("TIME_ASPCT") + " : " + csvAct.get("SYSTEM") + " : "
-                                            + csvAct.get("SCALE_TYP") + " : " + csvAct.get("METHOD_TYP") + " : ");
-
-                                    hb_session.update(csc_db);
-
-                                    //!! Matthias: metadata check with poor performance
-                                    //this might be a temporal measure
-                                    //Update Metadata
-                                    HashMap<String, CodeSystemMetadataValue> csmvList = new HashMap<String, CodeSystemMetadataValue>();
-                                    for (CodeSystemMetadataValue csmv : csevList.get(0).getCodeSystemMetadataValues())
-                                    {
-                                        csmvList.put(csmv.getMetadataParameter().getParamName(), csmv);
-                                    }
-
-                                    for (int i = 0; i < metadataFields.length; ++i)
-                                    {
-                                        String content = csvAct.get(metadataFields[i]);
-                                        CodeSystemMetadataValue csmv = csmvList.get(metadataFields[i]);
-                                        if (csmv != null)
-                                        { //Update
-                                            CodeSystemMetadataValue csmv_db = (CodeSystemMetadataValue) hb_session.load(CodeSystemMetadataValue.class, csmv.getId());
-                                            csmv_db.setParameterValue(content);
-                                            hb_session.update(csmv_db);
-                                        }
-                                        else
-                                        {//Noch nicht angelegt => Check if != ""
-                                            if (content.length() > 0)
-                                            {
-                                                //Neues CSMV plus link auf MP
-                                                CodeSystemMetadataValue mv = new CodeSystemMetadataValue();
-                                                mv.setParameterValue(content);
-
-                                                mv.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
-                                                mv.getCodeSystemEntityVersion().setVersionId((Long) csev_db.getVersionId());
-
-                                                mv.setMetadataParameter(new MetadataParameter());
-                                                MetadataParameter mp = null;
-                                                if (metadataParameterMap.containsKey(metadataFields[i]))
-                                                {
-                                                    mp = metadataParameterMap.get(metadataFields[i]);
+                                    for (String metadataField : metadataFields) {
+                                        String content = currentCSVfile.get(metadataField);
+                                        CodeSystemMetadataValue CSMV = CSMVList.get(metadataField);
+                                        if (CSMV != null) {
+                                            //Updating
+                                            CodeSystemMetadataValue CSMV_DB = (CodeSystemMetadataValue) hb_session.load(CodeSystemMetadataValue.class, CSMV.getId());
+                                            CSMV_DB.setParameterValue(content);
+                                            hb_session.update(CSMV_DB);
+                                        } 
+                                        else {
+                                            //Not yet created, check if != ""
+                                            if (content.length() > 0) {
+                                                //New CSMV and link to metadataparameter
+                                                CodeSystemMetadataValue metadataValue = new CodeSystemMetadataValue();
+                                                metadataValue.setParameterValue(content);
+                                                metadataValue.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
+                                                metadataValue.getCodeSystemEntityVersion().setVersionId(CSEV_DB.getVersionId());
+                                                metadataValue.setMetadataParameter(new MetadataParameter());
+                                                MetadataParameter metadataParameter;
+                                                if (metadataParameterMap.containsKey(metadataField))
+                                                    metadataParameter = metadataParameterMap.get(metadataField);
+                                                else {
+                                                    //Creating metadata_parameter
+                                                    metadataParameter = new MetadataParameter();
+                                                    metadataParameter.setParamName(metadataField);
+                                                    metadataParameter.setCodeSystem(new CodeSystem());
+                                                    metadataParameter.getCodeSystem().setId(super.getCodeSystem().getId());
+                                                    
+                                                    hb_session.save(metadataParameter);
+                                                    metadataParameterMap.put(metadataField, metadataParameter);
                                                 }
-                                                else
-                                                {
-                                                    //Create metadata_parameter
-                                                    mp = new MetadataParameter();
-                                                    mp.setParamName(metadataFields[i]);
-                                                    mp.setCodeSystem(new CodeSystem());
-                                                    mp.getCodeSystem().setId(super.getCodeSystem().getId());
-                                                    hb_session.save(mp);
-                                                    metadataParameterMap.put(metadataFields[i], mp);
-                                                }
-                                                mv.getMetadataParameter().setId(mp.getId());
-
-                                                hb_session.save(mv);
+                                                metadataValue.getMetadataParameter().setId(metadataParameter.getId());
+                                                hb_session.save(metadataValue);
                                             }
                                         }
                                     }
-                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt:  " + count);
+                                    LOGGER.info("LOINC concept (" + currentKey + ") update executed:  " + count);
                                 }
-                                catch (Exception e)
-                                {
+                                catch (Exception e){
                                     countFehler++;
-                                    errList.add(String.valueOf(newCount));
-                                    LOGGER.debug("Fehler im Update-Import Loinc: Vergleich zweier Einträge fehlerhaft!");
-                                    LOGGER.info("LOINC Konzept(" + actKey + ") update durchgefuehrt FEHLER: " + count);
+                                    errorList.add(String.valueOf(newCount));
+                                    LOGGER.info("Error [0045], LOINC concept (" + currentKey + ") update failed while comparing two entries (" + count + "): " + e.getLocalizedMessage());
                                 }
                             }
                         }
-                        else
-                        {
+                        else{
                             //New CSC
                             CreateConceptRequestType request = new CreateConceptRequestType();
                             request.setLogin(this.getLoginType());
-                            //request.setCodeSystem(super.getCodeSystem());
                             request.setCodeSystem(new CodeSystem());
                             request.getCodeSystem().setId(super.getCodeSystem().getId());
                             request.getCodeSystem().setCodeSystemVersions(new HashSet<CodeSystemVersion>());
-                            CodeSystemVersion csv_act = new CodeSystemVersion();
-                            csv_act.setVersionId(super.getCodeSystem().getCurrentVersionId());
-                            request.getCodeSystem().getCodeSystemVersions().add(csv_act);
+                            CodeSystemVersion currentCSV = new CodeSystemVersion();
+                            currentCSV.setVersionId(super.getCodeSystem().getCurrentVersionId());
+                            request.getCodeSystem().getCodeSystemVersions().add(currentCSV);
 
                             request.setCodeSystemEntity(new CodeSystemEntity());
                             request.getCodeSystemEntity().setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
 
-                            CodeSystemConcept csc = new CodeSystemConcept();
-                            csc.setIsPreferred(true);
+                            CodeSystemConcept CSC = new CodeSystemConcept();
+                            CSC.setIsPreferred(true);
 
-                            CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
-                            csev.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
-                            csev.setIsLeaf(true);
+                            CodeSystemEntityVersion CSEV = new CodeSystemEntityVersion();
+                            CSEV.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
+                            CSEV.setIsLeaf(true);
 
                             CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
                             membership.setIsMainClass(Boolean.TRUE);
@@ -759,191 +686,155 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
                             request.getCodeSystemEntity().setCodeSystemVersionEntityMemberships(new HashSet<CodeSystemVersionEntityMembership>());
                             request.getCodeSystemEntity().getCodeSystemVersionEntityMemberships().add(membership);
 
-                            CreateConcept cc = new CreateConcept();
+                            CreateConcept createConcept = new CreateConcept();
+                            
+                            CSC.setCode(currentKey);
+                            CSC.setTerm(currentCSVfile.get("LONG_COMMON_NAME"));
+                            CSC.setTermAbbrevation(currentCSVfile.get("SHORTNAME"));
+                            CSC.setDescription(currentCSVfile.get("COMPONENT") + " : " + currentCSVfile.get("PROPERTY") + " : "
+                                    + currentCSVfile.get("TIME_ASPCT") + " : " + currentCSVfile.get("SYSTEM") + " : "
+                                    + currentCSVfile.get("SCALE_TYP") + " : " + currentCSVfile.get("METHOD_TYP") + " : ");
 
-                            //request.setCodeSystemEntity(new CodeSystemEntity());
-                            //request.getCodeSystemEntity().setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
-                            csc.setCode(actKey);
-                            csc.setTerm(csvAct.get("LONG_COMMON_NAME"));
-                            csc.setTermAbbrevation(csvAct.get("SHORTNAME"));
-
-                            //Matthias: change "|" to ":" for fully specified name
-                            csc.setDescription(csvAct.get("COMPONENT") + " : " + csvAct.get("PROPERTY") + " : "
-                                    + csvAct.get("TIME_ASPCT") + " : " + csvAct.get("SYSTEM") + " : "
-                                    + csvAct.get("SCALE_TYP") + " : " + csvAct.get("METHOD_TYP") + " : ");
-
-                            // Entity-Version erstellen
-                            if (csev.getCodeSystemConcepts() == null)
-                            {
-                                csev.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
-                            }
+                            //Creating entity version
+                            if (CSEV.getCodeSystemConcepts() == null)
+                                CSEV.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
                             else
-                            {
-                                csev.getCodeSystemConcepts().clear();
-                            }
-                            csev.getCodeSystemConcepts().add(csc);
-                            csev.setEffectiveDate(parseDate(csvAct.get("DATE_LAST_CHANGED")));
-                            csev.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+                                CSEV.getCodeSystemConcepts().clear();
+                            
+                            CSEV.getCodeSystemConcepts().add(CSC);
+                            CSEV.setEffectiveDate(parseDate(currentCSVfile.get("DATE_LAST_CHANGED")));
+                            CSEV.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
 
-                            // Konzept speichern
-                            if (csc.getCode().length() > 0)
-                            {
-                                // Entity-Version dem Request hinzufügen
+                            //Saving concept
+                            if (CSC.getCode().length() > 0){
+                                //Adding entity version to the request
                                 request.getCodeSystemEntity().getCodeSystemEntityVersions().clear();
-                                request.getCodeSystemEntity().getCodeSystemEntityVersions().add(csev);
+                                request.getCodeSystemEntity().getCodeSystemEntityVersions().add(CSEV);
 
-                                // Dienst aufrufen (Konzept einfügen)
-                                CreateConceptResponseType responseCC = cc.CreateConcept(request, hb_session);
+                                CreateConceptResponseType responseCC = createConcept.CreateConcept(request, hb_session);
 
-                                if (responseCC.getReturnInfos().getStatus() == ReturnType.Status.OK)
-                                {
+                                if (responseCC.getReturnInfos().getStatus() == ReturnType.Status.OK){
                                     newCount++;
 
                                     if (responseCC.getCodeSystemEntity().getCurrentVersionId() > 0)
-                                    {
-                                        codesMap.put(csc.getCode(), responseCC.getCodeSystemEntity().getCurrentVersionId());
-                                    }
+                                        codesMap.put(CSC.getCode(), responseCC.getCodeSystemEntity().getCurrentVersionId());
 
-                                    // Metadaten zu diesem Konzept speichern
-                                    int mdCount = 0;
-
-                                    CodeSystemEntityVersion csev_result = (CodeSystemEntityVersion) responseCC.getCodeSystemEntity().getCodeSystemEntityVersions().toArray()[0];
-                                    mdCount = addMetadataToConcept(csvAct, csev_result.getVersionId(), hb_session, super.getCodeSystem().getId());
-
-                                    //System.out.println(count);
-                                    LOGGER.info("LOINC Konzept(" + actKey + ") neu erstellt: " + count);
+                                    LOGGER.info("LOINC concept (" + currentKey + ") created: " + count);
                                 }
-                                else
-                                {
+                                else{
                                     countFehler++;
-                                    errList.add(String.valueOf(newCount));
-                                    LOGGER.debug("Konzept konnte nicht erstellt werden: " + responseCC.getReturnInfos().getMessage());
-                                    LOGGER.info("LOINC Konzept(" + actKey + ") neu erstellt FEHLER: " + count);
+                                    errorList.add(String.valueOf(newCount));
+                                    LOGGER.info("Error [0046], LOINC concept (" + currentKey + ") creation failed: (" + count + "): " + responseCC.getReturnInfos().getMessage());
                                 }
                             }
-                            else
-                            {
+                            else{
                                 countFehler++;
-                                errList.add(String.valueOf(newCount));
-                                LOGGER.debug("Term ist nicht angegeben");
-                                LOGGER.info("LOINC Konzept(" + actKey + ") neu erstellt FEHLER: " + count);
+                                errorList.add(String.valueOf(newCount));
+                                LOGGER.info("Error [0047], LOINC concept (" + currentKey + ") creation failed, term missing: " + count);
                             }
                         }
                     }
 
-                    //Mimimum acceptable free memory you think your app needs 
-                    //long minRunningMemory = (1024 * 1024);
+                    //Freeing memory
                     Runtime runtime = Runtime.getRuntime();
-                    if (count% 100 == 0)
-                    {
-                        LOGGER.debug("FreeMemory: " + runtime.freeMemory());
-
-                        if (count % 1000 == 0)
-                        {
-                            // wichtig, sonst kommt es bei größeren Dateien zum Java-Heapspace-Fehler
+                    if (count% 100 == 0){
+                        runtime.freeMemory();
+                        if (count % 1000 == 0){
                             hb_session.flush();
                             hb_session.clear();
                         }
                         if (count % 10000 == 0)
-                        {
-                            // sicherheitshalber aufrufen
                             System.gc();
-                        }
                     }
                 }
-                csvAct.close();
-                LOGGER.debug("Update-Import abgeschlossen, speicher Ergebnisse in DB (commit): " + count);
-                LOGGER.info("countFehler: " + countFehler);
-                if (countFehler == 0)
-                {
-                    //reload codesystem
+                currentCSVfile.close();
+                
+                if (countFehler == 0){
+                    //Reloading codesystem
                     if (super.getCodeSystem().getId() != null)
-                    {
-                        cs_db = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
-                    }
+                        CS_DB = (CodeSystem) hb_session.get(CodeSystem.class, super.getCodeSystem().getId());
 
-                    this.setCodeSystem(cs_db);
+                    this.setCodeSystem(CS_DB);
                     
-                    CodeSystem cs_ret = new CodeSystem();
-                    cs_ret.setId(super.getCodeSystem().getId());
-                    cs_ret.setCurrentVersionId(super.getCodeSystem().getCurrentVersionId());
-                    cs_ret.setName(super.getCodeSystem().getName());
-                    cs_ret.setAutoRelease(super.getCodeSystem().getAutoRelease());
+                    CodeSystem CS_returned = new CodeSystem();
+                    CS_returned.setId(super.getCodeSystem().getId());
+                    CS_returned.setCurrentVersionId(super.getCodeSystem().getCurrentVersionId());
+                    CS_returned.setName(super.getCodeSystem().getName());
+                    CS_returned.setAutoRelease(super.getCodeSystem().getAutoRelease());
 
-                    CodeSystemVersion csv_ret = new CodeSystemVersion();
-                    csv_ret.setVersionId(super.getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId());
-                    csv_ret.setName(super.getCodeSystem().getCodeSystemVersions().iterator().next().getName());
-                    cs_ret.getCodeSystemVersions().clear();
-                    cs_ret.getCodeSystemVersions().add(csv_ret);
+                    CodeSystemVersion CSV_returned = new CodeSystemVersion();
+                    CSV_returned.setVersionId(super.getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId());
+                    CSV_returned.setName(super.getCodeSystem().getCodeSystemVersions().iterator().next().getName());
+                    CS_returned.getCodeSystemVersions().clear();
+                    CS_returned.getCodeSystemVersions().add(CSV_returned);
 
-                    this.setCodeSystem(cs_ret);
-                    
+                    this.setCodeSystem(CS_returned);
+         
                     LastChangeHelper.updateLastChangeDate(true, super.getCodeSystem().getCurrentVersionId(), null);
                     
-                    hb_session.getTransaction().commit();
-                    //response.getReturnInfos().setMessage("Update-Import abgeschlossen. Update bei " + count + " Konzept(en). " + newCount + " Konzepte wurden neu importiert. " + countFehler + " Fehler");
+                    if(!hb_session.getTransaction().wasCommitted())
+                        hb_session.getTransaction().commit();
                 }
-                else
-                {
+                else{
+                    //TODO error report comes here
                     LOGGER.info("countFehler: " + countFehler);
-                    //response.getReturnInfos().setMessage("Update-Import abgeschlossen. Update bei " + count + " Konzept(en). " + newCount + " Konzepte wurden neu importiert. " + countFehler + " Fehler;" + "Daten auf Grund der Fehler nicht in der Datenbank gespeichert. ");
                 }
             }
-            catch (Exception ex)
-            {
-                s = "Fehler beim LOINC-Import - Update: " + ex.getLocalizedMessage();
-                err = true;
+            catch (IOException ex){
+                LOGGER.error("Error [0048]: " + ex.getLocalizedMessage());
+                error = true;
 
-                try
-                {
+                try{
                     if(!hb_session.getTransaction().wasRolledBack()){
                         hb_session.getTransaction().rollback();
-                        LOGGER.info("[ImportLOINC.java] Rollback durchgefuehrt!");
+                        LOGGER.info("Rollback executed");
                     }
                 }
-                catch (Exception exRollback)
-                {
-                    if(!hb_session.getTransaction().wasRolledBack()){
-                        LOGGER.info(exRollback.getMessage());
-                        LOGGER.info("[ImportLOINC.java] Rollback fehlgeschlagen!");
-                    }
+                catch (Exception exRollback){
+                    LOGGER.error("Error [0049]: " + exRollback.getLocalizedMessage());
+                    if(!hb_session.getTransaction().wasRolledBack())
+                        LOGGER.info("Rollback failed");
                 }
-                finally
-                {
-                    throw new ImportException(s);
-                }
+            } 
+            catch (HibernateException ex) {
+                LOGGER.error("Error [0050]: " + ex.getLocalizedMessage());
+                error = true;
                 
+                try{
+                    if(!hb_session.getTransaction().wasRolledBack()){
+                        hb_session.getTransaction().rollback();
+                        LOGGER.info("Rollback executed");
+                    }
+                }
+                catch (Exception exRollback){
+                    LOGGER.error("Error [0051]: " + exRollback.getLocalizedMessage());
+                    if(!hb_session.getTransaction().wasRolledBack())
+                        LOGGER.info("Rollback failed");
+                }
             }
-            finally
-            {
-                // Session schließen
-                hb_session.close();
+            finally{
+                if(hb_session.isOpen())
+                    hb_session.close();
             }
 
-            LOGGER.debug("ImportLOINC - Update - fertig");
-
-            LOGGER.info("ImportLOINC - Update - fertig: " + dateformat.format(new Date()));
-            //Store actual "Version" only if no error occured!
-            if (countFehler == 0 && !err)
-            {
-                FileOutputStream fos;
-                try
-                {
-                    fos = new FileOutputStream(LOINCpath);
-                    Writer out = new OutputStreamWriter(fos, "UTF8");
+            //Store current version only if no error occured
+            if (countFehler == 0 && !error){
+                FileOutputStream fileOutputStream;
+                try{
+                    fileOutputStream = new FileOutputStream(LOINCpath);
+                    Writer out = new OutputStreamWriter(fileOutputStream, "UTF8");
                     out.write(new String(bytes, "UTF-8"));
                     out.close();
                 }
-                catch (FileNotFoundException ex)
-                {
-                    LOGGER.error(ex);
+                catch (FileNotFoundException ex){
+                    LOGGER.error("Error [0052]: " + ex.getLocalizedMessage());
                 }
-                catch (IOException ex)
-                {
-                    LOGGER.error(ex);
+                catch (IOException ex){
+                    LOGGER.error("Error [0053]: " + ex.getLocalizedMessage());
                 }
             }
         }
+        LOGGER.info("----- startImport finished (001) -----");
     }
     
     /**
@@ -1002,7 +893,7 @@ public class ImportLOINCNew extends CodeSystemImport implements ICodeSystemImpor
             }
         }
         catch (Exception e){
-            LOGGER.error("Error [0040]: " + e.getLocalizedMessage());
+            LOGGER.error("Error [0042]: " + e.getLocalizedMessage());
         }
         return metadataCount;
     }
