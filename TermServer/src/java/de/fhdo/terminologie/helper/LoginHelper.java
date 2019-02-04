@@ -31,8 +31,8 @@ import de.fhdo.terminologie.ws.types.LoginInfoType;
 import de.fhdo.terminologie.ws.types.LoginType;
 import de.fhdo.terminologie.ws.types.ReturnType;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.ws.BindingProvider;
 
 /**
@@ -43,8 +43,8 @@ public class LoginHelper{
 
     private static LoginHelper instance;
     final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
-    final private HashMap<String, LoginInfoType> userMap = new HashMap<String, LoginInfoType>();
-
+    final private ConcurrentHashMap<String, LoginInfoType> userMap = new ConcurrentHashMap<String, LoginInfoType>();
+    
     /**
      * Return the singleton instance or instantiate a new instance and return that.
      * @return the instance
@@ -67,15 +67,14 @@ public class LoginHelper{
     }
 
     /**
-     * TODO
-     * @param login TODO
-     * @param returnType TODO
-     * @param loginRequired wheter or not a login is required now
-     * @param hb_session the hibernate session from which to retrieve the login infos
+     * Calls getLoginInfos() to check whether or not the user is logged in or not.
+     * @param login the login parameter, containing information about the user.
+     * @param returnType contains the return information about the login.
+     * @param loginRequired wheter or not a login is required.
+     * @param hb_session the hibernate session from which to retrieve the login infos.
      * @return true if the user was successfully logged in.
      */
-    public boolean doLogin(LoginType login, ReturnType returnType, boolean loginRequired, org.hibernate.Session hb_session)
-    {   
+    public boolean doLogin(LoginType login, ReturnType returnType, boolean loginRequired, org.hibernate.Session hb_session){   
         LOGGER.info("+++++ doLogin started +++++");
         boolean loggedIn = false;
 
@@ -92,13 +91,14 @@ public class LoginHelper{
             returnType.setStatus(ReturnType.Status.OK);
             returnType.setMessage("Sie müssen mit Administrationsrechten am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
         }
+        
         LOGGER.info("----- doLogin finished (001) -----");
         return loggedIn;
     }
 
     /**
      * Calls getLoginInfos(Login, null).
-     * @param Login the parameter for the subsequent call
+     * @param Login the parameter for the subsequent call.
      * @return the return of the subsequent call.
      */
     public LoginInfoType getLoginInfos(LoginType Login){
@@ -107,13 +107,13 @@ public class LoginHelper{
 
     /**
      * Checks if the user is logged in and if the session is still valid, using the session-ID.
-     * @param Login LoginType with session-ID
-     * @param session the user's session
-     * @return LoginInfoType if successfull, else null
+     * @param Login LoginType with session-ID.
+     * @param session the user's session.
+     * @return LoginInfoType if successfull, else null.
      */
-    public LoginInfoType getLoginInfos(LoginType Login, org.hibernate.Session session)
-    {
+    public LoginInfoType getLoginInfos(LoginType Login, org.hibernate.Session session){
         LOGGER.info("+++++ getLoginInfos started +++++");
+        
         if (Login == null || Login.getSessionID() == null || Login.getSessionID().length() == 0){
             LOGGER.debug("Session-ID missing");
             LOGGER.info("----- getLoginInfos finished (001) -----");
@@ -122,55 +122,48 @@ public class LoginHelper{
         
         LoginRequestType request = new LoginRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.idp.authorizationIDP.LoginType());
-        LOGGER.info("Requested session-id: " + Login.getSessionID());
         request.getLogin().setSessionID(Login.getSessionID());
+        LOGGER.info("Requested session-id: " + Login.getSessionID());
+        
         GetLoginInfosResponse.Return loginInfos = null;
         try{
-            AuthorizationIDP port = WebServiceUrlHelper.getInstance().getAuthorizationIdpServicePort();
-            LOGGER.info("WS endpoint: " + ((BindingProvider) port).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
-            loginInfos = port.getLoginInfos(request);
+            AuthorizationIDP portAuthorizationIDP = WebServiceUrlHelper.getInstance().getAuthorizationIdpServicePort();
+            LOGGER.info("WS endpoint: " + ((BindingProvider) portAuthorizationIDP).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
+            loginInfos = portAuthorizationIDP.getLoginInfos(request);
         }
         catch (Exception e){
-            LOGGER.error(e);
+            LOGGER.error("Error [0062]: " + e.getLocalizedMessage());
         }
 
-        if (loginInfos.getReturnInfos().getStatus().equals(Status.OK))
-        {
-            LoginInfoType loginInfoType = new LoginInfoType();
-            loginInfoType.setLastIP(loginInfos.getReturnInfos().getLastIP());
+        //User is logged in
+        if (loginInfos !=null && loginInfos.getReturnInfos().getStatus().equals(Status.OK)){
+            LoginInfoType loginReturn = new LoginInfoType();
+            loginReturn.setLastIP(loginInfos.getReturnInfos().getLastIP());
 
             TermUser termUser = new TermUser();
             termUser.setId(loginInfos.getReturnInfos().getTermUser().getId());
             termUser.setIsAdmin(loginInfos.getReturnInfos().getTermUser().isIsAdmin());
             termUser.setName(loginInfos.getReturnInfos().getTermUser().getName());
-            loginInfoType.setTermUser(termUser);
+            loginReturn.setTermUser(termUser);
 
             LoginType loginType = new LoginType();
             loginType.setUsername(loginInfos.getReturnInfos().getTermUser().getName());
             loginType.setSessionID(Login.getSessionID());
-
-            loginInfoType.setLogin(loginType);
+            loginReturn.setLogin(loginType);
+            
             LOGGER.info("----- getLoginInfos finished (002) -----");
-            return loginInfoType;
+            return loginReturn;
         }
 
-        LoginInfoType loginInfoType = null;
-        
-        boolean hibernateSessionCreated = (session != null);
-        LOGGER.debug("Hibernate session created? " + hibernateSessionCreated);
-
-        if (Login.getSessionID() == null || Login.getSessionID().length() == 0){
-            LOGGER.debug("Session-ID missing");
-            LOGGER.info("----- getLoginInfos finished (003) -----");
-            return null;
-        }
+        //User is not logged in
+        LoginInfoType loginReturn = null;
 
         if (userMap.containsKey(Login.getSessionID())){
-            loginInfoType = userMap.get(Login.getSessionID());
+            loginReturn = userMap.get(Login.getSessionID());
             
             if (Login.getIp() != null && Login.getIp().length() > 0){
-                if (!(loginInfoType.getLastIP() != null && loginInfoType.getLastIP().equals(Login.getIp()))){
-                    LOGGER.debug("IP does not match (" + Login.getIp() + ")");
+                if (!(loginReturn.getLastIP() != null && loginReturn.getLastIP().equals(Login.getIp()))){
+                    LOGGER.debug("User-IP does not match (" + Login.getIp() + ")");
                     LOGGER.info("----- getLoginInfos finished (004) -----");
                     return null;
                 }
@@ -178,16 +171,16 @@ public class LoginHelper{
 
             // Checking timeout
             long now = new java.util.Date().getTime();
-            long timestamp = loginInfoType.getLastTimestamp().getTime();
+            long timestamp = loginReturn.getLastTimestamp().getTime();
             //3.2.21 increased session timeout from 30 to 120
             long session_timeout = 120 * 60000; // 120 minutes, TODO read from DB
             
             if (now - session_timeout < timestamp){
                 //Refresh timestamp
-                loginInfoType.setLastTimestamp(new Date());
-                userMap.put(Login.getSessionID(), loginInfoType);
+                loginReturn.setLastTimestamp(new Date());
+                userMap.put(Login.getSessionID(), loginReturn);
                 LOGGER.info("----- getLoginInfos finished (005) -----");
-                return loginInfoType;
+                return loginReturn;
             }
             else{
                 LOGGER.debug("Login has timed out");
@@ -199,7 +192,7 @@ public class LoginHelper{
             LOGGER.debug("Session-ID is missing from userMap");
 
         org.hibernate.Session hb_session;
-        if (hibernateSessionCreated)
+        if (session != null)
             hb_session = session;
         else
             hb_session = HibernateUtil.getSessionFactory().openSession();
@@ -230,23 +223,23 @@ public class LoginHelper{
                 Session s_session = liste.get(0);
 
                 // Creating response
-                loginInfoType = new LoginInfoType();
-                loginInfoType.setLastTimestamp(s_session.getLastTimestamp());
-                loginInfoType.setLastIP(s_session.getIpAddress());
-                loginInfoType.setTermUser(s_session.getTermUser());
-                loginInfoType.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
-                loginInfoType.setLogin(new LoginType());
-                loginInfoType.getLogin().setUsername(s_session.getTermUser().getName());
-                loginInfoType.getLogin().setSessionID(s_session.getSessionId());
+                loginReturn = new LoginInfoType();
+                loginReturn.setLastTimestamp(s_session.getLastTimestamp());
+                loginReturn.setLastIP(s_session.getIpAddress());
+                loginReturn.setTermUser(s_session.getTermUser());
+                loginReturn.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
+                loginReturn.setLogin(new LoginType());
+                loginReturn.getLogin().setUsername(s_session.getTermUser().getName());
+                loginReturn.getLogin().setSessionID(s_session.getSessionId());
 
-                userMap.put(Login.getSessionID(), loginInfoType);
+                userMap.put(Login.getSessionID(), loginReturn);
             }
         }
         catch (Exception e){
             LOGGER.error("Error at 'getLoginInfos', Hibernate: " + e.getLocalizedMessage());
         }
         finally{
-            if (hibernateSessionCreated){
+            if (session!=null){
                 if(hb_session!=null && hb_session.isOpen()){
                     LOGGER.debug("Closing hibernate session");
                     hb_session.close();
@@ -256,12 +249,12 @@ public class LoginHelper{
             }
         }
         LOGGER.info("----- getLoginInfos finished (007) -----");
-        return loginInfoType;
+        return loginReturn;
     }
 
     /**
      * Calls getLoginInfos(Login).
-     * @param Login the parameter for the subsequent call
+     * @param Login the parameter for the subsequent call.
      * @return the return value of the subsequent call.
      */
     public boolean isUserPermitted(LoginType Login){

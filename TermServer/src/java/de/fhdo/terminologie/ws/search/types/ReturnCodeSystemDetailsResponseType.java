@@ -19,25 +19,21 @@
  */
 package de.fhdo.terminologie.ws.search.types;
 
-
-
 import de.fhdo.terminologie.db.hibernate.CodeSystem;
 import de.fhdo.terminologie.ws.types.ReturnType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- *
- * @author warends
+ * V 3.3 RDY
+ * @author Warends
  */
 
 @XmlRootElement
 @XmlType(name = "", propOrder = { "returnInfos", "codeSystem"})
-
 public class ReturnCodeSystemDetailsResponseType {
- 
-  private ReturnType returnInfos;
-  private CodeSystem codeSystem;
+    private ReturnType returnInfos;
+    private CodeSystem codeSystem;
 
     /**
      * @return the returnInfos
@@ -66,5 +62,4 @@ public class ReturnCodeSystemDetailsResponseType {
     public void setCodeSystem(CodeSystem codeSystem) {
         this.codeSystem = codeSystem;
     }
-    
 }
