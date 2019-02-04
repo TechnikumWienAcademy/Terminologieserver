@@ -22,7 +22,13 @@
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListDomainValues.java</file>
         </group>
         <group>
-            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/db/hibernate/TermUser.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_export/ExportClaml.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/LoginHelper.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/types/LoginType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/types/ExportCodeSystemContentRequestType.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ReturnCodeSystemDetails.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ExportCodeSystemContent.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/types/ReturnCodeSystemDetailsRequestType.java</file>
         </group>
     </open-files>
 </project-private>

@@ -23,8 +23,12 @@ package de.fhdo.terminologie.ws.types;
  *
  * @author Bernhard Rimatzki
  */
-public class ExportType 
-{
+public class ExportType {
+    //TODO in XSD-Dateien anpassen damit die Felder auch in den generated sources sichtbar werden
+    public static final Long FORMAT_CLAML = 193L;
+    public static final Long FORMAT_CSV = 194L;
+    public static final Long FORMAT_SVS = 195L;
+    
     private Long formatId;
     private byte[] filecontent;
     private String url;

@@ -35,54 +35,44 @@ import java.util.Iterator;
 
 /**
  *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)/ warends
+ * @author Robert Mützner
  */
-public class ReturnCodeSystemDetails
-{
+public class ReturnCodeSystemDetails{
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  /**
-   * Liefert alle Informationen zu einem Vokabular
-   *
-   * @param parameter CodeSystem(Vokabular), VersionId
-   * @return Ergebnis des Webservices, gibt Details des angegebenen CodeSystems
-   * und der angegebenen VersionId zurück; wurde keine VersionId angegeben
-   * werden Details zu allen Versionen ausgegeben
-   *
-   */
-  //3.2.17 added loginalreadychecked
-  public ReturnCodeSystemDetailsResponseType ReturnCodeSystemDetails(ReturnCodeSystemDetailsRequestType parameter)
-  {
+    /**
+     * Liefert alle Informationen zu einem Vokabular
+     *
+     * @param parameter CodeSystem(Vokabular), VersionId
+     * @return Ergebnis des Webservices, gibt Details des angegebenen CodeSystems
+     * und der angegebenen VersionId zurück; wurde keine VersionId angegeben
+     * werden Details zu allen Versionen ausgegeben
+     * TODO
+    */
+    public ReturnCodeSystemDetailsResponseType ReturnCodeSystemDetails(ReturnCodeSystemDetailsRequestType parameter){
+        LOGGER.info("+++++ ReturnCodeSystemDetails started +++++");
 
-    if (logger.isInfoEnabled())
-    {
-      logger.info("====== ReturnCodeSystemDetails gestartet ======");
-    }
-
-    // Return-Informationen anlegen
-    ReturnCodeSystemDetailsResponseType response = new ReturnCodeSystemDetailsResponseType();
-    response.setReturnInfos(new ReturnType());
+        //Creating return information
+        ReturnCodeSystemDetailsResponseType response = new ReturnCodeSystemDetailsResponseType();
+        response.setReturnInfos(new ReturnType());
     
-    // Parameter prüfen
-    if (validateParameter(parameter, response) == false)
-    {
-      return response; // Fehler bei den Parametern
-    }
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- ReturnCodeSystemDetails finished (001) -----");
+            return response; //Faulty parameters
+        }
 
-    // Login-Informationen auswerten (gilt für jeden Webservice)
-    boolean loggedIn = false;
-    LoginInfoType loginInfoType = null;
-    //3.2.17 added loginalreadychecked check
-    if (parameter != null && !parameter.getLoginAlreadyChecked() && parameter.getLogin() != null)
-    {
-      loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
-      loggedIn = loginInfoType != null;
-    }
+        //Checking login (does every webservice)
+        boolean loggedIn = false;
+        LoginInfoType loginInfoType = null;
+        if (parameter != null && parameter.getLogin() != null){
+            loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
+            loggedIn = loginInfoType != null;
+        }
     
-    if (logger.isDebugEnabled())
+    if (LOGGER.isDebugEnabled())
     {
-      logger.debug("Benutzer ist eingeloggt: " + loggedIn);
+      LOGGER.debug("Benutzer ist eingeloggt: " + loggedIn);
     }
 
     try
@@ -153,7 +143,7 @@ public class ReturnCodeSystemDetails
           hql += " ))";
         }
         
-        logger.debug("HQL: " + hql);
+        LOGGER.debug("HQL: " + hql);
 
         // Query erstellen
         org.hibernate.Query q = hb_session.createQuery(hql);
@@ -246,7 +236,7 @@ public class ReturnCodeSystemDetails
         response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         response.getReturnInfos().setMessage("Fehler bei 'ReturnCodeSystemDetails', Hibernate: " + e.getLocalizedMessage());
 
-        logger.error("Fehler bei 'ReturnCodeSystemDetails', Hibernate: " + e.getLocalizedMessage());
+        LOGGER.error("Fehler bei 'ReturnCodeSystemDetails', Hibernate: " + e.getLocalizedMessage());
         e.printStackTrace();
       }
       finally
@@ -267,7 +257,7 @@ public class ReturnCodeSystemDetails
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
       response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems': " + e.getLocalizedMessage());
 
-      logger.error("Fehler bei 'ReturnCodeSystemDetails': " + e.getLocalizedMessage());
+      LOGGER.error("Fehler bei 'ReturnCodeSystemDetails': " + e.getLocalizedMessage());
       e.printStackTrace();
     }
 

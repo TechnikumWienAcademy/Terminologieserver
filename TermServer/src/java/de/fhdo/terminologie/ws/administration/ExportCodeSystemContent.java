@@ -27,176 +27,156 @@ import de.fhdo.terminologie.ws.administration.types.ExportCodeSystemContentRespo
 import de.fhdo.terminologie.ws.types.ReturnType;
 
 /**
- *
+ * V 3.3 OK
  * @author Bernhard Rimatzki
  */
-public class ExportCodeSystemContent
-{
+public class ExportCodeSystemContent{
 
-  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  /**
-   * Creates a new domain with the given parameters.
-   *
-   * @param parameter
-   * @return Return value of the webservice
-   */
-  public ExportCodeSystemContentResponseType ExportCodeSystemContent(ExportCodeSystemContentRequestType parameter)
-  {
-    if (logger.isInfoEnabled())
-    {  
-        logger.info("====== ExportCodeSystemContent started, ID: " + parameter.getCodeSystem().getCurrentVersionId() + ", name: " + parameter.getCodeSystem().getName() + ", version: " + parameter.getCodeSystem().getCurrentVersionId() +  " ======");
-    }
+    /**
+     * Checks the export parameters and calls the export function, which suits the export format ID given in the parameters.
+     * @param parameter the export parameters.
+     * @return a response with info about the export.
+    */
+    public ExportCodeSystemContentResponseType ExportCodeSystemContent(ExportCodeSystemContentRequestType parameter){
+        LOGGER.info("+++++ ExportCodeSystemContent started +++++");
     
-    // Create return information
-    ExportCodeSystemContentResponseType response = new ExportCodeSystemContentResponseType();
-    response.setReturnInfos(new ReturnType());
+        ExportCodeSystemContentResponseType response = new ExportCodeSystemContentResponseType();
+        response.setReturnInfos(new ReturnType());
     
-    if(StaticExportStatus.getActiveSessions() < StaticExportStatus.getMAX_SESSIONS())
-    {
-        StaticExportStatus.increaseAvtiveSessions();
-    }
-    else
-    {
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        response.getReturnInfos().setMessage("Maximale Anzahl an Export Sessions erreicht. Bitte Versuchen Sie es später wieder.");
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP503);
+        if(StaticExportStatus.getActiveSessions() < StaticExportStatus.getMAX_SESSIONS())
+            StaticExportStatus.increaseActiveSessions();
+        else{
+            response.getReturnInfos().setMessage("Maximale Anzahl an Export Sessions erreicht. Bitte Versuchen Sie es später wieder.");
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP503);
+            LOGGER.info("----- ExportCodeSystemContent finished (001) -----");
+            return response;
+        }
+
+        //Check parameters
+        if (validateParameter(parameter, response) == false){
+            StaticExportStatus.decreaseActiveSessions();
+            LOGGER.info("----- ExportCodeSystemContent finished (002) -----");
+            return response; // Parameter check failed
+        }
+
+        if (parameter == null || parameter.getExportInfos() == null || parameter.getExportInfos().getFormatId() == null){
+            StaticExportStatus.decreaseActiveSessions();
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            response.getReturnInfos().setMessage("Request -> ExportInfos -> Format-ID darf nicht null sein.");
+            LOGGER.info("----- ExportCodeSystemContent finished (003) -----");
+            return response;
+        }
+
+        long formatId = parameter.getExportInfos().getFormatId();
+
+        if (formatId == ExportCodeSystemContentRequestType.EXPORT_CLAML_ID){
+            try{
+                //TODO check class
+                ExportClaml exportClaML = new ExportClaml();
+                response = exportClaML.exportClaml(parameter);
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0059]: " + e.getLocalizedMessage());
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
+                response.getReturnInfos().setMessage("Fehler beim CLAML-Export: " + e.getLocalizedMessage());
+            }
+        }
+        else if (formatId == ExportCodeSystemContentRequestType.EXPORT_CSV_ID){
+            try{
+                //TODO check class
+                ExportCSV exportCSV = new ExportCSV(parameter);
+                String exportResponseString = exportCSV.exportCSV(response);
+
+                if (exportResponseString.length() == 0){
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+                    response.getReturnInfos().setStatus(ReturnType.Status.OK);
+                    response.getReturnInfos().setCount(exportCSV.getCountExported());
+                }
+                else{
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
+                    response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + exportResponseString);
+                }
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0060]: " + e.getLocalizedMessage());
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
+                response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + e.getLocalizedMessage());
+            }
+        }
+        else if (formatId == ExportCodeSystemContentRequestType.EXPORT_SVS_ID){
+            try{
+                //TODO check class
+                ExportCodeSystemSVS exportSVS = new ExportCodeSystemSVS(parameter);
+                String exportResponseString = exportSVS.exportSVS(response);
+
+                if (exportResponseString.length() == 0){
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+                    response.getReturnInfos().setStatus(ReturnType.Status.OK);
+                    response.getReturnInfos().setCount(exportSVS.getCountExported());
+                }
+                else{
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
+                    response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + exportResponseString);
+                }
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0061]: " + e.getLocalizedMessage());
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
+                response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + e.getLocalizedMessage());
+            }
+        }
+        else{
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            response.getReturnInfos().setMessage("Das Export-Format mit folgender ID ist unbekannt: " + formatId + "\n" + ExportCodeSystemContentRequestType.getPossibleFormats());
+        }
+        StaticExportStatus.decreaseActiveSessions();
+        
+        LOGGER.info("----- ExportCodeSystemContent finished (004) -----");
         return response;
     }
 
-    // Check parameters
-    if (validateParameter(parameter, response) == false)
-    {
-        StaticExportStatus.decreaseAvtiveSessions();
-        //response is set during validateParameter
-        return response; // Parameter check failed
-    }
-
-    if (parameter == null || parameter.getExportInfos() == null || parameter.getExportInfos().getFormatId() == null)
-    {
-        StaticExportStatus.decreaseAvtiveSessions();
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setMessage("Request->ExportInfos->formatId darf nicht NULL sein!");
-        return response;
-    }
-
-    long formatId = parameter.getExportInfos().getFormatId();
-
-    if (formatId == ExportCodeSystemContentRequestType.EXPORT_CLAML_ID)
-    {
-        try
-        {
-            ExportClaml exportClaML = new ExportClaml();
-            response = exportClaML.export(parameter);
-        }
-        catch (Exception e)
-        {
-            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-            response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-            response.getReturnInfos().setMessage("Fehler beim ClaML-Export: " + e.getLocalizedMessage());
-        }
-    }
-    else if (formatId == ExportCodeSystemContentRequestType.EXPORT_CSV_ID)
-    {
-      try
-      {
-        ExportCSV exportCSV = new ExportCSV(parameter);
-        String exportResponseString = exportCSV.exportCSV(response);
-
-        if (exportResponseString.length() == 0)
-        {
-          response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-          response.getReturnInfos().setStatus(ReturnType.Status.OK);
-          response.getReturnInfos().setCount(exportCSV.getCountExported());
+    /**
+     * Checks if the parameters are valid.
+     * @param Request the parameters to be checked.
+     * @param Response the container for the return infos.
+     * @return false, if the parameters are invalid.
+    */
+    private boolean validateParameter(ExportCodeSystemContentRequestType parameter, ExportCodeSystemContentResponseType response){
+        String responseString = "";
+        boolean passed = true;
+        
+        if(parameter.getCodeSystem() == null){
+            responseString = "Es muss ein Codesytem angegeben werden.";
+            passed = false;
         }
         else
-        {
-          response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-          response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-          response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-          response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + exportResponseString);
-        }
-      }
-      catch (Exception e)
-      {
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-        response.getReturnInfos().setMessage("Fehler beim CSV-Export: " + e.getLocalizedMessage());
-      }
-    }
-    else if (formatId == ExportCodeSystemContentRequestType.EXPORT_SVS_ID)
-    {
-      try
-      {
-        ExportCodeSystemSVS exportSVS = new ExportCodeSystemSVS(parameter);
-        String exportResponseString = exportSVS.exportSVS(response);
-
-        if (exportResponseString.length() == 0)
-        {
-          response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-          response.getReturnInfos().setStatus(ReturnType.Status.OK);
-          response.getReturnInfos().setCount(exportSVS.getCountExported());
-        }
-        else
-        {
-            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            if(parameter.getCodeSystem().getId() == null || parameter.getCodeSystem().getId() == 0){
+                responseString = "Es muss eine ID für ein Codesystem angegeben werden.";
+                passed = false;
+            }
+        
+        if(!passed){
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-            response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-            response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + exportResponseString);
+            response.getReturnInfos().setMessage(responseString);
         }
-      }
-      catch (Exception e)
-      {
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);
-        response.getReturnInfos().setMessage("Fehler beim SVS-Export: " + e.getLocalizedMessage());
-      }
-    }
-    else
-    {
-      response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-      response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-      response.getReturnInfos().setMessage("Das Export-Format mit folgender ID ist unbekannt: " + formatId + "\n" + ExportCodeSystemContentRequestType.getPossibleFormats());
-    }
-    StaticExportStatus.decreaseAvtiveSessions();
-    return response;
-  }
 
-  /**
-   * Checks the parameters with the cross-reference.
-   * TODO
-   * @param Request
-   * @param Response
-   * @return false, if the parameters are invalid
-   */
-  private boolean validateParameter(ExportCodeSystemContentRequestType parameter, ExportCodeSystemContentResponseType response)
-  {
-    String responseString = "";
-    if(parameter.getCodeSystem() == null)
-    {
-      responseString = "Es muss ein Codesystem mitgegeben werden.";
+        return passed;
     }
-    else
-    {
-      if(parameter.getCodeSystem().getId() == null || parameter.getCodeSystem().getId() == 0)
-      {
-        responseString = "Es muss eine ID für ein Codesystem mitgegeben werden.";
-      }
-    }
-
-    if(responseString.length() > 0)
-    {
-      response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-      response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-      response.getReturnInfos().setMessage(responseString);
-      return false;
-    }
-
-    return true;
-  }
 }

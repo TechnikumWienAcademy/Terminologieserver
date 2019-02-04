@@ -58,7 +58,6 @@ import de.fhdo.terminologie.ws.search.types.ReturnCodeSystemDetailsResponseType;
 import de.fhdo.terminologie.ws.types.ExportType;
 import de.fhdo.terminologie.ws.types.ReturnType;
 import de.fhdo.terminologie.ws.types.ReturnType.Status;
-import de.fhdo.terminologie.ws.types.SortingType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -90,105 +89,88 @@ import org.w3c.dom.Document;
 
 /**
  *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
- * (robert.muetzner@fh-dortmund.de)
+ * @author Robert Mützner
  * @author Michael Heller
- */
-public class ExportClaml
-{
-
-    private static Logger logger = Logger4j.getInstance().getLogger();
+*/
+public class ExportClaml{
+    private static final Logger LOGGER = Logger4j.getInstance().getLogger();
     //Variablen für ImportStatus
-    public static double percentageComplete = 0.0;
+    public static float percentageComplete = 0F;
     public static String currentTask = "";
     private int countExported = 0;
-    //private Search search;
-    //private ConceptAssociations association;
     private CodeSystem codeSystem = null;
     private CodeSystemVersion codeSystemVersion = null;
     private ClaML claml = null;
     private ExportCodeSystemContentRequestType request;
     private Map<String, RubricKind> rubricKinds;
-    //private HashMap metaDataMap = new HashMap();
-    SimpleDateFormat sdfEN;
-    long timeStart;
-    //org.hibernate.Session hb_session;
+    SimpleDateFormat dateFormatter;
+    long startingTime;
 
-    public ExportClaml()
-    {
-        sdfEN = new SimpleDateFormat("yyyy-MM-dd");
+    /**
+     * Standard constructor with the addition of instantiating the SimpleDateFormat with "yyyy-MM-dd".
+     */
+    public ExportClaml(){
+        dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     }
 
-    public ExportCodeSystemContentResponseType export(ExportCodeSystemContentRequestType req)
-    {
+    /**
+     * 
+     * @param req
+     * @return 
+     */
+    public ExportCodeSystemContentResponseType exportClaml(ExportCodeSystemContentRequestType req){
+        LOGGER.info("+++++ exportClaml started +++++");
+        
         countExported = 0;
-
         request = req;
         claml = new ClaML();
-        //search = new Search();
-        //association = new ConceptAssociations();
-
+        startingTime = new Date().getTime();
+        codeSystem = request.getCodeSystem();
+        
         ExportCodeSystemContentResponseType returnInfos = new ExportCodeSystemContentResponseType();
         returnInfos.setReturnInfos(new ReturnType());
         returnInfos.setExportInfos(new ExportType());
 
-        if (logger.isInfoEnabled())
-        {
-            logger.info("-----------------------");
-            logger.info("Export ClaML gestartet ");
-            logger.info("-----------------------");
-        }
-
-        timeStart = new Date().getTime();
-
         String packagename = clamlBindingXSD.ClaML.class.getPackage().getName();
-        try
-        {
-            JAXBContext jc = JAXBContext.newInstance(packagename);
+        try{
+            JAXBContext JAXBcontext = JAXBContext.newInstance(packagename);
 
-            codeSystem = this.request.getCodeSystem();
+            //Reading code system details
+            ReturnCodeSystemDetailsRequestType RCSDrequest = new ReturnCodeSystemDetailsRequestType();
+            RCSDrequest.setCodeSystem(codeSystem);
 
-            // CodeSystem-Details lesen
-            ReturnCodeSystemDetailsRequestType rcsdRequest = new ReturnCodeSystemDetailsRequestType();
-            rcsdRequest.setCodeSystem(codeSystem);
-
-            //Matthias: login
-            rcsdRequest.setLogin(req.getLogin());
-            //3.2.17 added
-            rcsdRequest.setLoginAlreadyChecked(true);
+            //Login
+            RCSDrequest.setLogin(req.getLogin());
             
-            
-            ReturnCodeSystemDetailsResponseType rcsdResponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(rcsdRequest);
+            //TODO check class
+            ReturnCodeSystemDetailsResponseType RCSDresponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(RCSDrequest);
 
-            if (rcsdResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
-            {
-                //hb_session = HibernateUtil.getSessionFactory().openSession();
-                if (request.getExportInfos().isUpdateCheck())
-                {
+            if (RCSDresponse.getReturnInfos().getStatus() == ReturnType.Status.OK){
+                if (request.getExportInfos().isUpdateCheck()){
 
-                    if (!rcsdResponse.getCodeSystem().getCurrentVersionId().equals(codeSystem.getCodeSystemVersions().iterator().next().getVersionId()))
+                    if (!RCSDresponse.getCodeSystem().getCurrentVersionId().equals(codeSystem.getCodeSystemVersions().iterator().next().getVersionId()))
                     {
-                        request.getCodeSystem().getCodeSystemVersions().iterator().next().setVersionId(rcsdResponse.getCodeSystem().getCurrentVersionId());
+                        request.getCodeSystem().getCodeSystemVersions().iterator().next().setVersionId(RCSDresponse.getCodeSystem().getCurrentVersionId());
                         codeSystem = this.request.getCodeSystem();
                         // CodeSystem-Details lesen
-                        rcsdRequest = new ReturnCodeSystemDetailsRequestType();
-                        rcsdRequest.setCodeSystem(codeSystem);
+                        RCSDrequest = new ReturnCodeSystemDetailsRequestType();
+                        RCSDrequest.setCodeSystem(codeSystem);
 
-                        rcsdResponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(rcsdRequest);
+                        RCSDresponse = new ReturnCodeSystemDetails().ReturnCodeSystemDetails(RCSDrequest);
                     }
                 }
 
-                if (rcsdResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
+                if (RCSDresponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
                 {
                     // Codesystem aus Webservice-Antwort übernehmen
-                    codeSystem = rcsdResponse.getCodeSystem();
+                    codeSystem = RCSDresponse.getCodeSystem();
 
                     if (codeSystem != null)
                     {
-                        logger.debug("Codesystem geladen: " + codeSystem.getName());
-                        logger.debug("Codesystem-Versionen: " + codeSystem.getCodeSystemVersions().size());
+                        LOGGER.debug("Codesystem geladen: " + codeSystem.getName());
+                        LOGGER.debug("Codesystem-Versionen: " + codeSystem.getCodeSystemVersions().size());
                         codeSystemVersion = codeSystem.getCodeSystemVersions().iterator().next();
-                        logger.debug("Codesystem-Version geladen: " + codeSystemVersion.getName());
+                        LOGGER.debug("Codesystem-Version geladen: " + codeSystemVersion.getName());
 
                         // Hilfsvariablen
                         rubricKinds = new HashMap<String, RubricKind>();
@@ -210,7 +192,7 @@ public class ExportClaml
                         title.setName(codeSystem.getName());
                         if (codeSystemVersion.getReleaseDate() != null)
                         {
-                            title.setDate(sdfEN.format(codeSystemVersion.getReleaseDate()));
+                            title.setDate(dateFormatter.format(codeSystemVersion.getReleaseDate()));
                         }
                         else
                         {
@@ -296,7 +278,7 @@ public class ExportClaml
                         //Matthias: order concepts according their superclass entries
                         //eases the import afterwards
                         //this.orderConcepts();
-                        Marshaller m = jc.createMarshaller();
+                        Marshaller m = JAXBcontext.createMarshaller();
                         //  m.marshal(this.claml, new File("D:/Users/Michael/Documents/Masterprojekt1/x1gex2009/Klassifikationsdateien/exportICD.xml"));
                         //ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
@@ -305,8 +287,8 @@ public class ExportClaml
                         // ClaML-Datei aus Klassen im Speicher erstellen
                         m.marshal(this.claml, bos);
 
-                        long diff = (new Date().getTime() - timeStart) / 1000;
-                        logger.debug("ClaML-Export-Dauer: " + diff);
+                        long diff = (new Date().getTime() - startingTime) / 1000;
+                        LOGGER.debug("ClaML-Export-Dauer: " + diff);
 
                         StringWriter writer = new StringWriter();
 
@@ -372,7 +354,7 @@ public class ExportClaml
                     }
                     else
                     {
-                        logger.debug("[ExportClaml.java] Vokabular nicht gefunden");
+                        LOGGER.debug("[ExportClaml.java] Vokabular nicht gefunden");
                         returnInfos.getReturnInfos().setStatus(Status.FAILURE);
                         returnInfos.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP409);
                         returnInfos.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
@@ -385,7 +367,7 @@ public class ExportClaml
                     returnInfos.getReturnInfos().setStatus(Status.FAILURE);
                     returnInfos.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP409);
                     returnInfos.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-                    returnInfos.getReturnInfos().setMessage(rcsdResponse.getReturnInfos().getMessage());
+                    returnInfos.getReturnInfos().setMessage(RCSDresponse.getReturnInfos().getMessage());
                 }
             }
             else
@@ -394,13 +376,13 @@ public class ExportClaml
                 returnInfos.getReturnInfos().setStatus(Status.FAILURE);
                 returnInfos.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP409);
                 returnInfos.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-                returnInfos.getReturnInfos().setMessage(rcsdResponse.getReturnInfos().getMessage());
+                returnInfos.getReturnInfos().setMessage(RCSDresponse.getReturnInfos().getMessage());
             }
 
         }
         catch (JAXBException ex)
         {
-            logger.debug("[ExportClaml.java] " + ex.getMessage());
+            LOGGER.debug("[ExportClaml.java] " + ex.getMessage());
 
         }
         finally
@@ -449,7 +431,7 @@ public class ExportClaml
         }
         catch (Exception ex)
         {
-            logger.debug("[ExportClaml.java] " + ex.getMessage());
+            LOGGER.debug("[ExportClaml.java] " + ex.getMessage());
         }
         return data;
     }
@@ -485,11 +467,11 @@ public class ExportClaml
             csev.setStatusDate(request.getExportParameter().getDateFrom());
             conceptsReq.getCodeSystemEntity().getCodeSystemEntityVersions().add(csev);
 
-            logger.debug("Snych-Zeit: " + request.getExportParameter().getDateFrom().toString());
+            LOGGER.debug("Snych-Zeit: " + request.getExportParameter().getDateFrom().toString());
         }
         else
         {
-            logger.debug("keine Snych-Zeit angegeben");
+            LOGGER.debug("keine Snych-Zeit angegeben");
         }
 
         Session hb_session = HibernateUtil.getSessionFactory().openSession();
@@ -503,7 +485,7 @@ public class ExportClaml
         
         ListCodeSystemConceptsResponseType conceptsResp = new ListCodeSystemConcepts().ListCodeSystemConcepts(conceptsReq, true);
         //!!WIESO HIER KEINE RETURN INFORMATIONS (FALSCH BENANNT)
-        logger.debug("[ExportClaml.java] " + conceptsResp.getReturnInfos().getMessage());
+        LOGGER.debug("[ExportClaml.java] " + conceptsResp.getReturnInfos().getMessage());
 
         //HashMap hm = new HashMap();
         clamlBindingXSD.Class clazz = null;
@@ -544,7 +526,7 @@ public class ExportClaml
                                 percentageComplete = aktCount / classCount * 100.0;
                                 currentTask = neuCode;
 
-                                logger.info("Code_" + altCode);
+                                LOGGER.info("Code_" + altCode);
 
                                 //Neuer Code (Gruppenwechsel)
                                 if (!neuCode.equals(altCode))
@@ -627,12 +609,12 @@ public class ExportClaml
                     {
                         //hb_session.flush();
                         //hb_session.clear();
-                        logger.info("Session flushed");
+                        LOGGER.info("Session flushed");
 
                         if (i % 1000 == 0)
                         {
                             //System.gc();
-                            logger.info("GC");
+                            LOGGER.info("GC");
                             Runtime.getRuntime().gc();
                         }
                     }
@@ -640,13 +622,13 @@ public class ExportClaml
             }
             catch (Exception ex)
             {
-                logger.error("Fehler in 'createMetaData': " + ex.getLocalizedMessage());
+                LOGGER.error("Fehler in 'createMetaData': " + ex.getLocalizedMessage());
 
                 ex.printStackTrace();
             }
             finally
             {
-                logger.debug("Schließe Hibernate-Session (ExportClaml.java)");
+                LOGGER.debug("Schließe Hibernate-Session (ExportClaml.java)");
                 hb_session.close();
                 //HibernateUtil.closeSessionFactory();
             }
@@ -795,7 +777,7 @@ public class ExportClaml
             //ListConceptAssociationsResponseType conceptAssocResp = new ListConceptAssociations().ListConceptAssociations(conceptAssocReq, hb_session);
             //Matthias:Testing
             ListConceptAssociationsResponseType conceptAssocResp = new ListConceptAssociations().ListConceptAssociations(conceptAssocReq, null);
-            logger.info("[ExportClaml.java] " + conceptAssocResp.getReturnInfos().getMessage());
+            LOGGER.info("[ExportClaml.java] " + conceptAssocResp.getReturnInfos().getMessage());
 
             if (conceptAssocResp.getReturnInfos().getStatus() == Status.OK)
             {

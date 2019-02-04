@@ -29,6 +29,9 @@ import de.fhdo.terminologie.ws.authoringPub.GetCreateCodeSystemPubResponseRespon
 import de.fhdo.terminologie.ws.authoringPub.GetCreateValueSetPubResponseResponse;
 import de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType;
 import de.fhdo.terminologie.ws.authorizationPub.Authorization;
+import de.fhdo.terminologie.ws.authorizationPub.CheckLoginResponse;
+import de.fhdo.terminologie.ws.authorizationPub.LoginRequestType;
+import de.fhdo.terminologie.ws.authorizationPub.LoginType;
 import de.fhdo.terminologie.ws.search.ListValueSetsRequestType;
 import de.fhdo.terminologie.ws.search.ListValueSetsResponse;
 import de.fhdo.terminologie.ws.search.Search;
@@ -61,90 +64,78 @@ import types.termserver.fhdo.de.ValueSetVersion;
 
 /**
  *
- * @author puraner
+ * @author Stefan Puraner
  */
-public class TerminologyReleaseManager
-{
+public class TerminologyReleaseManager{
     private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
     private String sessionId;
     private String pubSessionId;
     private de.fhdo.terminologie.ws.searchPub.CodeSystem targetCS;
     private de.fhdo.terminologie.ws.searchPub.ValueSet targetVS;
     private long importId;
-    //3.2.17 added
-    private boolean sessionIDsSet;
 
-    public TerminologyReleaseManager()
-    {
+    /**
+     * TODO
+     */
+    public TerminologyReleaseManager(){
         this.sessionId = SessionHelper.getSessionId();
         this.pubSessionId = CollaborationSession.getInstance().getPubSessionID();
         this.targetCS = null;
         this.targetVS = null;
-        try
-        {
+        try{
             importId = SecureRandom.getInstance("SHA1PRNG").nextLong();
         }
-        catch (NoSuchAlgorithmException ex)
-        {
-            LOGGER.error(ex);
+        catch (NoSuchAlgorithmException ex){
+            LOGGER.error("Error [0054]: " + ex.getLocalizedMessage());
         }
-        //3.2.17 added
-        sessionIDsSet = this.areSessionIdsSet();
     }
 
     /**
-     * checks if publication plattform is alive
-     *
-     * @return
+     * Checks if the publication platform port is not null and the user is logged in.
+     * @return true if both requirements are met, otherwise false.
      */
-    private boolean isPubPlattformAliveAndUserLoggedIn()
-    {
-        LOGGER.info("+++++ isPubPlattformAliveAndUserLoggedIn started +++++");
-        //3.2.17 auskommentiert
-        /*LoginRequestType request = new LoginRequestType();
-        request.setLogin(new LoginType());
-        request.getLogin().setSessionID(this.pubSessionId);*/
+    private boolean isPubPlatformAliveAndUserLoggedIn(){
+        LOGGER.info("+++++ isPubPlatformAliveAndUserLoggedIn started +++++");
         
         Authorization port_authorizationPub = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
 
-        if (port_authorizationPub == null)
-        {
-            LOGGER.debug("PubServicePort is null");
-            LOGGER.info("----- isPubPlattformAliveAndUserLoggedIn finished (001) -----");
+        if (port_authorizationPub == null){
+            LOGGER.debug("Publication service port is null");
+            LOGGER.info("----- isPubPlatformAliveAndUserLoggedIn finished (001) -----");
             return false;
         }
-        //3.2.17
-        LOGGER.info("----- isPubPlattformAliveAndUserLoggedIn finished (002) -----");
-        return true;
 
-        //3.2.17 auskommentiert
-        /*
-        try
-        {
+        LoginRequestType request = new LoginRequestType();
+        request.setLogin(new LoginType());
+        request.getLogin().setSessionID(this.pubSessionId);
+        
+        try{
             CheckLoginResponse.Return response = port_authorizationPub.checkLogin(request);
-            //ListCodeSystemsResponse.Return response = port_searchPub.listCodeSystems(parameter);
-            if (response.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authorizationPub.Status.OK))
-            {
+            if (response.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authorizationPub.Status.OK)){
+                LOGGER.info("----- isPubPlatformAliveAndUserLoggedIn finished (002) -----");
                 return true;
             }
-            else
-            {
-                logger.debug("User ist nicht eingeloggt");
+            else{
+                LOGGER.debug("User not logged in");
+                LOGGER.info("----- isPubPlatformAliveAndUserLoggedIn finished (003) -----");
                 return false;
             }
         }
-        catch (Exception ex)
-        {
-            logger.error(ex);
+        catch (Exception ex){
+            LOGGER.error("[0055]: " + ex.getLocalizedMessage());
+            LOGGER.info("----- isPubPlatformAliveAndUserLoggedIn finished (004) -----");
             return false;
-        }*/
+        }
     }
 
+    /**
+     * Checks whether or not the session-IDs are set.
+     * @return true if they are set, otherwise false.
+     */
     private boolean areSessionIdsSet()
     {
         LOGGER.info("+++++ areSessionIdsSet started +++++");
-        if ((this.sessionId != null) && (this.pubSessionId != null))
-        {
+        if ((this.sessionId != null) && (this.pubSessionId != null)){
             LOGGER.info("----- areSessionIdsSet finished (001) -----");
             return true;
         }
@@ -152,114 +143,82 @@ public class TerminologyReleaseManager
         return false;
     }
 
-    private ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po)
-    {
+    /**
+     * TODO
+     * @param statusTo
+     * @param proposedObject
+     * @return 
+     */
+    private ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject proposedObject){
         LOGGER.info("+++++ transferTerminologyToPublicServer started +++++");
-        //initially set return value
-        ReturnType ret = new ReturnType();
-        ret.setSuccess(false);
+        ReturnType returnInfo = new ReturnType();
+        returnInfo.setSuccess(false);
 
-        try
-        {
-            //check if pub is alive
-            LOGGER.debug("Check if pub-platform is reachable and user is logged in");
-            if (!this.isPubPlattformAliveAndUserLoggedIn())
-            {
-                LOGGER.debug("Check failed, pub-platform is unreachable or user is not logged in");
-                ret.setSuccess(false);
-                ret.setMessage("Verbindung zur Publikationsplattform konnte nicht hergestellt werden.");
+        try{
+            if (!this.isPubPlatformAliveAndUserLoggedIn()){
+                returnInfo.setSuccess(false);
+                returnInfo.setMessage("Verbindung zur Publikationsplattform konnte nicht hergestellt werden.");
+                LOGGER.debug("Pub-platform is unreachable or user is not logged in");
                 LOGGER.info("----- transferTerminologyToPublicServer finished (001) -----");
-                return ret;
+                return returnInfo;
             }
-            LOGGER.debug("Check successful, pub-platform is reachable and user is logged in");
+            LOGGER.debug("Pub-platform is reachable and user is logged in");
             
-            //check if session Ids are set
-            LOGGER.debug("Check if SessionIDs are set");
-            //3.2.17
-            //if (!this.areSessionIdsSet())
-            if(!this.sessionIDsSet)
-            {
-                LOGGER.debug("Check failed, SessionIDs are not set");
-                ret.setSuccess(false);
-                ret.setMessage("SessionIDs sind nicht gesetzt.");
-                LOGGER.info("TermBrowser: Collaboration Session: " + this.sessionId);
-                LOGGER.info("TermBrowser: Pub Session: " + this.pubSessionId);
+            //Check if session IDs are set
+            if(!this.areSessionIdsSet()){
+                returnInfo.setSuccess(false);
+                returnInfo.setMessage("SessionIDs sind nicht gesetzt.");
+                LOGGER.info("Collaboration Session, must not be null, is: " + this.sessionId);
+                LOGGER.info("Pub Session, must not be null, is: " + this.pubSessionId);
                 LOGGER.info("----- transferTerminologyToPublicServer finished (002) -----");
-                return ret;
+                return returnInfo;
             }
-            LOGGER.debug("Check successful, SessionIDs are set");
+            LOGGER.debug("SessionIDs are set");
 
-            //start with transfer
-            if (po.getClassname().equals("CodeSystemVersion"))
-            {
-                CodeSystem csToExport = this.getCodeSystemToExport(po.getProposal().getVocabularyIdTwo(), po.getProposal().getVocabularyId());
+            //Starting transfer
+            if (proposedObject.getClassname().equals("CodeSystemVersion")){
+                CodeSystem CStoExport = this.getCodeSystemToExport(proposedObject.getProposal().getVocabularyIdTwo(), proposedObject.getProposal().getVocabularyId());
 
-                //check if CS was found on Collab plattform
-                if ((csToExport.getId() == null) || (csToExport.getCodeSystemVersions().isEmpty()))
-                {
-                    ret.setSuccess(false);
-                    ret.setMessage("CodeSystem für Transfer nicht gefunden. CSID: "
-                            + po.getProposal().getVocabularyIdTwo()
-                            + ", CSV ID: "
-                            + po.getProposal().getVocabularyId()
-                            + "CodeSystem: " + po.getProposal().getVocabularyName());
+                //Check if CS was found on collab plattform
+                if ((CStoExport.getId() == null) || (CStoExport.getCodeSystemVersions().isEmpty())){
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("CodeSystem für Transfer nicht gefunden. CS ID: "+ proposedObject.getProposal().getVocabularyIdTwo()
+                            + ", CSV ID: " + proposedObject.getProposal().getVocabularyId()
+                            + "CodeSystem: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (003) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
-                List<de.fhdo.terminologie.ws.searchPub.CodeSystem> result = this.getTargetCodeSystemFromPub(csToExport.getName());
-
-                boolean exists = false;
-                if ((result != null) && (result.size() == 1))
-                {
-                    //3.2.21
-                    if(result.get(0).getName().equals(csToExport.getName())){
-                        exists = true;
-                        this.targetCS = result.get(0);
-                        if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
+                List<de.fhdo.terminologie.ws.searchPub.CodeSystem> CSpubList = this.getTargetCodeSystemFromPub(CStoExport.getName());
+                boolean CSexistsOnPub = false;
+                
+                
+                if (CSpubList != null && CSpubList.size() == 1){
+                    //Check if name of found CS and CS to be exported are identical
+                    if(CSpubList.get(0).getName().equals(CStoExport.getName())){
+                        CSexistsOnPub = true;
+                        this.targetCS = CSpubList.get(0);
                     }
-                    //check if name of found CS and CS to be exported are identical
-                    /*for (de.fhdo.terminologie.ws.searchPub.CodeSystem cs : result)
-                    {
-                        if (cs.getName().equals(csToExport.getName()))
-                        {
-                            exists = true;
-                        }
-                    }
-
-                    if (exists)
-                        this.targetCS = result.get(0);
-                    }*/
                 }
-                else if ((result == null) || (result.isEmpty()))
-                {
-                    //no codesystem found on pub
+                else if ((CSpubList == null) || (CSpubList.isEmpty())){
+                    //No codesystem found on pub
+                    CSexistsOnPub = false;
                     this.targetCS = null;
-                    exists = false;
                 }
-                else if (result.size() > 1)
-                {
-                    //checks if the CS name is identical
-                    for (de.fhdo.terminologie.ws.searchPub.CodeSystem cs : result)
-                    {
-                        if (cs.getName().equals(csToExport.getName()))
-                        {
-                            exists = true;
-                            this.targetCS = cs;
-                            if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
-                            //3.2.21
+                else if (CSpubList.size() > 1){
+                    //Checking if one of the pubCSs fits the exportCS
+                    for (de.fhdo.terminologie.ws.searchPub.CodeSystem CS : CSpubList)
+                        if (CS.getName().equals(CStoExport.getName())){
+                            CSexistsOnPub = true;
+                            this.targetCS = CS;
                             break;
                         }
-                    }
 
-                    if (!exists)
-                    {
-                        //multiple code systems found
+                    if (!CSexistsOnPub){
+                        //Multiple code systems found, user has to choose one
                         Map map = new HashMap();
-                        map.put("targets", result);
-                        map.put("source", csToExport.getName());
+                        map.put("targets", CSpubList);
+                        map.put("source", CStoExport.getName());
 
                         Window win = (Window) Executions.createComponents("/collaboration/publication/selectTargetPopup.zul", null, map);
                         ((SelectTargetPopup) win).setReleaseManager(this);
@@ -268,35 +227,35 @@ public class TerminologyReleaseManager
                         win.setVisible(false);
 
                         if (this.targetCS != null)
-                        {
-                            exists = true;
-                        }
+                            CSexistsOnPub = true;
                     }
                 }
 
-                if ((this.targetCS == null) && (!exists))
-                {
-                    ret.setSuccess(false);
-                    ret.setMessage("CodeSystem konnte auf der Publikationsplattform nicht gefunden werden. (" + csToExport.getName() + ")");
+                if (!CSexistsOnPub){
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("CodeSystem konnte auf der Publikationsplattform nicht gefunden werden. (" + CStoExport.getName() + ")");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (004) -----");
-                    return ret;
+                    return returnInfo;
                 }
-
-                ExportType exportedCodeSystem = this.getExportedCodeSystem(csToExport);
+                else
+                    LOGGER.info("CS (" + this.targetCS.getName() + ") found on pub, versions size: " + this.targetCS.getCodeSystemVersions().size());
+                    
+                //ANCHOR
+                ExportType exportedCodeSystem = this.getExportedCodeSystemFromCollab(CStoExport);
 
                 if (exportedCodeSystem == null)
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage("CodeSystem konnte nicht exportiert werden. CSID: "
-                            + po.getProposal().getVocabularyIdTwo()
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("CodeSystem konnte nicht exportiert werden. CSID: "
+                            + proposedObject.getProposal().getVocabularyIdTwo()
                             + ", CSV ID: "
-                            + po.getProposal().getVocabularyId()
-                            + "CodeSystem: " + po.getProposal().getVocabularyName());
+                            + proposedObject.getProposal().getVocabularyId()
+                            + "CodeSystem: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (005) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
-                de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importCodeSystem(csToExport.getCodeSystemVersions().get(0), exportedCodeSystem);
+                de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importCodeSystem(CStoExport.getCodeSystemVersions().get(0), exportedCodeSystem);
 
                 if (this.targetCS.getCodeSystemVersions() != null)
                 {
@@ -306,45 +265,45 @@ public class TerminologyReleaseManager
 
                 if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))
                 {
-                    ret.setSuccess(true);
-                    ret.setMessage(ret_import.getMessage());
+                    returnInfo.setSuccess(true);
+                    returnInfo.setMessage(ret_import.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (006) -----");
-                    return ret;
+                    return returnInfo;
                 }
                 else
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage(ret_import.getMessage());
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage(ret_import.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (007) -----");
-                    return ret;
+                    return returnInfo;
                 }
             }
-            else if (po.getClassname().equals("ValueSetVersion"))
+            else if (proposedObject.getClassname().equals("ValueSetVersion"))
             {
-                ValueSet vsToExport = this.getValueSetToExport(po.getProposal().getVocabularyName(), po.getProposal().getVocabularyId());
+                ValueSet vsToExport = this.getValueSetToExport(proposedObject.getProposal().getVocabularyName(), proposedObject.getProposal().getVocabularyId());
 
                 //check if CS was found on Collab plattform
                 if ((vsToExport.getId() == null) || (vsToExport.getValueSetVersions().isEmpty()))
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage("ValueSet für Transfer nicht gefunden.\nVSID: "
-                            + po.getProposal().getVocabularyIdTwo()
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("ValueSet für Transfer nicht gefunden.\nVSID: "
+                            + proposedObject.getProposal().getVocabularyIdTwo()
                             + ",\nVSV ID: "
-                            + po.getProposal().getVocabularyId()
-                            + "\nValueSet: " + po.getProposal().getVocabularyName());
+                            + proposedObject.getProposal().getVocabularyId()
+                            + "\nValueSet: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (008) -----");
-                    return ret;
+                    return returnInfo;
                 }
                 
                 ArrayList<String> missingEntries = this.areValueSetContentsPresentOnPubPlattform(vsToExport);
 
                 if (!missingEntries.isEmpty())
                 {
-                    ret.setSuccess(false);
+                    returnInfo.setSuccess(false);
                     String message = "ValueSet kann nicht freigegeben werden, da benötigte CodeSystem(e) auf der Publikationsplattform fehlen.\n"
-                            + "VSID: " + po.getProposal().getVocabularyIdTwo() + "\n"
-                            + "VSV ID: " + po.getProposal().getVocabularyId() + "\n"
-                            + "ValueSet: " + po.getProposal().getVocabularyName() + "\n"
+                            + "VSID: " + proposedObject.getProposal().getVocabularyIdTwo() + "\n"
+                            + "VSV ID: " + proposedObject.getProposal().getVocabularyId() + "\n"
+                            + "ValueSet: " + proposedObject.getProposal().getVocabularyName() + "\n"
                             + "Fehlende Codes: " + missingEntries.size() + "\n";
                     
                     int i = 0;
@@ -358,9 +317,9 @@ public class TerminologyReleaseManager
                         }
                     }
                     
-                    ret.setMessage(message);
+                    returnInfo.setMessage(message);
                     LOGGER.info("----- transferTerminologyToPublicServer finished (009) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
                 List<de.fhdo.terminologie.ws.searchPub.ValueSet> result = this.getTargetValueSetFromPub(vsToExport.getName());
@@ -423,24 +382,24 @@ public class TerminologyReleaseManager
 
                 if ((this.targetVS == null) && (!exists))
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage("ValueSet konnte auf der Publikationsplattform nicht gefunden werden. (" + vsToExport.getName() + ")");
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("ValueSet konnte auf der Publikationsplattform nicht gefunden werden. (" + vsToExport.getName() + ")");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (010) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
                 ExportType exportedValueSet = this.getExportedValueSet(vsToExport);
 
                 if (exportedValueSet == null)
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage("ValueSet konnte nicht exportiert werden.\nVSID: "
-                            + po.getProposal().getVocabularyIdTwo()
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("ValueSet konnte nicht exportiert werden.\nVSID: "
+                            + proposedObject.getProposal().getVocabularyIdTwo()
                             + ",\n VSV ID: "
-                            + po.getProposal().getVocabularyId()
-                            + "\nValueSet: " + po.getProposal().getVocabularyName());
+                            + proposedObject.getProposal().getVocabularyId()
+                            + "\nValueSet: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (011) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
                 de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importValueSet(vsToExport.getValueSetVersions().get(0), exportedValueSet);
@@ -452,35 +411,35 @@ public class TerminologyReleaseManager
 
                 if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))
                 {
-                    ret.setSuccess(true);
-                    ret.setMessage(ret_import.getMessage());
+                    returnInfo.setSuccess(true);
+                    returnInfo.setMessage(ret_import.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (012) -----");
-                    return ret;
+                    return returnInfo;
                 }
                 else
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage(ret_import.getMessage());
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage(ret_import.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (013) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
             }
-            else if (po.getClassname().equals("CodeSystem"))
+            else if (proposedObject.getClassname().equals("CodeSystem"))
             {
-                CodeSystem csToExport = this.getCodeSystemToExport(po.getProposal().getVocabularyIdTwo(), null);
+                CodeSystem csToExport = this.getCodeSystemToExport(proposedObject.getProposal().getVocabularyIdTwo(), null);
 
                 //check if CS was found on Collab plattform
                 if ((csToExport.getId() == null) || (csToExport.getCodeSystemVersions().isEmpty()))
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage("CodeSystem für Transfer nicht gefunden.\nCSID: "
-                            + po.getProposal().getVocabularyIdTwo()
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("CodeSystem für Transfer nicht gefunden.\nCSID: "
+                            + proposedObject.getProposal().getVocabularyIdTwo()
                             + ",\n CSV ID: "
-                            + po.getProposal().getVocabularyId()
-                            + "\nCodeSystem: " + po.getProposal().getVocabularyName());
+                            + proposedObject.getProposal().getVocabularyId()
+                            + "\nCodeSystem: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (014) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
                 List<de.fhdo.terminologie.ws.searchPub.CodeSystem> result = this.getTargetCodeSystemFromPub(csToExport.getName());
@@ -534,42 +493,42 @@ public class TerminologyReleaseManager
                     //now target CS has to be set
                     if (this.targetCS != null)
                     {
-                        ret.setSuccess(true);
-                        ret.setMessage("CodeSystem successfully created.");
+                        returnInfo.setSuccess(true);
+                        returnInfo.setMessage("CodeSystem successfully created.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (015) -----");
-                        return ret;
+                        return returnInfo;
                     }
                     else
                     {
-                        ret.setSuccess(false);
-                        ret.setMessage("CodeSystem konnte auf Publikationsumgebung nicht erstellt werden.");
+                        returnInfo.setSuccess(false);
+                        returnInfo.setMessage("CodeSystem konnte auf Publikationsumgebung nicht erstellt werden.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (016) -----");
-                        return ret;
+                        return returnInfo;
                     }
                 }
                 else
                 {
-                    ret.setSuccess(true);
-                    ret.setMessage("CodeSystem already exists.");
+                    returnInfo.setSuccess(true);
+                    returnInfo.setMessage("CodeSystem already exists.");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (017) -----");
-                    return ret;
+                    return returnInfo;
                 }
             }
-            else if (po.getClassname().equals("ValueSet"))
+            else if (proposedObject.getClassname().equals("ValueSet"))
             {
-                ValueSet vsToExport = this.getValueSetToExport(po.getProposal().getVocabularyName(), null);
+                ValueSet vsToExport = this.getValueSetToExport(proposedObject.getProposal().getVocabularyName(), null);
 
                 //check if CS was found on Collab plattform
                 if ((vsToExport.getId() == null) || (vsToExport.getValueSetVersions().isEmpty()))
                 {
-                    ret.setSuccess(false);
-                    ret.setMessage("ValueSet für Transfer nicht gefunden. VSID: "
-                            + po.getProposal().getVocabularyIdTwo()
+                    returnInfo.setSuccess(false);
+                    returnInfo.setMessage("ValueSet für Transfer nicht gefunden. VSID: "
+                            + proposedObject.getProposal().getVocabularyIdTwo()
                             + ", VSV ID: "
-                            + po.getProposal().getVocabularyId()
-                            + "ValueSet: " + po.getProposal().getVocabularyName());
+                            + proposedObject.getProposal().getVocabularyId()
+                            + "ValueSet: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (018) -----");
-                    return ret;
+                    return returnInfo;
                 }
 
                 List<de.fhdo.terminologie.ws.searchPub.ValueSet> result = this.getTargetValueSetFromPub(vsToExport.getName());
@@ -617,43 +576,43 @@ public class TerminologyReleaseManager
                     //now target CS has to be set                    
                     if (this.targetVS != null)
                     {
-                        ret.setSuccess(true);
-                        ret.setMessage("ValueSet successfully created.");
+                        returnInfo.setSuccess(true);
+                        returnInfo.setMessage("ValueSet successfully created.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (019) -----");
-                        return ret;
+                        return returnInfo;
                     }
                     else
                     {
-                        ret.setSuccess(false);
-                        ret.setMessage("ValueSet konnte auf Publikationsumgebung nicht erstellt werden.");
+                        returnInfo.setSuccess(false);
+                        returnInfo.setMessage("ValueSet konnte auf Publikationsumgebung nicht erstellt werden.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (020) -----");
-                        return ret;
+                        return returnInfo;
                     }
                 }
                 else
                 {
-                    ret.setSuccess(true);
-                    ret.setMessage("ValueSet already exists.");
+                    returnInfo.setSuccess(true);
+                    returnInfo.setMessage("ValueSet already exists.");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (021) -----");
-                    return ret;
+                    return returnInfo;
                 }
             }
         }
         catch (ServerSOAPFaultException ex)
         {
             LOGGER.error(ex);
-            ret.setSuccess(false);
-            ret.setMessage("Die Antwort des Servers ist fehlerhaft.");
+            returnInfo.setSuccess(false);
+            returnInfo.setMessage("Die Antwort des Servers ist fehlerhaft.");
         }
         catch (Exception ex)
         {
             //TODO set message
             LOGGER.error(ex);
-            ret.setSuccess(false);
-            ret.setMessage("An Error occured.");
+            returnInfo.setSuccess(false);
+            returnInfo.setMessage("An Error occured.");
         }
         LOGGER.info("----- transferTerminologyToPublicServer finished (022) -----");
-        return ret;
+        return returnInfo;
     }
 
     /**
@@ -728,102 +687,81 @@ public class TerminologyReleaseManager
     }
 
     /**
-     * Exports the requested CodeSystem from the collab plattform.
+     * Exports the requested CS from the collab plattform.
      * If a LOINC-file is requested, the file from the LoincCsvPath in the database will be exported instead
      * since the webservice does not support the LOINF-file-format.
-     *
-     * @param codesystemId The Id of the code system which will be exported
-     * @param codesystemVersionId The versionId of the code system which will be exported
+     * @param codesystem the CS to be exported.
      * @return TODO
+     * @throws ServerSOAPFaultException 
      */
-    private ExportType getExportedCodeSystem(CodeSystem codesystem) throws ServerSOAPFaultException
-    {
-        LOGGER.info("+++++ getExportedCodeSystem started +++++");
-        Long codesystemId = codesystem.getId();
-        Long codesystemVersionId = codesystem.getCodeSystemVersions().get(0).getVersionId();
+    private ExportType getExportedCodeSystemFromCollab(CodeSystem codesystem) throws ServerSOAPFaultException{
+        LOGGER.info("+++++ getExportedCodeSystemFromCollab started +++++");
+        Long codesystemID = codesystem.getId();
+        Long codesystemVersionID = codesystem.getCodeSystemVersions().get(0).getVersionId();
+        
+        LOGGER.info("CS ID: " + codesystemID);
+        LOGGER.info("CSV ID: " + codesystemVersionID);
 
-        LOGGER.info("TermBrowser: TRANSFER: Trying to export CodeSystem and Version from collab plattform");
-        LOGGER.info("TermBrowser: CS ID: " + codesystemId);
-        LOGGER.info("TermBrowser: CSV ID: " + codesystemVersionId);
+        ExportCodeSystemContentRequestType requestExportCS = new ExportCodeSystemContentRequestType();
+        requestExportCS.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
+        requestExportCS.getLogin().setSessionID(this.sessionId);
+        requestExportCS.setCodeSystem(new CodeSystem());
+        requestExportCS.getCodeSystem().setId(codesystemID);
+        CodeSystemVersion CSV = new CodeSystemVersion();
+        CSV.setVersionId(codesystemVersionID);
+        requestExportCS.getCodeSystem().getCodeSystemVersions().add(CSV);
 
-        ExportCodeSystemContentRequestType req_export_cs = new ExportCodeSystemContentRequestType();
-        req_export_cs.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
-        req_export_cs.getLogin().setSessionID(this.sessionId);
-        //3.2.17 added
-        req_export_cs.setLoginAlreadyChecked(true);
+        //Export Type TODO 193L durch statischen wert ersetzen
+        ExportType exportType = new ExportType();
+        exportType.setFormatId(193L);
+        exportType.setUpdateCheck(false);
+        requestExportCS.setExportInfos(exportType);
 
-        req_export_cs.setCodeSystem(new CodeSystem());
-        req_export_cs.getCodeSystem().setId(codesystemId);
-        CodeSystemVersion csv = new CodeSystemVersion();
-        csv.setVersionId(codesystemVersionId);
-        req_export_cs.getCodeSystem().getCodeSystemVersions().add(csv);
-
-        // Export Type
-        ExportType eType = new ExportType();
-        long format = 193L;
-
-        LOGGER.info("TermBrowser: export format: " + format);
-        eType.setFormatId(format);
-        eType.setUpdateCheck(false);
-        req_export_cs.setExportInfos(eType);
-
-        // Optional: ExportParameter
-        ExportParameterType eParameterType = new ExportParameterType();
-        eParameterType.setAssociationInfos("");
-        eParameterType.setCodeSystemInfos(true);
-        eParameterType.setTranslations(true);
-        req_export_cs.setExportParameter(eParameterType);
+        //Optional ExportParameter
+        ExportParameterType exportParameterType = new ExportParameterType();
+        exportParameterType.setAssociationInfos("");
+        exportParameterType.setCodeSystemInfos(true);
+        exportParameterType.setTranslations(true);
+        requestExportCS.setExportParameter(exportParameterType);
 
         Return response = new Return();
 
-        /**
-         * LOINC is not exported by webservice. Instead a file from the
-         * filesystem is loaded.
-         */
-        if (codesystem.getName().contains("LOINC"))
-        {
+        
+        if (codesystem.getName().contains("LOINC")){
+            //LOINC is not exported by the webservice, instead the file from the path is loaded
             String path = DBSysParam.instance().getStringValue("LoincCsvPath", null, null);
             File file = new File(path);
-            FileInputStream fis = null;
-            try
-            {
-                fis = new FileInputStream(file);
-                byte bytesPrev[] = new byte[(int) file.length()];
-                fis.read(bytesPrev);
+            FileInputStream fileInputStream = null;
+            try{
+                fileInputStream = new FileInputStream(file);
+                byte bytesLOINC[] = new byte[(int) file.length()];
+                fileInputStream.read(bytesLOINC);
                 response.setExportInfos(new ExportType());
-                response.getExportInfos().setFilecontent(bytesPrev);
+                response.getExportInfos().setFilecontent(bytesLOINC);
                 response.getExportInfos().setFormatId(200l);
                 response.setReturnInfos(new de.fhdo.terminologie.ws.administration.ReturnType());
                 response.getReturnInfos().setStatus(de.fhdo.terminologie.ws.administration.Status.OK);
             }
-            catch (FileNotFoundException ex)
-            {
-                LOGGER.error(ex);
+            catch (FileNotFoundException ex){
+                LOGGER.error("Error [0056]: " + ex.getLocalizedMessage());
             }
-            catch (IOException ex)
-            {
-                LOGGER.error(ex);
+            catch (IOException ex){
+                LOGGER.error("Error [0057]: " + ex.getLocalizedMessage());
             }
-            finally
-            {
-                if (fis != null)
-                {
-                    try
-                    {
-                        fis.close();
+            finally{
+                if (fileInputStream != null){
+                    try{
+                        fileInputStream.close();
                     }
-                    catch (IOException ex)
-                    {
-                        LOGGER.error(ex);
+                    catch (IOException ex){
+                        LOGGER.error("Error [0058]: " + ex.getLocalizedMessage());
                     }
                 }
             }
         }
-        else
-        {
-            // WS-Aufruf
-            LOGGER.info("TermBrowser: Calling export service");
-            response = WebServiceHelper.exportCodeSystemContent(req_export_cs);
+        else{
+            //WS-Aufrur von hier login already checked entfernen ANCHOR2
+            response = WebServiceHelper.exportCodeSystemContent(requestExportCS);
         }
         LOGGER.info("----- getExportedCodeSystem finished (001) -----");
         return response.getExportInfos();

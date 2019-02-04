@@ -37,7 +37,7 @@ import javax.xml.ws.BindingProvider;
 
 /**
  * The LoginHelper is a singleton object, which calls the login operations.
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
+ * @author Robert Mützner
  */
 public class LoginHelper{
 
@@ -57,9 +57,9 @@ public class LoginHelper{
 
     /**
      * Calls doLogin(login, returnType, loginRequired, null).
-     * @param login the parameter for the subsequent call
-     * @param returnType parameter for the subsequent call
-     * @param loginRequired parameter for the subsequent call
+     * @param login the parameter for the subsequent call.
+     * @param returnType parameter for the subsequent call.
+     * @param loginRequired parameter for the subsequent call.
      * @return return response of the subsequent call.
      */
     public boolean doLogin(LoginType login, ReturnType returnType, boolean loginRequired){

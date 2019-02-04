@@ -20,74 +20,65 @@
 package de.fhdo.terminologie.ws.types;
 
 /**
- *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
+ * V 3.3 RDY
+ * @author Robert Mützner
  */
-public class LoginType
-{
-  private String sessionID, username, password, ip;
+public class LoginType{
+    private String sessionID, username, password, ip;
 
-  /**
-   * @return the sessionID
-   */
-  public String getSessionID()
-  {
-    return sessionID;
-  }
+    /**
+     * @return the sessionID.
+     */
+    public String getSessionID(){
+        return sessionID;
+    }
 
-  /**
-   * @param sessionID the sessionID to set
-   */
-  public void setSessionID(String sessionID)
-  {
-    this.sessionID = sessionID;
-  }
+    /**
+     * @param sessionID the sessionID to set.
+     */
+    public void setSessionID(String sessionID){
+        this.sessionID = sessionID;
+    }
 
-  /**
-   * @return the username
-   */
-  public String getUsername()
-  {
-    return username;
-  }
+    /**
+     * @return the username.
+     */
+    public String getUsername(){
+        return username;
+    }
 
-  /**
-   * @param username the username to set
-   */
-  public void setUsername(String username)
-  {
-    this.username = username;
-  }
+    /**
+     * @param username the username to set.
+     */
+    public void setUsername(String username){
+        this.username = username;
+    }
 
-  /**
-   * @return the password
-   */
-  public String getPassword()
-  {
-    return password;
-  }
+    /**
+     * @return the password.
+     */
+    public String getPassword(){
+        return password;
+    }
 
-  /**
-   * @param password the password to set
-   */
-  public void setPassword(String password)
-  {
-    this.password = password;
-  }
+    /**
+     * @param password the password to set.
+     */
+    public void setPassword(String password){
+        this.password = password;
+    }
 
-  /**
-   * @return the ip
-   */
-  public String getIp()
-  {
-    return ip;
-  }
+    /**
+     * @return the IP.
+     */
+    public String getIp(){
+        return ip;
+    }
 
-  /**
-   * @param ip the ip to set
-   */
-  public void setIp(String ip)
-  {
-    this.ip = ip;
-  }
+    /**
+     * @param ip the ip to set.
+     */
+    public void setIp(String ip){
+      this.ip = ip;
+    }
 }

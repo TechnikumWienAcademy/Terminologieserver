@@ -48,7 +48,7 @@ public class ExportValueSetContent
     
     if(StaticExportStatus.getActiveSessions() < StaticExportStatus.getMAX_SESSIONS())
     {
-        StaticExportStatus.increaseAvtiveSessions();
+        StaticExportStatus.increaseActiveSessions();
     }
     else
     {
@@ -62,7 +62,7 @@ public class ExportValueSetContent
     // Parameter prüfen
     if (validateParameter(parameter, response) == false)
     {
-        StaticExportStatus.decreaseAvtiveSessions();
+        StaticExportStatus.decreaseActiveSessions();
         return response; // Fehler bei den Parametern
     }
 
@@ -90,7 +90,7 @@ public class ExportValueSetContent
     if (loggedIn == false)
     {
       // Benutzer muss für diesen Webservice eingeloggt sein
-        StaticExportStatus.decreaseAvtiveSessions();
+        StaticExportStatus.decreaseActiveSessions();
         response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
         response.getReturnInfos().setStatus(ReturnType.Status.OK);
         response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP403);
@@ -172,7 +172,7 @@ public class ExportValueSetContent
       response.getReturnInfos().setMessage("Das Export-Format mit folgender ID ist unbekannt: " + formatId + "\n" + ExportValueSetContentRequestType.getPossibleFormats());
     }
 
-    StaticExportStatus.decreaseAvtiveSessions();
+    StaticExportStatus.decreaseActiveSessions();
     return response;
 
   }

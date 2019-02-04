@@ -10,6 +10,12 @@
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/ProposalWorkflow.java</file>
         </group>
         <group/>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/proposal/ProposalStatusChange.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/publication/ProposalStatusChangeBatch.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/TerminologyReleaseManager.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/helper/WebServiceHelper.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/build/generated-sources/jax-ws/de/fhdo/terminologie/ws/administration/Administration.java</file>
+        </group>
     </open-files>
 </project-private>
