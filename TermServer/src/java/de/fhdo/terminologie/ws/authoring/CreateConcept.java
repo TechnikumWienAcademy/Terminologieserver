@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.hibernate.HibernateException;
 
 /**
  * 3.2.26 checked
@@ -144,217 +145,218 @@ public class CreateConcept{
                 codeSystemVersionId = ((CodeSystemVersion) paramCodeSystem.getCodeSystemVersions().toArray()[0]).getVersionId();
       
 
-            try{
-                // Creating new entity and entity-version
-                CodeSystemEntity entity = new CodeSystemEntity();
-                hb_session.save(entity);
-        
-                CodeSystemEntityVersion entityVersion = (CodeSystemEntityVersion) paramCodeSystemEntity.getCodeSystemEntityVersions().toArray()[0];
-                
-                CodeSystemConcept concept = null;
-                if (entityVersion.getCodeSystemConcepts() != null && entityVersion.getCodeSystemConcepts().size() > 0)
-                    concept = (CodeSystemConcept) entityVersion.getCodeSystemConcepts().toArray()[0];
+            if(hb_session!=null)
+                try{
+                    // Creating new entity and entity-version
+                    CodeSystemEntity entity = new CodeSystemEntity();
+                    hb_session.save(entity);
 
-                AssociationType assocType = null;
-                if (entityVersion.getAssociationTypes() != null && entityVersion.getAssociationTypes().size() > 0)
-                    assocType = (AssociationType) entityVersion.getAssociationTypes().toArray()[0];
-                
-                if(entityVersion.getStatus() == null)
-                    entityVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-                
-                entityVersion.setStatusDate(new Date());
-                entityVersion.setInsertTimestamp(new Date());
-                entityVersion.setCodeSystemEntity(entity);
-                entityVersion.setCodeSystemConcepts(null);
-                entityVersion.setCodeSystemEntityVersionAssociationsForCodeSystemEntityVersionId1(null);
-                entityVersion.setCodeSystemEntityVersionAssociationsForCodeSystemEntityVersionId2(null);
-                entityVersion.setCodeSystemMetadataValues(null);
-                entityVersion.setValueSetMetadataValues(null);
-                entityVersion.setConceptValueSetMemberships(null);
-                entityVersion.setAssociationTypes(null);
-                entityVersion.setPropertyVersions(null);
-        
-                hb_session.save(entityVersion);
-        
-                //Creating response
-                codeSystemEntityVersionId = entityVersion.getVersionId();
-                CodeSystemEntityVersion entityVersionReturn = new CodeSystemEntityVersion();
-                entityVersionReturn.setVersionId(codeSystemEntityVersionId);
-                entityVersionReturn.setStatus(entityVersion.getStatus());
+                    CodeSystemEntityVersion entityVersion = (CodeSystemEntityVersion) paramCodeSystemEntity.getCodeSystemEntityVersions().toArray()[0];
 
-                response.setCodeSystemEntity(new CodeSystemEntity());
-                response.getCodeSystemEntity().setId(entity.getId());
-                response.getCodeSystemEntity().setCurrentVersionId(entityVersion.getVersionId());
-                response.getCodeSystemEntity().setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
-                response.getCodeSystemEntity().getCodeSystemEntityVersions().add(entityVersionReturn);
+                    CodeSystemConcept concept = null;
+                    if (entityVersion.getCodeSystemConcepts() != null && entityVersion.getCodeSystemConcepts().size() > 0)
+                        concept = (CodeSystemConcept) entityVersion.getCodeSystemConcepts().toArray()[0];
 
-                LOGGER.debug("EntityId: " + entity.getId());
-                LOGGER.debug("EntityVersionId: " + codeSystemEntityVersionId);
+                    AssociationType assocType = null;
+                    if (entityVersion.getAssociationTypes() != null && entityVersion.getAssociationTypes().size() > 0)
+                        assocType = (AssociationType) entityVersion.getAssociationTypes().toArray()[0];
 
-                //Saving currentVersion in the entity
-                entity.setCurrentVersionId(entityVersion.getVersionId());
-                hb_session.update(entity);
-        
-                LOGGER.debug("CurrentVersionId: " + entity.getCurrentVersionId());
+                    if(entityVersion.getStatus() == null)
+                        entityVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
 
-                //Saving concept with translations
-                if (concept != null){
-                    concept.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
-                    concept.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
-                    concept.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
+                    entityVersion.setStatusDate(new Date());
+                    entityVersion.setInsertTimestamp(new Date());
+                    entityVersion.setCodeSystemEntity(entity);
+                    entityVersion.setCodeSystemConcepts(null);
+                    entityVersion.setCodeSystemEntityVersionAssociationsForCodeSystemEntityVersionId1(null);
+                    entityVersion.setCodeSystemEntityVersionAssociationsForCodeSystemEntityVersionId2(null);
+                    entityVersion.setCodeSystemMetadataValues(null);
+                    entityVersion.setValueSetMetadataValues(null);
+                    entityVersion.setConceptValueSetMemberships(null);
+                    entityVersion.setAssociationTypes(null);
+                    entityVersion.setPropertyVersions(null);
 
-                    Iterator<CodeSystemConceptTranslation> itTranslation = concept.getCodeSystemConceptTranslations().iterator();
-                    while (itTranslation.hasNext()){
-                        CodeSystemConceptTranslation cTranslation = itTranslation.next();
-                        cTranslation.setCodeSystemConcept(concept);
+                    hb_session.save(entityVersion);
+
+                    //Creating response
+                    codeSystemEntityVersionId = entityVersion.getVersionId();
+                    CodeSystemEntityVersion entityVersionReturn = new CodeSystemEntityVersion();
+                    entityVersionReturn.setVersionId(codeSystemEntityVersionId);
+                    entityVersionReturn.setStatus(entityVersion.getStatus());
+
+                    response.setCodeSystemEntity(new CodeSystemEntity());
+                    response.getCodeSystemEntity().setId(entity.getId());
+                    response.getCodeSystemEntity().setCurrentVersionId(entityVersion.getVersionId());
+                    response.getCodeSystemEntity().setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
+                    response.getCodeSystemEntity().getCodeSystemEntityVersions().add(entityVersionReturn);
+
+                    LOGGER.debug("EntityId: " + entity.getId());
+                    LOGGER.debug("EntityVersionId: " + codeSystemEntityVersionId);
+
+                    //Saving currentVersion in the entity
+                    entity.setCurrentVersionId(entityVersion.getVersionId());
+                    hb_session.update(entity);
+
+                    LOGGER.debug("CurrentVersionId: " + entity.getCurrentVersionId());
+
+                    //Saving concept with translations
+                    if (concept != null){
+                        concept.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
+                        concept.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
+                        concept.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
+
+                        Iterator<CodeSystemConceptTranslation> itTranslation = concept.getCodeSystemConceptTranslations().iterator();
+                        while (itTranslation.hasNext()){
+                            CodeSystemConceptTranslation cTranslation = itTranslation.next();
+                            cTranslation.setCodeSystemConcept(concept);
+                        }
+
+                        hb_session.save(concept);
                     }
 
-                    hb_session.save(concept);
-                }
-                
-                if (assocType != null){
-                    assocType.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
-                    assocType.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
-                    assocType.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
-          
-                    hb_session.save(assocType);
-                }
+                    if (assocType != null){
+                        assocType.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
+                        assocType.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
+                        assocType.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
 
-                //Saving relationship to the vocabulary
-                if (codeSystemVersionId > 0){
-                    CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
+                        hb_session.save(assocType);
+                    }
 
-                    membership.setId(new CodeSystemVersionEntityMembershipId());
-                    membership.getId().setCodeSystemEntityId(entity.getId());
-                    membership.getId().setCodeSystemVersionId(codeSystemVersionId);
+                    //Saving relationship to the vocabulary
+                    if (codeSystemVersionId > 0){
+                        CodeSystemVersionEntityMembership membership = new CodeSystemVersionEntityMembership();
 
-                    membership.setIsAxis(Boolean.FALSE);
-                    membership.setIsMainClass(Boolean.FALSE);
+                        membership.setId(new CodeSystemVersionEntityMembershipId());
+                        membership.getId().setCodeSystemEntityId(entity.getId());
+                        membership.getId().setCodeSystemVersionId(codeSystemVersionId);
 
-                    if (paramCodeSystemEntity.getCodeSystemVersionEntityMemberships() != null && paramCodeSystemEntity.getCodeSystemVersionEntityMemberships().size() > 0){
-                        CodeSystemVersionEntityMembership memberRequest = (CodeSystemVersionEntityMembership) paramCodeSystemEntity.getCodeSystemVersionEntityMemberships().toArray()[0];
+                        membership.setIsAxis(Boolean.FALSE);
+                        membership.setIsMainClass(Boolean.FALSE);
 
-                        if (memberRequest != null){
-                            membership.setIsAxis(memberRequest.getIsAxis());
-                            membership.setIsMainClass(memberRequest.getIsMainClass());
+                        if (paramCodeSystemEntity.getCodeSystemVersionEntityMemberships() != null && paramCodeSystemEntity.getCodeSystemVersionEntityMemberships().size() > 0){
+                            CodeSystemVersionEntityMembership memberRequest = (CodeSystemVersionEntityMembership) paramCodeSystemEntity.getCodeSystemVersionEntityMemberships().toArray()[0];
+
+                            if (memberRequest != null){
+                                membership.setIsAxis(memberRequest.getIsAxis());
+                                membership.setIsMainClass(memberRequest.getIsMainClass());
+                            }
+                        }
+                        hb_session.save(membership);
+                    }
+
+                    //Saving property
+                    if (paramProperty != null){
+                        Iterator<Property> itProperty = paramProperty.iterator();
+                        while (itProperty.hasNext()){
+                            Property property = itProperty.next();
+
+                            PropertyVersion lastPropVersion = null;
+                            Iterator<PropertyVersion> itPropertyVersion = property.getPropertyVersions().iterator();
+                            while (itPropertyVersion.hasNext()){
+
+                                PropertyVersion propertyVersion = itPropertyVersion.next();
+                                propertyVersion.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
+                                propertyVersion.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
+
+                                propertyVersion.setProperty(property);
+
+                                propertyVersion.setInsertTimestamp(new Date());
+                                propertyVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+                                propertyVersion.setStatusDate(new Date());
+
+                                lastPropVersion = propertyVersion;
+                            }
+                            hb_session.save(property);
+
+                            //Setting current-Version-ID
+                            if (lastPropVersion != null){
+                                property.setCurrentVersionId(lastPropVersion.getVersionId());
+                                hb_session.update(property);
+                            }
+
+                            lastPropVersion = null;
+                            itPropertyVersion = property.getPropertyVersions().iterator();
+                            while (itPropertyVersion.hasNext()){
+                                PropertyVersion propertyVersion = itPropertyVersion.next();
+
+                                if (lastPropVersion != null)
+                                    propertyVersion.setPreviousVersionId(lastPropVersion.getVersionId());
+
+                                lastPropVersion = propertyVersion;
+
+                                hb_session.update(propertyVersion);
+                            }
                         }
                     }
-                    hb_session.save(membership);
-                }
 
-                //Saving property
-                if (paramProperty != null){
-                    Iterator<Property> itProperty = paramProperty.iterator();
-                    while (itProperty.hasNext()){
-                        Property property = itProperty.next();
+                    if (paramCodeSystem != null && paramCodeSystem.getId() != null){  
+                        //Checking if metadataParameter default values have to be created
+                        String HQL_metadataParameter_search = "select distinct mp from MetadataParameter mp";
+                            HQL_metadataParameter_search += " join fetch mp.codeSystem cs";
 
-                        PropertyVersion lastPropVersion = null;
-                        Iterator<PropertyVersion> itPropertyVersion = property.getPropertyVersions().iterator();
-                        while (itPropertyVersion.hasNext()){
-                            
-                            PropertyVersion propertyVersion = itPropertyVersion.next();
-                            propertyVersion.setCodeSystemEntityVersion(new CodeSystemEntityVersion());
-                            propertyVersion.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
+                        HQLParameterHelper parameterHelper = new HQLParameterHelper();
+                        parameterHelper.addParameter("cs.", "id", paramCodeSystem.getId());
 
-                            propertyVersion.setProperty(property);
+                        //Adding parameters, always connected with AND
+                        HQL_metadataParameter_search += parameterHelper.getWhere("");
+                        LOGGER.debug("HQL: " + HQL_metadataParameter_search);
 
-                            propertyVersion.setInsertTimestamp(new Date());
-                            propertyVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-                            propertyVersion.setStatusDate(new Date());
+                        org.hibernate.Query Q_metadataParameter_search = hb_session.createQuery(HQL_metadataParameter_search);
+                        parameterHelper.applyParameter(Q_metadataParameter_search);
 
-                            lastPropVersion = propertyVersion;
-                        }
-                        hb_session.save(property);
-            
-                        //Setting current-Version-ID
-                        if (lastPropVersion != null){
-                            property.setCurrentVersionId(lastPropVersion.getVersionId());
-                            hb_session.update(property);
-                        }
+                        List<MetadataParameter> metadataParameterList = Q_metadataParameter_search.list();
+                        if (!metadataParameterList.isEmpty()){
+                            Iterator<MetadataParameter> iter = metadataParameterList.iterator();
+                            while (iter.hasNext()){
+                                MetadataParameter metadataParameter = (MetadataParameter) iter.next();
+                                if(metadataParameter.getCodeSystem() != null && metadataParameter.getCodeSystem().getName() != null){
+                                    if(!metadataParameter.getCodeSystem().getName().equals("LOINC")){
+                                        CodeSystemMetadataValue CSmetadataValue = new CodeSystemMetadataValue();
 
-                        lastPropVersion = null;
-                        itPropertyVersion = property.getPropertyVersions().iterator();
-                        while (itPropertyVersion.hasNext()){
-                            PropertyVersion propertyVersion = itPropertyVersion.next();
+                                        CSmetadataValue.setParameterValue("");
+                                        CSmetadataValue.setMetadataParameter(metadataParameter);
+                                        CSmetadataValue.setCodeSystemEntityVersion(entityVersion);
 
-                            if (lastPropVersion != null)
-                                propertyVersion.setPreviousVersionId(lastPropVersion.getVersionId());
-                                
-                            lastPropVersion = propertyVersion;
-
-                            hb_session.update(propertyVersion);
-                        }
-                    }
-                }
-
-                if (paramCodeSystem != null && paramCodeSystem.getId() != null){  
-                    //Checking if metadataParameter default values have to be created
-                    String HQL_metadataParameter_search = "select distinct mp from MetadataParameter mp";
-                        HQL_metadataParameter_search += " join fetch mp.codeSystem cs";
-
-                    HQLParameterHelper parameterHelper = new HQLParameterHelper();
-                    parameterHelper.addParameter("cs.", "id", paramCodeSystem.getId());
-
-                    //Adding parameters, always connected with AND
-                    HQL_metadataParameter_search += parameterHelper.getWhere("");
-                    LOGGER.debug("HQL: " + HQL_metadataParameter_search);
-
-                    org.hibernate.Query Q_metadataParameter_search = hb_session.createQuery(HQL_metadataParameter_search);
-                    parameterHelper.applyParameter(Q_metadataParameter_search);
-
-                    List<MetadataParameter> metadataParameterList = Q_metadataParameter_search.list();
-                    if (!metadataParameterList.isEmpty()){
-                        Iterator<MetadataParameter> iter = metadataParameterList.iterator();
-                        while (iter.hasNext()){
-                            MetadataParameter metadataParameter = (MetadataParameter) iter.next();
-                            if(metadataParameter.getCodeSystem() != null && metadataParameter.getCodeSystem().getName() != null){
-                                if(!metadataParameter.getCodeSystem().getName().equals("LOINC")){
-                                    CodeSystemMetadataValue CSmetadataValue = new CodeSystemMetadataValue();
-
-                                    CSmetadataValue.setParameterValue("");
-                                    CSmetadataValue.setMetadataParameter(metadataParameter);
-                                    CSmetadataValue.setCodeSystemEntityVersion(entityVersion);
-                        
-                                    hb_session.save(CSmetadataValue);
+                                        hb_session.save(CSmetadataValue);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            catch (Exception e){
-                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-                response.getReturnInfos().setMessage("Fehler bei 'CreateConcept', Hibernate [0027]: " + e.getLocalizedMessage());
-                response.setCodeSystemEntity(null);
-                codeSystemEntityVersionId = 0;
+                catch (Exception e){
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                    response.getReturnInfos().setMessage("Fehler bei 'CreateConcept', Hibernate [0027]: " + e.getLocalizedMessage());
+                    response.setCodeSystemEntity(null);
+                    codeSystemEntityVersionId = 0;
 
-                LOGGER.error("Fehler bei 'CreateConcept', Hibernate [0027]: " + e.getLocalizedMessage());
-            }
-            finally{
-                //Completing transaction
-                if (createHibernateSession){
-                    if (codeSystemEntityVersionId > 0){
-                        if(codeSystemVersionId > 0)
-                            LastChangeHelper.updateLastChangeDate(true, codeSystemVersionId, hb_session);
-                        if(!hb_session.getTransaction().wasCommitted())
-                            hb_session.getTransaction().commit();
-                    }
-                    else{
-                        //Changes not successful
-                        if(!hb_session.getTransaction().wasRolledBack())
-                            hb_session.getTransaction().rollback();
-
-                        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-                        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-                        response.getReturnInfos().setMessage("Konzept konnte nicht erstellt werden!");
-                        response.setCodeSystemEntity(null);
-                        LOGGER.warn("Create concept failed [0028], codeSystemEntityVersionID: " + codeSystemEntityVersionId);
-                    }
-                    if(hb_session.isOpen())
-                        hb_session.close();
+                    LOGGER.error("Fehler bei 'CreateConcept', Hibernate [0027]: " + e.getLocalizedMessage());
                 }
-            }
+                finally{
+                    //Completing transaction
+                    if (createHibernateSession){
+                        if (codeSystemEntityVersionId > 0){
+                            if(codeSystemVersionId > 0)
+                                LastChangeHelper.updateLastChangeDate(true, codeSystemVersionId, hb_session);
+                            if(!hb_session.getTransaction().wasCommitted())
+                                hb_session.getTransaction().commit();
+                        }
+                        else{
+                            //Changes not successful
+                            if(!hb_session.getTransaction().wasRolledBack())
+                                hb_session.getTransaction().rollback();
+
+                            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                            response.getReturnInfos().setMessage("Konzept konnte nicht erstellt werden!");
+                            response.setCodeSystemEntity(null);
+                            LOGGER.warn("Create concept failed [0028], codeSystemEntityVersionID: " + codeSystemEntityVersionId);
+                        }
+                        if(hb_session.isOpen())
+                            hb_session.close();
+                    }
+                }
             
             //Creating response
             if (codeSystemEntityVersionId > 0){
@@ -364,7 +366,7 @@ public class CreateConcept{
             }
 
         }
-        catch (Exception e){
+        catch (HibernateException e){
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setMessage("Fehler bei 'CreateConcept' [0029] " + e.getLocalizedMessage());

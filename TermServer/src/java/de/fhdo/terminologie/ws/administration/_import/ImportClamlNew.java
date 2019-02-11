@@ -48,6 +48,7 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -157,98 +158,72 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             LOGGER.debug("loadClamlXML()");
             inputStream = new ByteArrayInputStream(this.fileContent);
             this.loadClamlXML(inputStream);
-            //ANKER
 
             this.status = StaticStatusList.getStatus(this.getImportId());
 
-            //3.2.20 added wasrolledback
             if (this.status != null && this.status.isCancel() && !hb_session.getTransaction().wasRolledBack())
-            {
                 hb_session.getTransaction().rollback();
-            }
-            else
-            {
-                //3.2.20 added if around block
+            else{
                 if(!hb_session.getTransaction().wasCommitted()){
                     hb_session.flush();
                     hb_session.getTransaction().commit();
                 }
             }
-
         }
-        catch (HibernateException ex)
-        {
-            LOGGER.error("ImportClaml error: " + ex.getLocalizedMessage());
-            LOGGER.error(ex);
+        catch (HibernateException ex){
+            LOGGER.error("Error [0110]: " + ex.getLocalizedMessage(), ex);
 
-            try
-            {
+            try{
                 if(!hb_session.getTransaction().wasRolledBack()){
                     hb_session.getTransaction().rollback();
-                    LOGGER.info("[ImportClaml.java] Rollback durchgeführt!");
+                    LOGGER.info("Rollback executed");
                 }
             }
-            catch (Exception exRollback)
-            {
-                if(!hb_session.getTransaction().wasRolledBack()){
-                    LOGGER.info(exRollback.getMessage());
-                    LOGGER.info("[ImportSVS.java] Rollback fehlgeschlagen!");
-                }
+            catch (Exception exRollback){
+                LOGGER.error("Error [0111]: " + exRollback.getLocalizedMessage(), exRollback);
+                if(!hb_session.getTransaction().wasRolledBack())
+                    LOGGER.info("Rollback failed");
             }
             
             throw new ImportException(ex.getLocalizedMessage());
         }
-        catch (SAXException ex)
-        {
-            LOGGER.error(ex);
+        catch (SAXException ex){
+            LOGGER.error("Error [0112]: " + ex.getLocalizedMessage(), ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
-        catch (IOException ex)
-        {
-            LOGGER.error(ex);
+        catch (IOException ex){
+            LOGGER.error("Error [0113]: " + ex.getLocalizedMessage(), ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
-        catch (ParserConfigurationException ex)
-        {
-            LOGGER.error(ex);
+        catch (ParserConfigurationException ex){
+            LOGGER.error("Error [0114]: " + ex.getLocalizedMessage(), ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
-        catch (Exception ex)
-        {
-            LOGGER.error(ex);
+        catch (Exception ex){
+            LOGGER.error("Error [0115]: " + ex.getLocalizedMessage(), ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
-        finally
-        {
-            try
-            {
+        finally{
+            try{
                 if(hb_session.isOpen() && hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasRolledBack()){
                     hb_session.getTransaction().rollback();
-                    LOGGER.info("[ImportClaml.java] Rollback durchgeführt!");
+                    LOGGER.info("Rollback executed");
                 }
             }
-            catch (Exception exRollback)
-            {
-                if(!hb_session.getTransaction().wasRolledBack()){
-                    LOGGER.info(exRollback.getMessage());
-                    LOGGER.info("[ImportClaml.java] Rollback fehlgeschlagen!");
-                }
+            catch (Exception exRollback){
+                LOGGER.error("Error [0116]: " + exRollback.getLocalizedMessage(), exRollback);
+                if(!hb_session.getTransaction().wasRolledBack())
+                    LOGGER.info("Rollback failed");
             }
-            //currentTask = "";
-            //percentageComplete = 0.0;
 
-            // Session schließen
-            if(hb_session != null && hb_session.isConnected())
-            {
-                hb_session.close();
-            }
-            
+            if(hb_session != null && hb_session.isConnected() && hb_session.isOpen())
+                hb_session.close();  
 
+            //TODO check this
             //isRunning = false;
-            LOGGER.info("ImportClaml fertig");
         }
-        
         //TODO create proposals here
+        LOGGER.info("----- startImport finished (001) -----");
     }
 
     /**
@@ -469,72 +444,44 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 else if (endElement.getName().toString().equals("RubricKinds")){
                     //CreateAssociationType (Unterklasse,Oberklasse)
                     this._assoctypeTaxonomy = this.CreateAssociationType("ist Oberklasse von", "ist Unterklasse von");
-                    //ANKER
-                    
                     LOGGER.debug(this._ccatrespt.getReturnInfos().getMessage());
-                    if (this._ccatrespt.getReturnInfos().getStatus() == ReturnType.Status.OK)
-                    {
-                        // System.out.println("ID: " + ccatrespt.getEntity().getEntityVersionList().get(0).getId());
+                    
+                    if (this._ccatrespt.getReturnInfos().getStatus() == ReturnType.Status.OK){
                         this._ccatresptTaxonomy = this._ccatrespt;
-
-                        //AssociationTypes für alle RubricKinds erstellen
-                        Iterator itRubricKinds = rubricKinds.getRubricKind().iterator();
-                        //System.out.println("anzrk:" + rks.getRubricKind().size());
-                        while (itRubricKinds.hasNext())
-                        {
-                            RubricKind rk = (RubricKind) itRubricKinds.next();
-
-                            AssociationType assoctypeTemp = this.CreateAssociationType(rk.getName(), rk.getName());
-                            this._assoctypeHashmap.put(rk.getName(), assoctypeTemp);
-                            // System.out.println("vorher");
-
+                        
+                        //Creating associationTypes for all rubricKinds
+                        for (RubricKind rubricKind : rubricKinds.getRubricKind()) {
+                            AssociationType assocTypeTemp = this.CreateAssociationType(rubricKind.getName(), rubricKind.getName());
+                            this._assoctypeHashmap.put(rubricKind.getName(), assocTypeTemp);
                             LOGGER.debug(this._ccatrespt.getReturnInfos().getMessage());
                             if (this._ccatrespt.getReturnInfos().getStatus() == ReturnType.Status.OK)
-                            {
-                                //  System.out.println("ID: " + ccatrespt.getEntity().getEntityVersionList().get(0).getId());
-                                this._ccatresptHashmap.put(rk.getName(), this._ccatrespt);
-                            }
-                            //  System.out.println("nacher");
+                                this._ccatresptHashmap.put(rubricKind.getName(), this._ccatrespt);
                         }
                     }
                 }
             }
 
             if (countEvery % 100000 == 0)
-            {
-
-                // sicherheitshalber aufrufen
                 System.gc();
-
-            }
             countEvery++;
-
         }
 
         Collection<clamlBindingXSD.Class> clazzCollection = this._clamlClassMap.values();
         int counter = 0;
-        for (clamlBindingXSD.Class claz : clazzCollection)
-        {
+        for (clamlBindingXSD.Class bufferClazz : clazzCollection){
             counter++;
-            importClazz(claz);
+            importClazz(bufferClazz);
 
-            if (counter % 500 == 0)
-            {
-                //Wichtig, sonst kommt es bei größeren Dateien zum Java-Heapspace-Fehler
-                LOGGER.warn("Flushed: " + counter);
+            if (counter % 500 == 0){
                 hb_session.flush();
-                //hb_session.clear();
+                hb_session.clear();
 
                 if (countEvery % 5000 == 0)
-                {
-                    //Sicherheitshalber aufrufen, versucht den garbage collector laufen zu lassen
                     System.gc();
-                }
             }
         }
-
-        boolean stop = true;
-
+        
+        LOGGER.info("----- LoadClamlXML finished (001) -----");
     }
 
     private void createCodeSystem(String title, String uid, String versionName, Date date, String authority, String description) throws Exception{
@@ -616,189 +563,153 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     }
     
     private AssociationType CreateAssociationType(String forwardName, String reverseName){
-        //ANKER
-        //Associationtype erstellen
-        //EntityType erstellen
-        CodeSystemEntity etAssoc = new CodeSystemEntity();
+        LOGGER.info("+++++ CreateAssociationType started +++++");
+        
+        //Creating entityType
+        CodeSystemEntity CSentityAssoc = new CodeSystemEntity();
         //TODO IsAxis ist nicht in CodeSystemEntity sondern in CodeSystemVersionEntityMembership
-        //etAssoc.setIsAxis(false);
-        //TODO Ob das wohl so richtig ist.
-        Set<CodeSystemVersionEntityMembership> memlist = etAssoc.getCodeSystemVersionEntityMemberships();
-        Iterator memIter = memlist.iterator();
-        while (memIter.hasNext())
-        {
-            CodeSystemVersionEntityMembership csvem = (CodeSystemVersionEntityMembership) memIter.next();
-            //if(csvem.) wenn es die korrekte Verbindung der beiden Tabellen ist, dann nur setzen
-            csvem.setIsAxis(Boolean.FALSE);
+        //CSentityAssoc.setIsAxis(false);
+        Set<CodeSystemVersionEntityMembership> membershipList = CSentityAssoc.getCodeSystemVersionEntityMemberships();
+        for (CodeSystemVersionEntityMembership CSVentityMembership : membershipList) {
+            //TODO if(csvem.) wenn es die korrekte Verbindung der beiden Tabellen ist, dann nur setzen
+            CSVentityMembership.setIsAxis(Boolean.FALSE);
         }
 
-        Set<AssociationType> assoList = new HashSet<AssociationType>();
-        AssociationType assoctype = new AssociationType();
-        assoctype.setForwardName(forwardName);
-        assoctype.setReverseName(reverseName);
-        assoList.add(assoctype);
+        Set<AssociationType> associationList = new HashSet<AssociationType>();
+        AssociationType associationType = new AssociationType();
+        associationType.setForwardName(forwardName);
+        associationType.setReverseName(reverseName);
+        associationList.add(associationType);
 
-        Set<CodeSystemEntityVersion> evlistAssoc = new HashSet<CodeSystemEntityVersion>();
-        //EntityVersionType erstellen
-        CodeSystemEntityVersion evtAssoc = new CodeSystemEntityVersion();
-        evtAssoc.setMajorRevision(0);
-        evtAssoc.setMinorRevision(0);
-        evtAssoc.setAssociationTypes(assoList);
-        evtAssoc.setIsLeaf(true);
-
-        evlistAssoc.add(evtAssoc);
-
-        etAssoc.setCodeSystemEntityVersions(evlistAssoc);
-
-        CreateConceptAssociationTypeRequestType ccatrt = new CreateConceptAssociationTypeRequestType();
-        ccatrt.setCodeSystemEntity(etAssoc);
-
-        ccatrt.setLogin(this.getLoginType());
+        Set<CodeSystemEntityVersion> CSEVlistAssociations = new HashSet<CodeSystemEntityVersion>();
         
-        CreateConceptAssociationType ccat = new CreateConceptAssociationType();
-        this._ccatrespt = ccat.CreateConceptAssociationType(ccatrt, hb_session);
+        //Creating entityVersionType
+        CodeSystemEntityVersion EVTassociation = new CodeSystemEntityVersion();
+        EVTassociation.setMajorRevision(0);
+        EVTassociation.setMinorRevision(0);
+        EVTassociation.setAssociationTypes(associationList);
+        EVTassociation.setIsLeaf(true);
 
-        return assoctype;
+        CSEVlistAssociations.add(EVTassociation);
+        
+        CSentityAssoc.setCodeSystemEntityVersions(CSEVlistAssociations);
 
+        CreateConceptAssociationTypeRequestType createConceptAssocRequest = new CreateConceptAssociationTypeRequestType();
+        createConceptAssocRequest.setCodeSystemEntity(CSentityAssoc);
+        createConceptAssocRequest.setLogin(this.getLoginType());
+        
+        CreateConceptAssociationType createConceptAssoc = new CreateConceptAssociationType();
+        this._ccatrespt = createConceptAssoc.CreateConceptAssociationType(createConceptAssocRequest, hb_session);
+
+        LOGGER.info("----- CreateAssociationType finished (001) -----");
+        return associationType;
     }
     
-    private void importClazz(clamlBindingXSD.Class clazz) throws ImportException
-    {
-
-        if (clazz.getSuperClass() != null && clazz.getSuperClass().iterator().hasNext())
-        {
+    private void importClazz(clamlBindingXSD.Class clazz) throws ImportException{
+        LOGGER.info("+++++ importClazz started +++++");
+        
+        if (clazz.getSuperClass() != null && clazz.getSuperClass().iterator().hasNext()){
             String code = clazz.getSuperClass().iterator().next().getCode();
             if (this._clamlClassMap.get(code) != null)
-            {
                 importClazz(this._clamlClassMap.get(code));
-            }
         }
 
-        try
-        {
-            if (this._clamlClassMap.get(clazz.getCode()) != null)
-            {
+        try{
+            if (this._clamlClassMap.get(clazz.getCode()) != null){
                 this.CreateSingleConcept(clazz);
                 LOGGER.debug("Concept writing: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
                 if (clazz.getMeta() != null && clazz.getMeta().size() > 0)
-                {
                     this.createMetaData(clazz);
-                }
                 this._clamlClassMap.remove(clazz.getCode());
             }
-
         }
-        catch (Exception ex)
-        {
-            LOGGER.error(ex);
+        catch (Exception ex){
+            LOGGER.error("Error [0109]: " + ex.getLocalizedMessage(), ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
-
+        
+        LOGGER.info("----- importClazz finished (001) -----");
     }
     
-    private void CreateSingleConcept(clamlBindingXSD.Class cl) throws Exception
-    {
-        //Konzepte erstellen
-        String code = "";
-        String rubKind = "";
-        String labelString = "";
+    private void CreateSingleConcept(clamlBindingXSD.Class cl) throws Exception{
+        LOGGER.info("+++++ CreateSingleConcept started +++++");
+        
+        //Creating concept
+        String code;
+        String rubKind;
+        String labelString;
 
         clamlBindingXSD.Class clazz = cl;
         code = clazz.getCode();
         //clazz.getKind()  // TODO Kind abspeichern für Export
 
-        //Status aktualisieren
-        //this.setCurrentCountInStatusList(++this._aktCount, this.getImportId());;
+        //Updating import status
         this.setCurrentTaskInStatusList(code, this.getImportId());
 
-        Iterator it2 = clazz.getRubric().iterator();
-        Iterator it3 = clazz.getRubric().iterator();
+        Iterator iteratorPreferred = clazz.getRubric().iterator();
+        Iterator iteratorRest = clazz.getRubric().iterator();
 
-        boolean found = false;
-        // Alle Rubrics Durchlaufen
-        // Das erste mal um preferred zu suchen und anzulegen, dann das zweite mal um alle anderen anzulegen
-        Rubric rubi = null;
-        while (it2.hasNext())
-        {
-            rubi = (Rubric) it2.next();
-            rubKind = (String) rubi.getKind();
+        boolean rubricFound = false;
+        //Searching all rubric, first time to find and create preferred, second time to create all others
+        Rubric rubric = null;
+        while (iteratorPreferred.hasNext()){
+            rubric = (Rubric) iteratorPreferred.next();
+            rubKind = (String) rubric.getKind();
 
-            if (rubKind.equals(RubricKinds.RUBRICKINDS.preferred.getCode()))
-            {
-                found = true;
-                labelString = getAllRubricStrings(rubi);
-                this.createPrefferedTerm(labelString, code, clazz);
+            if (rubKind.equals(RubricKinds.RUBRICKINDS.preferred.getCode())){
+                rubricFound = true;
+                labelString = getAllRubricStrings(rubric);
+                this.createPreferredTerm(labelString, code, clazz);
             }
         }
-        if (found == false && rubi != null)
-        {
-            rubi.setKind(RubricKinds.RUBRICKINDS.preferred.getCode());
-            labelString = getAllRubricStrings(rubi);
-            this.createPrefferedTerm(labelString, code, clazz);
+        if (rubricFound == false && rubric != null){
+            rubric.setKind(RubricKinds.RUBRICKINDS.preferred.getCode());
+            labelString = this.getAllRubricStrings(rubric);
+            this.createPreferredTerm(labelString, code, clazz);
         }
 
-        while (it3.hasNext() && found == true)
-        {
-            rubi = (Rubric) it3.next();
-            rubKind = (String) rubi.getKind();
+        while (iteratorRest.hasNext() && rubricFound == true){
+            rubric = (Rubric) iteratorRest.next();
+            rubKind = (String) rubric.getKind();
             if (!(rubKind.equals(RubricKinds.RUBRICKINDS.preferred.getCode())
-                    || rubKind.equals(RubricKinds.RUBRICKINDS.note.getCode())))
-            {
-                labelString = getAllRubricStrings(rubi);
+            || rubKind.equals(RubricKinds.RUBRICKINDS.note.getCode()))){
+                labelString = getAllRubricStrings(rubric);
                 this.createNotPrefferdTerm(labelString, code, clazz, rubKind);
             }
         }
     }
     
-    private String getAllRubricStrings(Rubric rubric)
-    {
+    private String getAllRubricStrings(Rubric rubric){
         String returnString = "";
-        Iterator itRubric = rubric.getLabel().iterator();
-        while (itRubric.hasNext())
-        {
-            Label label = (Label) itRubric.next();
+        
+        for (Label label : rubric.getLabel()) {
             List contentList = label.getContent();
-            Iterator itContent = contentList.iterator();
-            while (itContent.hasNext())
-            {
-                Object o = itContent.next();
+            Iterator contentIterator = contentList.iterator();
+            while (contentIterator.hasNext()){
+                Object object = contentIterator.next();
 
-                if (o instanceof String)
-                {
-                    returnString = returnString + o.toString();
-                }
-                else
-                {
-                    if (o instanceof Fragment)
-                    {
-                        Fragment fragment = (Fragment) o;
-                        List fragmentListe = fragment.getContent();
-                        Iterator itFragmentContent = fragmentListe.iterator();
-                        while (itFragmentContent.hasNext())
-                        {
-                            Object o2 = itFragmentContent.next();
-                            if (o2 instanceof String)
-                            {
-                                returnString = returnString + o2.toString();
-
-                            }
+                if (object instanceof String)
+                    returnString = returnString + object.toString();
+                else{
+                    if (object instanceof Fragment){
+                        Fragment fragment = (Fragment) object;
+                        List fragmentContentList = fragment.getContent();
+                        Iterator fragmentIterator = fragmentContentList.iterator();
+                        while (fragmentIterator.hasNext()){
+                            Object fragmentObject = fragmentIterator.next();
+                            if (fragmentObject instanceof String)
+                                returnString = returnString + fragmentObject.toString();
                         }
                     }
-                    else
-                    {
-                        if (o instanceof Para)
-                        {
-                            Para para = (Para) o;
-                            List paraListe = para.getContent();
-                            Iterator itParaContent = paraListe.iterator();
-                            while (itParaContent.hasNext())
-                            {
-                                Object o2 = itParaContent.next();
-                                if (o2 instanceof String)
-                                {
-                                    returnString = returnString + o2.toString();
-
-                                }
+                    else{
+                        if (object instanceof Para){
+                            Para para = (Para) object;
+                            List paraList = para.getContent();
+                            Iterator paraIterator = paraList.iterator();
+                            while (paraIterator.hasNext()){
+                                Object paraObject = paraIterator.next();
+                                if (paraObject instanceof String)
+                                    returnString = returnString + paraObject.toString();
                             }
                         }
                     }
@@ -808,372 +719,298 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         return returnString;
     }
     
-    private void createPrefferedTerm(String labelString, String code, clamlBindingXSD.Class clazz) throws Exception
-    {
+    private void createPreferredTerm(String labelString, String code, clamlBindingXSD.Class clazz) throws Exception{
+        LOGGER.info("+++++ createPreferredTerm started +++++");
         LOGGER.debug("createPrefferedTerm mit Code: " + code + ", Text: " + labelString);
 
-        CreateConceptRequestType request = new CreateConceptRequestType();
+        CreateConceptRequestType createConceptRequest = new CreateConceptRequestType();
 
-        // EntityType erstellen
-        CodeSystemEntity cse = new CodeSystemEntity();
-        CodeSystemVersionEntityMembership csvem = new CodeSystemVersionEntityMembership();
-        csvem.setIsAxis(false);
-        if (clazz.getSuperClass() != null && clazz.getSuperClass().size() > 0)
-        {
-            csvem.setIsAxis(false);
-            csvem.setIsMainClass(false);
+        //Creating entityType
+        CodeSystemEntity CSentity = new CodeSystemEntity();
+        CodeSystemVersionEntityMembership CSVentityMembership = new CodeSystemVersionEntityMembership();
+        CSVentityMembership.setIsAxis(false);
+        if (clazz.getSuperClass() != null && clazz.getSuperClass().size() > 0){
+            CSVentityMembership.setIsAxis(false);
+            CSVentityMembership.setIsMainClass(false);
         }
         else
-        {
-            csvem.setIsMainClass(true);
-        }
+            CSVentityMembership.setIsMainClass(true);
 
         if (clazz.getKind() != null && clazz.getKind().equals("chapter"))
-        {
-            csvem.setIsMainClass(true);
-        }
+            CSVentityMembership.setIsMainClass(true);
 
-        cse.setCodeSystemVersionEntityMemberships(new HashSet<CodeSystemVersionEntityMembership>());
-        cse.getCodeSystemVersionEntityMemberships().add(csvem);
+        CSentity.setCodeSystemVersionEntityMemberships(new HashSet<CodeSystemVersionEntityMembership>());
+        CSentity.getCodeSystemVersionEntityMemberships().add(CSVentityMembership);
 
-        CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
-        csev.setMajorRevision(1);
-        csev.setMinorRevision(0);
-        csev.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+        CodeSystemEntityVersion CSentityVersion = new CodeSystemEntityVersion();
+        CSentityVersion.setMajorRevision(1);
+        CSentityVersion.setMinorRevision(0);
+        CSentityVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
 
-        //Matthias: testing
         clamlBindingXSD.Class claz = this._clamlClassMap.get(code);
         if (claz.getSubClass() != null && claz.getSubClass().iterator().hasNext())
-        {
-            csev.setIsLeaf(false);
-        }
+            CSentityVersion.setIsLeaf(false);
         else
-        {
-            csev.setIsLeaf(true);  // erstmal true, wird per Trigger auf false gesetzt, wenn eine Beziehung eingefügt wird
-        }
+            CSentityVersion.setIsLeaf(true);  //True, will be trigger-set to false if a relationship is added
 
-        CodeSystemConcept csc = new CodeSystemConcept();
-        csc.setCode(code);
-        csc.setTerm(labelString);
-        csc.setTermAbbrevation("");
-        csc.setIsPreferred(true);
+        CodeSystemConcept CSconcept = new CodeSystemConcept();
+        CSconcept.setCode(code);
+        CSconcept.setTerm(labelString);
+        CSconcept.setTermAbbrevation("");
+        CSconcept.setIsPreferred(true);
 
-        for (Rubric r : clazz.getRubric())
-        {
-            if (r.getKind().equals(RubricKinds.RUBRICKINDS.note.getCode()))
-            {
-                csc.setDescription(r.getLabel().get(0).getContent().get(0).toString());
-            }
-        }
+        for (Rubric rubric : clazz.getRubric())
+            if (rubric.getKind().equals(RubricKinds.RUBRICKINDS.note.getCode()))    
+                CSconcept.setDescription(rubric.getLabel().get(0).getContent().get(0).toString());
 
-        csev.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
-        csev.getCodeSystemConcepts().add(csc);
+        CSentityVersion.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
+        CSentityVersion.getCodeSystemConcepts().add(CSconcept);
 
-        cse.setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
-        cse.getCodeSystemEntityVersions().add(csev);
+        CSentity.setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
+        CSentity.getCodeSystemEntityVersions().add(CSentityVersion);
 
-        addAttributeMetadata(clazz, csev, csc);
+        this.addAttributeMetadata(clazz, CSentityVersion, CSconcept);
+        LOGGER.debug("isMainClass: " + CSVentityMembership.getIsMainClass());
 
-        LOGGER.debug("isMainClass: " + csvem.getIsMainClass());
-
-        request.setCodeSystem(this.codesystem);
-        request.setCodeSystemEntity(cse);
-        request.setLogin(this.getLoginType());
+        createConceptRequest.setCodeSystem(this.codesystem);
+        createConceptRequest.setCodeSystemEntity(CSentity);
+        createConceptRequest.setLogin(this.getLoginType());
         
-        //Konzept erstellen
-        CreateConcept cc = new CreateConcept();
-        this._ccsResponse = cc.CreateConcept(request, hb_session);
-
-        LOGGER.debug("[ImportClaml.java]" + this._ccsResponse.getReturnInfos().getMessage());
-        if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
-        {
+        //Creating concept
+        CreateConcept createConcept = new CreateConcept();
+        this._ccsResponse = createConcept.CreateConcept(createConceptRequest, hb_session);
+        LOGGER.debug(this._ccsResponse.getReturnInfos().getMessage());
+        
+        if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK){
             if (clazz.getSuperClass() != null && clazz.getSuperClass().size() > 0)
-            {
                 this.createSuperclassAssociation(code, clazz);
-            }
 
-            //aktuelle entityVersionID aus der Response in Hashmap schreiben/merken:
-            long aktEntityVersionID = 0;
+            //Writing current entityVersionID from response into hashmap
+            long currentEntityVersionID;
 
-            if (this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().hasNext())
-            {
-                aktEntityVersionID = this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId();
-                this._referenceMap.put(code, aktEntityVersionID);
+            if (this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().hasNext()){
+                currentEntityVersionID = this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId();
+                this._referenceMap.put(code, currentEntityVersionID);
             }
 
             this.aktCount++;
             this.setCurrentCountInStatusList(this.aktCount, this.getImportId());
-            if(this.getImportType().getRole() != null && this.getImportType().getRole().equals(CODES.ROLE_TRANSFER))
-            {
-                //Status bei Freigabe in log file ausgeben
+            if(this.getImportType().getRole() != null && this.getImportType().getRole().equals(CODES.ROLE_TRANSFER)){
                 LOGGER.info("Import progress: " + this.aktCount + "/" + this.getTotalCountInStatusList(this.getImportId()));
             }
         }
         else
-        {
             throw new Exception();
-        }
     }
 
-    private void createNotPrefferdTerm(String labelString, String code, clamlBindingXSD.Class clazz, String rubKind) throws Exception
-    {
+    private void createNotPrefferdTerm(String labelString, String code, clamlBindingXSD.Class clazz, String rubKind) throws Exception{
         LOGGER.debug("createNotPrefferdTerm mit Code: " + code + ", Text: " + labelString);
-        //System.out.println("test4");
-        CreateConceptRequestType request = new CreateConceptRequestType();
-
-        //EntityType erstellen
-        CodeSystemEntity cse = new CodeSystemEntity();
-        CodeSystemVersionEntityMembership csvem = new CodeSystemVersionEntityMembership();
-        csvem.setIsAxis(false);
-        cse.setCodeSystemVersionEntityMemberships(new HashSet<CodeSystemVersionEntityMembership>());
-        cse.getCodeSystemVersionEntityMemberships().add(csvem);
-
-        //EntityVersionType erstellen
-        CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
-        csev.setMajorRevision(1);
-        csev.setMinorRevision(0);
-        csev.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-        csev.setIsLeaf(true);
-
-        //TermType erstellen
-        CodeSystemConcept csc = new CodeSystemConcept();
-        csc.setCode(code);
-        csc.setTerm(labelString);
-        csc.setTermAbbrevation("");
-        csc.setIsPreferred(false);
-
-        csev.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
-        csev.getCodeSystemConcepts().add(csc);
-
-        cse.setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
-        cse.getCodeSystemEntityVersions().add(csev);
-
-        addAttributeMetadata(clazz, csev, csc);
-
-        request.setCodeSystem(this.codesystem);
-        request.setCodeSystemEntity(cse);
-        request.setLogin(this.getLoginType());
         
-        //Konzept erstellen
-        CreateConcept cc = new CreateConcept();
-        this._ccsResponse = cc.CreateConcept(request, hb_session);
+        CreateConceptRequestType createConceptRequest = new CreateConceptRequestType();
 
-        LOGGER.debug("[ImportClaml.java]" + this._ccsResponse.getReturnInfos().getMessage());
-        if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
-        {
+        //Creating entityType
+        CodeSystemEntity CSentity = new CodeSystemEntity();
+        CodeSystemVersionEntityMembership CSVentityMembership = new CodeSystemVersionEntityMembership();
+        CSVentityMembership.setIsAxis(false);
+        CSentity.setCodeSystemVersionEntityMemberships(new HashSet<CodeSystemVersionEntityMembership>());
+        CSentity.getCodeSystemVersionEntityMemberships().add(CSVentityMembership);
+
+        //Creating entityVersionType
+        CodeSystemEntityVersion CSEV = new CodeSystemEntityVersion();
+        CSEV.setMajorRevision(1);
+        CSEV.setMinorRevision(0);
+        CSEV.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+        CSEV.setIsLeaf(true);
+
+        //Creating termType
+        CodeSystemConcept CSconcept = new CodeSystemConcept();
+        CSconcept.setCode(code);
+        CSconcept.setTerm(labelString);
+        CSconcept.setTermAbbrevation("");
+        CSconcept.setIsPreferred(false);
+
+        CSEV.setCodeSystemConcepts(new HashSet<CodeSystemConcept>());
+        CSEV.getCodeSystemConcepts().add(CSconcept);
+
+        CSentity.setCodeSystemEntityVersions(new HashSet<CodeSystemEntityVersion>());
+        CSentity.getCodeSystemEntityVersions().add(CSEV);
+
+        this.addAttributeMetadata(clazz, CSEV, CSconcept);
+
+        createConceptRequest.setCodeSystem(this.codesystem);
+        createConceptRequest.setCodeSystemEntity(CSentity);
+        createConceptRequest.setLogin(this.getLoginType());
+        
+        //Creating concept
+        CreateConcept createConcept = new CreateConcept();
+        this._ccsResponse = createConcept.CreateConcept(createConceptRequest, hb_session);
+
+        LOGGER.debug(this._ccsResponse.getReturnInfos().getMessage());
+        if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK){
             this.createTerm2TermAssociation(code, clazz, rubKind);
-            
             this.aktCount++;
             this.setCurrentCountInStatusList(this.aktCount, this.getImportId());
-
         }
         else
-        {
-            //throw new Exception();
-        }
+            throw new Exception();
     }
     
-    private void addAttributeMetadata(clamlBindingXSD.Class clazz, CodeSystemEntityVersion csev, CodeSystemConcept csc) throws ImportException
-    {
-        if (clazz != null && csev != null && csc != null)
-        {
-
-            for (Meta meta : clazz.getMeta())
-            {
-                try
-                {
+    private void addAttributeMetadata(clamlBindingXSD.Class clazz, CodeSystemEntityVersion csev, CodeSystemConcept csc) throws ImportException{
+        if (clazz != null && csev != null && csc != null){
+            for (Meta meta : clazz.getMeta()){
+                try{
                     if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.hints.getCode()))
-                    {
                         csc.setHints(meta.getValue());
-                    }
+                    
                     if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.meaning.getCode()))
-                    {
                         csc.setMeaning(meta.getValue());
-                    }
+                    
                     if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.termAbbrevation.getCode()))
-                    {
                         csc.setTermAbbrevation(meta.getValue());
-                    }
 
                     if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.majorRevision.getCode()))
-                    {
                         csev.setMajorRevision(Integer.parseInt(meta.getValue()));
-                    }
+                    
                     if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.minorRevision.getCode()))
-                    {
                         csev.setMinorRevision(Integer.parseInt(meta.getValue()));
-                    }
+                    
                     if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.status.getCode()))
-                    {
                         csev.setStatus(Integer.parseInt(meta.getValue()));
-                    }
-                    if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.statusDate.getCode()))
-                    {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        csev.setStatusDate(sdf.parse(meta.getValue()));
+
+                    if (meta.getName().equals(MetadataDefinition.METADATA_ATTRIBUTES.statusDate.getCode())){
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        csev.setStatusDate(dateFormat.parse(meta.getValue()));
                     }
                 }
-                catch (Exception ex)
-                {
-                    LOGGER.error(ex);
+                catch (NumberFormatException ex){
+                    LOGGER.error("Error [0105]: " + ex.getLocalizedMessage(), ex);
+                    throw new ImportException(ex.getLocalizedMessage());
+                } catch (ParseException ex) {
+                    LOGGER.error("Error [0106]: " + ex.getLocalizedMessage(), ex);
                     throw new ImportException(ex.getLocalizedMessage());
                 }
             }
         }
     }
     
-    private void createTerm2TermAssociation(String code, clamlBindingXSD.Class clazz, String rubkind) throws Exception
-    {
-        //aktuelle entityVersionID aus der Response merken:
-        long aktEntityVersionID = 0;
+    private void createTerm2TermAssociation(String code, clamlBindingXSD.Class clazz, String rubkind) throws Exception{
+        //Storing curent entityVersionID from response
+        long currentEntityVersionID = 0;
         if (this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().hasNext())
-        {
-            aktEntityVersionID = this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId();
-        }
+            currentEntityVersionID = this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId();
 
-        //den eigenen Code in der HashMap suchen (ist der Code des prefferdTerms)
+        //Searching own code of prefferedTerms in Hashmap
         long prefferedTermEntityVersionID = (Long) this._referenceMap.get(code);
 
-        CodeSystemEntityVersionAssociation evat = new CodeSystemEntityVersionAssociation();
+        CodeSystemEntityVersionAssociation CSEVassoc = new CodeSystemEntityVersionAssociation();
+        
         //TODO hier hat sich die Struktur der Daten geändert muss noch mal überdacht werden
+        CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
+        CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(prefferedTermEntityVersionID);
 
-        evat.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
-        evat.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(prefferedTermEntityVersionID);
+        CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
+        CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(currentEntityVersionID);
 
-        evat.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
-        evat.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(aktEntityVersionID);
+        CSEVassoc.setAssociationKind(Definitions.ASSOCIATION_KIND.ONTOLOGY.getCode());
+        CSEVassoc.setLeftId(prefferedTermEntityVersionID);
 
-        evat.setAssociationKind(Definitions.ASSOCIATION_KIND.ONTOLOGY.getCode());
-        evat.setLeftId(prefferedTermEntityVersionID);
+        CSEVassoc.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+        CSEVassoc.setStatusDate(new Date());
 
-        evat.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-        evat.setStatusDate(new Date());
+        //Getting associationType and response from the corresponding hashMaps
+        CreateConceptAssociationTypeResponseType CCassocResponse = (CreateConceptAssociationTypeResponseType) this._ccatresptHashmap.get(rubkind);
+        AssociationType assocType = (AssociationType) this._assoctypeHashmap.get(rubkind);
+        assocType.setCodeSystemEntityVersionId(CCassocResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId());
 
-        //AssociationType und Response aus der jeweiligen Hasmap holen
-        CreateConceptAssociationTypeResponseType resp = (CreateConceptAssociationTypeResponseType) this._ccatresptHashmap.get(rubkind);
-        AssociationType atype = (AssociationType) this._assoctypeHashmap.get(rubkind);
-        atype.setCodeSystemEntityVersionId(resp.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId());
+        CSEVassoc.setAssociationType(assocType);
 
-        evat.setAssociationType(atype);
-
-        CreateConceptAssociationRequestType ccar = new CreateConceptAssociationRequestType();
+        CreateConceptAssociationRequestType CCassocRequest = new CreateConceptAssociationRequestType();
+        
         //TODO hier muss noch das CodeSystemEntityVersionAssociation in CreateConceptAssociationTypeRequestType gesetzt werden
         //es besitzt jedoch eine andere Struktur
+        CCassocRequest.setCodeSystemEntityVersionAssociation(CSEVassoc);
+        CCassocRequest.setLogin(this.getLoginType());
 
-        ccar.setCodeSystemEntityVersionAssociation(evat);
-        ccar.setLogin(this.getLoginType());
-
-        CreateConceptAssociation cca = new CreateConceptAssociation();
-        CreateConceptAssociationResponseType ccaresp = cca.CreateConceptAssociation(ccar, hb_session);
-        LOGGER.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
-        if (ccaresp.getReturnInfos().getStatus() == ReturnType.Status.OK)
-        {
-            LOGGER.debug("[ImportClaml.java] Create Association Erfolgreich");
-
-        }
+        CreateConceptAssociation createConceptAssoc = new CreateConceptAssociation();
+        CreateConceptAssociationResponseType CCAresponse = createConceptAssoc.CreateConceptAssociation(CCassocRequest, hb_session);
+        
+        LOGGER.debug(CCAresponse.getReturnInfos().getMessage());
+        if (CCAresponse.getReturnInfos().getStatus() == ReturnType.Status.OK)
+            LOGGER.debug("Create Association finished successfully");
         else
-        {
-            // throw new Exception();
-        }
+            throw new Exception();
     }
     
-    private void createSuperclassAssociation(String code, clamlBindingXSD.Class clazz) throws Exception
-    {
-        //aktuelle entityVersionID aus der Response in Hashmap schreiben/merken:
-        long aktEntityVersionID = 0;
-        if (this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().hasNext())
-        {
-            aktEntityVersionID = this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId();
-            this._referenceMap.put(code, aktEntityVersionID);
+    private void createSuperclassAssociation(String code, clamlBindingXSD.Class clazz) throws Exception{
+        //Writing current entityVersionID from response into the hashmap
+        long currentEntityVersionID = 0;
+        if (this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().hasNext()){
+            currentEntityVersionID = this._ccsResponse.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId();
+            this._referenceMap.put(code, currentEntityVersionID);
         }
 
-        //Die erste SuperClass holen
-        String superclazzCode = "";
+        //Get first superClass
+        String superclazzCode;
         long superclazzEntityVersionID = 0;
-        if (clazz.getSuperClass().iterator().hasNext())
-        {
+        if (clazz.getSuperClass().iterator().hasNext()){
             superclazzCode = clazz.getSuperClass().iterator().next().getCode();
-            //Superclass id in der Hashmap suchen
             superclazzEntityVersionID = (Long) this._referenceMap.get(superclazzCode);
-            //System.out.println("superclassCode: " + superclazzCode + " superclassID:" + superclazzEntityVersionID + "aktCode" + code + " aktID:" + aktEntityVersionID);
         }
 
-        CodeSystemEntityVersionAssociation evat = new CodeSystemEntityVersionAssociation();
+        CodeSystemEntityVersionAssociation CSEVassoc = new CodeSystemEntityVersionAssociation();
+        
         //TODO hier hat sich die Struktur der Daten geändert muss noch mal überdacht werden
-        evat.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
-        evat.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(superclazzEntityVersionID);
+        CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
+        CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(superclazzEntityVersionID);
 
-        evat.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
-        evat.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(aktEntityVersionID);
+        CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
+        CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(currentEntityVersionID);
 
-        evat.setAssociationKind(Definitions.ASSOCIATION_KIND.TAXONOMY.getCode());
-        evat.setLeftId(superclazzEntityVersionID);
-        evat.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-        evat.setStatusDate(new Date());
+        CSEVassoc.setAssociationKind(Definitions.ASSOCIATION_KIND.TAXONOMY.getCode());
+        CSEVassoc.setLeftId(superclazzEntityVersionID);
+        CSEVassoc.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+        CSEVassoc.setStatusDate(new Date());
 
         this._assoctypeTaxonomy.setCodeSystemEntityVersionId(this._ccatresptTaxonomy.getCodeSystemEntity().getCodeSystemEntityVersions().iterator().next().getVersionId());
-        evat.setAssociationType(this._assoctypeTaxonomy);
+        CSEVassoc.setAssociationType(this._assoctypeTaxonomy);
 
-        CreateConceptAssociationRequestType ccar = new CreateConceptAssociationRequestType();
+        CreateConceptAssociationRequestType createConceptAssocRequest = new CreateConceptAssociationRequestType();
         //TODO hier muss noch das CodeSystemEntityVersionAssociation in CreateConceptAssociationTypeRequestType gesetzt werden
         //es besitzt jedoch eine andere Struktur
 
-        ccar.setCodeSystemEntityVersionAssociation(evat);
-        ccar.setLogin(this.getLoginType());
-        CreateConceptAssociation cca = new CreateConceptAssociation();
+        createConceptAssocRequest.setCodeSystemEntityVersionAssociation(CSEVassoc);
+        createConceptAssocRequest.setLogin(this.getLoginType());
+        CreateConceptAssociation createConceptAssoc = new CreateConceptAssociation();
         //TODO cca.CreateConceptAssociation( ist noch nicht implementiert
 
-        CreateConceptAssociationResponseType ccaresp = cca.CreateConceptAssociation(ccar, hb_session);
-
-        LOGGER.debug("[ImportClaml.java]" + ccaresp.getReturnInfos().getMessage());
-        if (ccaresp.getReturnInfos().getStatus() == ReturnType.Status.OK)
-        {
-            LOGGER.debug("[ImportClaml.java] Create Association Erfolgreich");
-
-        }
-        else
-        {
-            LOGGER.error("Fehler");
-        }
-
+        CreateConceptAssociationResponseType CCAresponse = createConceptAssoc.CreateConceptAssociation(createConceptAssocRequest, hb_session);
+        LOGGER.debug(CCAresponse.getReturnInfos().getMessage());
     }
     
-    private void createMetaData(clamlBindingXSD.Class clazz)
-    {
-        if (LOGGER.isInfoEnabled())
-        {
-            LOGGER.debug("createMetaData gestartet");
-        }
-
+    private void createMetaData(clamlBindingXSD.Class clazz){
+        LOGGER.info("+++++ createMetaData started +++++");
+        
         for (Meta meta : clazz.getMeta())
-        {
-            if (meta.getName() != null && meta.getName().length() > 0)
-            {
-                // Prüfen, ob es ein Metadatenattribut ist
-                if (MetadataDefinition.METADATA_ATTRIBUTES.isCodeValid(meta.getName()) == false)
-                {
+            if (meta.getName() != null && meta.getName().length() > 0){
+                //Checking if it is a metadata attribute
+                if (MetadataDefinition.METADATA_ATTRIBUTES.isCodeValid(meta.getName()) == false){
                     long metaDataID = insertMetaData(meta.getName(), meta.getValue(), clazz.getCode());
                     if (metaDataID > 0)
-                    {
-                        LOGGER.debug("[ImportClaml.java] Neues entity_version_parameter_value mit ID: " + metaDataID);
-                    }
+                        LOGGER.debug("New entity_version_parameter_value with ID: " + metaDataID);
                 }
             }
-        }
 
-        // ClassKind in Metadaten abspeichern, damit dieser wieder exportiert werden kann
-        if (clazz.getKind() != null)
-        {
+        //Storing classKind in metadata, so that it can be exported
+        if (clazz.getKind() != null){
             String classKind = clazz.getKind().toString();
-            if (classKind.length() > 0)
-            {
+            if (classKind.length() > 0){
                 long metaDataID = insertMetaData("ClaML_ClassKind", classKind, clazz.getCode());
                 if (metaDataID > 0)
-                {
-                    LOGGER.debug("[ImportClaml.java] Neues entity_version_parameter_value mit ID: " + metaDataID);
-                }
+                    LOGGER.debug("New entity_version_parameter_value with ID: " + metaDataID);
             }
         }
+        
+        LOGGER.info("----- createMetaData finished (001) -----");
     }
     
     private long insertMetaData(String name, String value, String code)

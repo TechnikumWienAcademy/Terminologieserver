@@ -40,59 +40,51 @@ import java.util.Set;
  *
  * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
  */
-public class CreateConceptAssociationType
-{
+public class CreateConceptAssociationType{
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  public CreateConceptAssociationTypeResponseType CreateConceptAssociationType(
-    CreateConceptAssociationTypeRequestType parameter)
-  {
-    return CreateConceptAssociationType(parameter, null);
-  }
+    public CreateConceptAssociationTypeResponseType CreateConceptAssociationType(CreateConceptAssociationTypeRequestType parameter){
+        return CreateConceptAssociationType(parameter, null);
+    }
   
-  public CreateConceptAssociationTypeResponseType CreateConceptAssociationType(
-    CreateConceptAssociationTypeRequestType parameter, org.hibernate.Session session)
-  {
-    if (logger.isInfoEnabled())
-      logger.info("====== CreateConceptAssociationType gestartet ======");
+    public CreateConceptAssociationTypeResponseType CreateConceptAssociationType(CreateConceptAssociationTypeRequestType parameter, org.hibernate.Session session){
+        LOGGER.info("+++++ CreateConceptAssociationType started +++++");
     
-    // Return-Informationen anlegen
-    CreateConceptAssociationTypeResponseType response = new CreateConceptAssociationTypeResponseType();
-    response.setReturnInfos(new ReturnType());
+        //Creating response
+        CreateConceptAssociationTypeResponseType response = new CreateConceptAssociationTypeResponseType();
+        response.setReturnInfos(new ReturnType());
 
-    // Parameter prüfen
-    if (validateParameter(parameter, response) == false)
-    {
-      return response; // Fehler bei den Parametern
+        //Checking parameters
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- CreateConceptAssociationType finished (001) -----");
+            return response; //Faulty parameters
+        }
+    
+        CreateConcept createConcept = new CreateConcept();
+        CreateConceptResponseType responseCC = new CreateConceptResponseType();
+        responseCC.setReturnInfos(response.getReturnInfos());
+    
+        LoginType paramLogin = null;
+        CodeSystem paramCodeSystem = null;
+        CodeSystemEntity paramCodeSystemEntity = null;
+        List<Property> paramProperty = null;
+    
+        if(parameter != null){
+            paramLogin = parameter.getLogin();
+            paramCodeSystem = parameter.getCodeSystem();
+            paramCodeSystemEntity = parameter.getCodeSystemEntity();
+            paramProperty = parameter.getProperty();
+        }
+    
+        createConcept.CreateConceptOrAssociationType(responseCC, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session);
+    
+        response.setReturnInfos(responseCC.getReturnInfos());
+        response.setCodeSystemEntity(responseCC.getCodeSystemEntity());
+        
+        LOGGER.info("----- CreateConceptAssociationType finished (002) -----");
+        return response;
     }
-    
-    
-    CreateConcept cc = new CreateConcept();
-    CreateConceptResponseType responseCC = new CreateConceptResponseType();
-    responseCC.setReturnInfos(response.getReturnInfos());
-    
-    LoginType paramLogin = null;
-    CodeSystem paramCodeSystem = null;
-    CodeSystemEntity paramCodeSystemEntity = null;
-    List<Property> paramProperty = null;
-    
-    if(parameter != null)
-    {
-      paramLogin = parameter.getLogin();
-      paramCodeSystem = parameter.getCodeSystem();
-      paramCodeSystemEntity = parameter.getCodeSystemEntity();
-      paramProperty = parameter.getProperty();
-    }
-    
-    //3.2.17 added last parameter
-    cc.CreateConceptOrAssociationType(responseCC, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session);
-    
-    response.setReturnInfos(responseCC.getReturnInfos());
-    response.setCodeSystemEntity(responseCC.getCodeSystemEntity());
-    
-    return response;
-  }
 
   /**
    * Prüft die Parameter anhand der Cross-Reference

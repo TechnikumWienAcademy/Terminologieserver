@@ -105,12 +105,14 @@ public class ExportClaml{
     private Map<String, RubricKind> rubricKinds;
     SimpleDateFormat dateFormatter;
     long startingTime;
+    private Session hb_session;
 
     /**
      * Standard constructor with the addition of instantiating the SimpleDateFormat with "yyyy-MM-dd".
      */
     public ExportClaml(){
         dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        hb_session = HibernateUtil.getSessionFactory().openSession();
     }
 
     /**
@@ -164,7 +166,7 @@ public class ExportClaml{
                     if (codeSystem != null){
                         LOGGER.debug("Loaded CS: " + codeSystem.getName());
                         LOGGER.debug("CSV-size: " + codeSystem.getCodeSystemVersions().size());
-                        LOGGER.debug("Codesystem-Version geladen: " + codeSystemVersion.getName());
+                        //LOGGER.debug("Codesystem-Version geladen: " + codeSystemVersion.getName());
 
                         codeSystemVersion = codeSystem.getCodeSystemVersions().iterator().next();
                         //Helping variables
@@ -393,7 +395,8 @@ public class ExportClaml{
         else
             LOGGER.debug("No synch time given.");
 
-        Session hb_session = HibernateUtil.getSessionFactory().openSession();
+        //DABACA
+        //Session hb_session = HibernateUtil.getSessionFactory().openSession();
 
         ListCodeSystemConceptsResponseType listCSconceptsResponse = new ListCodeSystemConcepts().ListCodeSystemConcepts(listCSconceptsRequest, true);
         LOGGER.debug("ListCSconceptsResponse: " + listCSconceptsResponse.getReturnInfos().getMessage());
@@ -481,7 +484,7 @@ public class ExportClaml{
                 }
             }
             catch (HibernateException ex){
-                LOGGER.error("Error [0066]: " + ex.getLocalizedMessage());
+                LOGGER.error("Error [0066]: " + ex.getLocalizedMessage(), ex);
             }
             finally{
                 if(hb_session.isOpen())

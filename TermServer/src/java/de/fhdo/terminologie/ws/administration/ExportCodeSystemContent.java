@@ -80,7 +80,7 @@ public class ExportCodeSystemContent{
                 response = exportClaML.exportClaml(parameter);
             }
             catch (Exception e){
-                LOGGER.error("Error [0059]: " + e.getLocalizedMessage());
+                LOGGER.error("Error [0059]: " + e.getLocalizedMessage(), e);
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
                 response.getReturnInfos().setHttpStatus(ReturnType.HttpStatus.HTTP500);

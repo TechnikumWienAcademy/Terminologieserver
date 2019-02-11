@@ -34,16 +34,14 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 
 /**
- * A stream based parser for parsing delimited text data from a file or a
- * stream.
+ * A stream based parser for parsing delimited text data from a file or a stream.
  */
 public class CsvReader {
 	private Reader inputStream = null;
-
 	private String fileName = null;
 
 	// This holds all the values for switches that the user is allowed to set
-	private UserSettings userSettings = new UserSettings();
+	private final UserSettings userSettings = new UserSettings();
 
 	private Charset charset = null;
 

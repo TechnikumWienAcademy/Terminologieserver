@@ -29,14 +29,15 @@ import de.fhdo.terminologie.ws.conceptAssociation.types.CreateConceptAssociation
 import de.fhdo.terminologie.ws.types.LoginInfoType;
 import de.fhdo.terminologie.ws.types.ReturnType;
 import java.util.Date;
+import org.hibernate.HibernateException;
 
 /**
  *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
+ * @author Robert Mützner
  */
 public class CreateConceptAssociation {
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
     public CreateConceptAssociationResponseType CreateConceptAssociation(CreateConceptAssociationRequestType parameter) {
         return CreateConceptAssociation(parameter, null);
@@ -47,158 +48,137 @@ public class CreateConceptAssociation {
      * Die erstegenannte Verbindung ist hier immer die "Left-ID".
      * 
      * @param parameter
+     * @param session
      * @return 
      */
     public CreateConceptAssociationResponseType CreateConceptAssociation(CreateConceptAssociationRequestType parameter, org.hibernate.Session session) {
-        if (logger.isInfoEnabled()) {
-            logger.info("====== CreateConceptAssociation gestartet ======");
-        }
-        // Return-Informationen anlegen
+        LOGGER.info("+++++ CreateConceptAssociation started +++++");
+        
+        //Creating response
         CreateConceptAssociationResponseType response = new CreateConceptAssociationResponseType();
         response.setReturnInfos(new ReturnType());
         
-        boolean createHibernateSession = (session == null);
-        
-        // Parameter prüfen
+        //Checking parameters
         if (validateParameter(parameter, response) == false) {
-            return response; // Fehler bei den Parametern
+            LOGGER.info("----- CreateConceptAssociation finished (001) -----");
+            return response; //Faulty parameters
         }
 
-        // Login-Informationen auswerten (gilt für jeden Webservice)
+        //Login, does every webservice
         boolean loggedIn = false;
-        LoginInfoType loginInfoType = null;
+        LoginInfoType loginInfoType;
         if (parameter != null && parameter.getLogin() != null) {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin(), session);
             loggedIn = loginInfoType != null;
         }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Benutzer ist eingeloggt: " + loggedIn);
-        }
   
         // TODO Lizenzen prüfen (?)
         
-        if (loggedIn == false) {
-            // Benutzer muss für diesen Webservice eingeloggt sein
+        if (!loggedIn) {
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.OK);
             response.getReturnInfos().setMessage("Sie müssen am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
+            LOGGER.info("----- CreateConceptAssociation finished (002) -----");
             return response;
         }
 
-        try {
-            long associationId = 0;
+        if(parameter != null)
+            try {
+                long associationId = 0;
 
-            // Hibernate-Block, Session öffnen
-            org.hibernate.Session      hb_session = null;
-            
-            
-            if (createHibernateSession) {
-                hb_session = HibernateUtil.getSessionFactory().openSession();
-                hb_session.getTransaction().begin();
-            } else {
-                hb_session = session;
-                //hb_session.getTransaction().begin();
-            }
+                org.hibernate.Session hb_session;            
+                if (session == null) {
+                    hb_session = HibernateUtil.getSessionFactory().openSession();
+                    hb_session.getTransaction().begin();
+                } else 
+                    hb_session = session;
 
-            CodeSystemEntityVersionAssociation association = parameter.getCodeSystemEntityVersionAssociation();
-            long entityVersionId1 = association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().getVersionId();
-            long entityVersionId2 = association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().getVersionId();
-            long associationTypeId = association.getAssociationType().getCodeSystemEntityVersionId();
+                CodeSystemEntityVersionAssociation CSEVassoc = parameter.getCodeSystemEntityVersionAssociation();
+                long entityVersionId1 = CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().getVersionId();
+                long entityVersionId2 = CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().getVersionId();
+                long associationTypeId = CSEVassoc.getAssociationType().getCodeSystemEntityVersionId();
 
-            // Beziehungen neu erstellen, damit NUR IDs drin stehen
-            association.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(null);
-            association.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(null);
+                //Creating relationships anew, so that ONLY IDs are in them
+                CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(null);
+                CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(null);
 
-            association.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
-            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(entityVersionId1);
+                CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
+                CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(entityVersionId1);
 
-            association.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
-            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(entityVersionId2);
+                CSEVassoc.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
+                CSEVassoc.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(entityVersionId2);
 
-            association.setAssociationType(null);
-            association.setAssociationType(new AssociationType());
-            association.getAssociationType().setCodeSystemEntityVersionId(associationTypeId);
+                CSEVassoc.setAssociationType(null);
+                CSEVassoc.setAssociationType(new AssociationType());
+                CSEVassoc.getAssociationType().setCodeSystemEntityVersionId(associationTypeId);
 
-            // Weitere Attribute setzen
-            association.setLeftId(entityVersionId1);  // TODO ist die 1. für uns immer die "links"?
-            association.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-            association.setStatusDate(new Date());
-            association.setInsertTimestamp(new Date());
+                //Creating other attributes
+                CSEVassoc.setLeftId(entityVersionId1);  // TODO ist die 1. für uns immer die "links"?
+                CSEVassoc.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
+                CSEVassoc.setStatusDate(new Date());
+                CSEVassoc.setInsertTimestamp(new Date());
 
+                try{
+                    //Checking whether associationTypeId is an association or not
+                    if (hb_session.get(AssociationType.class, associationTypeId) == null) {
+                        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+                        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                        response.getReturnInfos().setMessage("Sie müssen eine gültige ID für ein AssociationType angeben. Das Konzept mit der ID '" + associationTypeId + "' ist kein AssociationType!");
+                    } 
+                    else {
+                        hb_session.save(CSEVassoc);
+                        associationId = CSEVassoc.getId();
+                    }
 
-            try // 2. try-catch-Block zum Abfangen von Hibernate-Fehlern
-            {
-                // prüfen, ob AssociationTypeId auch eine Association ist
-                if (hb_session.get(AssociationType.class, associationTypeId) == null) {
-                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-                    response.getReturnInfos().setMessage("Sie müssen eine gültige ID für ein AssociationType angeben. Das Konzept mit der ID '" + associationTypeId + "' ist kein AssociationType!");
-
-                    logger.info("ungültige ID für AssociationType");
-                } else {
-                    // Beziehung abspeichern
-                    hb_session.save(association);
-                    associationId = association.getId();
-                }
-
-                // Transaktion abschließen
-                if (createHibernateSession) {
                     if (associationId > 0) {
-                        
-                        if(association.getAssociationKind() == 2 && association.getAssociationType().getCodeSystemEntityVersionId().equals(4L)){
-                    
-                            //Check parentCSEV isLeaf or childs are not shown!
-                            CodeSystemEntityVersion csev_Parent = (CodeSystemEntityVersion)hb_session.get(CodeSystemEntityVersion.class, entityVersionId1);
-                            if(csev_Parent.getIsLeaf().booleanValue()){
-                            
-                                csev_Parent.setIsLeaf(false);
-                                hb_session.update(csev_Parent);
+                        if(CSEVassoc.getAssociationKind() == 2 && CSEVassoc.getAssociationType().getCodeSystemEntityVersionId().equals(4L)){
+
+                            //Check parentCSEV isLeaf or children are not shown!
+                            CodeSystemEntityVersion CSEVparent = (CodeSystemEntityVersion)hb_session.get(CodeSystemEntityVersion.class, entityVersionId1);
+                            if(CSEVparent.getIsLeaf()){
+                                CSEVparent.setIsLeaf(false);
+                                hb_session.update(CSEVparent);
                             }
                         }
-                        
-                        hb_session.getTransaction().commit();
-                    } else {
-                        // Ã„nderungen nicht erfolgreich
-                        logger.warn("[CreateConceptAssociation.java] Ã„nderungen nicht erfolgreich");
 
-                        hb_session.getTransaction().rollback();
+                        if(!hb_session.getTransaction().wasCommitted())
+                            hb_session.getTransaction().commit();
+                    } 
+                    else{
+                        LOGGER.warn("Changes not successful");
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            hb_session.getTransaction().rollback();
                     }
+                } 
+                catch (Exception e) {
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setMessage("Fehler bei 'CreateConceptAssociation', Hibernate: " + e.getLocalizedMessage());
+                    LOGGER.error("Error [0107]: " + e.getLocalizedMessage(), e);
+                } 
+                finally {
+                    if (hb_session.isOpen()) 
+                        hb_session.close();
                 }
-            } catch (Exception e) {
-                // Fehlermeldung an den Aufrufer weiterleiten
+
+                //Building response
+                if (associationId > 0) {
+                    response.setCodeSystemEntityVersionAssociation(new CodeSystemEntityVersionAssociation());
+                    response.getCodeSystemEntityVersionAssociation().setId(CSEVassoc.getId());
+
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+                    response.getReturnInfos().setStatus(ReturnType.Status.OK);
+                    response.getReturnInfos().setMessage("Beziehung zwischen 2 Konzepten erfolgreich erstellt");
+                }
+            } 
+            catch (HibernateException e) {
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-                response.getReturnInfos().setMessage("Fehler bei 'CreateConceptAssociation', Hibernate: " + e.getLocalizedMessage());
-
-                logger.error("Fehler bei 'CreateConceptAssociation', Hibernate: " + e.getLocalizedMessage());
-                e.printStackTrace();
-            } finally {
-                if (createHibernateSession) {
-                    hb_session.close();
-                }
+                response.getReturnInfos().setMessage("Fehler bei 'CreateConceptAssociation': " + e.getLocalizedMessage());
+                LOGGER.error("Error [0108]: " + e.getLocalizedMessage(), e);
             }
-
-            // Antwort zusammenbauen
-            if (associationId > 0) {
-                response.setCodeSystemEntityVersionAssociation(new CodeSystemEntityVersionAssociation());
-                response.getCodeSystemEntityVersionAssociation().setId(association.getId());
-
-                // Status an den Aufrufer weitergeben
-                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-                response.getReturnInfos().setStatus(ReturnType.Status.OK);
-                response.getReturnInfos().setMessage("Beziehung zwischen 2 Konzepten erfolgreich erstellt");
-            }
-
-        } catch (Exception e) {
-            // Fehlermeldung an den Aufrufer weiterleiten
-            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-            response.getReturnInfos().setMessage("Fehler bei 'CreateConceptAssociation': " + e.getLocalizedMessage());
-
-            logger.error("Fehler bei 'CreateConceptAssociation': " + e.getLocalizedMessage());
-        }
-
+        
+        LOGGER.info("----- CreateConceptAssociation finished (003) -----");
         return response;
     }
 
