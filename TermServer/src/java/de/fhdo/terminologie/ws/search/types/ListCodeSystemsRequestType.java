@@ -30,16 +30,6 @@ public class ListCodeSystemsRequestType
 {
   private LoginType login;
   private CodeSystem codeSystem;
-  //3.2.17 added
-  private boolean loginAlreadyChecked;
-    
-    public void setLoginAlreadyChecked(boolean para){
-        loginAlreadyChecked = para;
-    }
-    
-    public boolean getLoginAlreadyChecked(){
-        return loginAlreadyChecked;
-    }
   
   /**
    * @return the login

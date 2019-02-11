@@ -25,8 +25,8 @@ import java.util.List;
  *
  * @author Bernhard Rimatzki
  */
-public class ImportType 
-{
+public class ImportType {
+    
     private Long formatId;
     private byte[] filecontent;
     private List<FilecontentListEntry> fileContentList;
@@ -34,7 +34,7 @@ public class ImportType
     private String role;
 
     /**
-     * @return the formatId
+     * @return the ID of the import, identifying it either as Claml, CSV or SVS import.
      */
     public Long getFormatId() {
         return formatId;

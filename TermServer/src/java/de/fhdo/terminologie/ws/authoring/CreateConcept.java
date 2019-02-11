@@ -87,46 +87,38 @@ public class CreateConcept{
         CodeSystem paramCodeSystem = null;
         CodeSystemEntity paramCodeSystemEntity = null;
         List<Property> paramProperty = null;
-        //3.2.17 added TODO aus dem gesamten Code entfernen
-        boolean loginAlreadyChecked = false;
             
         if (parameter != null){
             paramLogin = parameter.getLogin();
             paramCodeSystem = parameter.getCodeSystem();
             paramCodeSystemEntity = parameter.getCodeSystemEntity();
             paramProperty = parameter.getProperty();
-            //3.2.17
-            loginAlreadyChecked = parameter.isLoginAlreadyChecked();
         }
 
         //3.2.17 added last parameter
-        CreateConceptOrAssociationType(response, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session, loginAlreadyChecked);
+        CreateConceptOrAssociationType(response, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session);
     
         LOGGER.info("----- CreateConcept finished (002) -----");
         return response;
     }
 
-    //3.2.17 added boolean loginAlreadyChecked
     public void CreateConceptOrAssociationType(CreateConceptResponseType response,
           LoginType paramLogin, CodeSystem paramCodeSystem,
           CodeSystemEntity paramCodeSystemEntity,
           List<Property> paramProperty,
-          org.hibernate.Session session,
-          boolean loginAlreadyChecked){
+          org.hibernate.Session session){
       
         LOGGER.info("+++++ CreateConceptOrAssociationType started +++++");
         boolean createHibernateSession = (session == null);
         
         boolean loggedIn = false;
         LoginInfoType loginInfoType = null;
-        //3.2.17 added second check
-        if (paramLogin != null && !loginAlreadyChecked){
+        if (paramLogin != null){
             loginInfoType = LoginHelper.getInstance().getLoginInfos(paramLogin, session);
             loggedIn = loginInfoType != null;
         }
 
-        //3.2.17 added first check
-        if (!loginAlreadyChecked && loggedIn == false){
+        if (loggedIn == false){
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setMessage("Sie müssen am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");

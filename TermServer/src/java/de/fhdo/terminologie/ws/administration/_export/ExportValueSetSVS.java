@@ -271,8 +271,6 @@ public class ExportValueSetSVS
                     requestListCodeSystemConcepts.getValueSet().getValueSetVersions().add((ValueSetVersion) parameter.getValueSet().getValueSetVersions().toArray()[0]);
                     requestListCodeSystemConcepts.setLogin(parameter.getLogin());
                     //requestListCodeSystemConcepts.setLookForward(true);
-                    //3.2.17 added
-                    requestListCodeSystemConcepts.setLoginAlreadyChecked(true);
                     
                     boolean syncEnabled = parameter.getExportParameter() != null && parameter.getExportParameter().getDateFrom() != null;
 

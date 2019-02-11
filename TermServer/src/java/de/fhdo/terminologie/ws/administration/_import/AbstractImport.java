@@ -70,10 +70,7 @@ public abstract class AbstractImport
      * Checks if the import parameters are valid and throws an exception otherwise.
      * @throws ImportParameterValidationException 
      */
-    protected void validateParameters() throws ImportParameterValidationException
-    {
-        LOGGER.info("+++++ validateParameters started +++++");
-        
+    protected void validateParameters() throws ImportParameterValidationException{
         if(this.importId == null){
             throw new ImportParameterValidationException("ImportId must not be null.");
         }
@@ -89,8 +86,6 @@ public abstract class AbstractImport
         if ((this.fileContent == null) && (this.fileContentList == null)){
             throw new ImportParameterValidationException("Either Filecontent or FileContentList have to be set.");
         }
-        
-        LOGGER.debug("----- validateParamters finished (001) -----");
     }
     
     protected void setTotalCountInStatusList(int totalCount, Long importId)
@@ -108,20 +103,14 @@ public abstract class AbstractImport
         StaticStatusList.getStatus(importId).setImportCount(currentCount);
     }
     
-    protected void closeHibernateSession()
-    {
-        if (this.hb_session != null)
-        {
+    protected void closeHibernateSession(){
+        if (this.hb_session != null && this.hb_session.isOpen())
             this.hb_session.close();
-        }
     }
     
-    protected void rollbackHibernateTransaction()
-    {
-        if (this.hb_session != null)
-        {
+    protected void rollbackHibernateTransaction(){
+        if (this.hb_session != null && !this.hb_session.getTransaction().wasRolledBack())
             this.hb_session.getTransaction().rollback();
-        }
     }
     
     protected int getTotalCountInStatusList(Long importId)

@@ -76,7 +76,6 @@ public class ExportCodeSystemContent{
 
         if (formatId == ExportCodeSystemContentRequestType.EXPORT_CLAML_ID){
             try{
-                //TODO check class
                 ExportClaml exportClaML = new ExportClaml();
                 response = exportClaML.exportClaml(parameter);
             }

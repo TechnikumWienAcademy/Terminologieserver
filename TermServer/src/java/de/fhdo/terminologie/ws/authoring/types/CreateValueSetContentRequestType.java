@@ -35,15 +35,6 @@ public class CreateValueSetContentRequestType
   private List<CodeSystemEntity> codeSystemEntity;
   private ValueSet valueSet;
   private ConceptValueSetMembership conceptValueSetMembership;
-  private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
   
   public CreateValueSetContentRequestType()
   {

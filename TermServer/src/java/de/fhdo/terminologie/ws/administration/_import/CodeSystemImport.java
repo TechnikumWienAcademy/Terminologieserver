@@ -6,19 +6,16 @@
 package de.fhdo.terminologie.ws.administration._import;
 
 import de.fhdo.terminologie.db.hibernate.CodeSystem;
-import static de.fhdo.terminologie.ws.administration._import.AbstractImport.LOGGER;
 import de.fhdo.terminologie.ws.administration.exceptions.ImportParameterValidationException;
 
 /**
  *
- * @author puraner
+ * @author Stefan Puraner
  */
-public abstract class CodeSystemImport extends AbstractImport
-{
+public abstract class CodeSystemImport extends AbstractImport{
     protected CodeSystem codesystem;
     
-    public CodeSystemImport()
-    {
+    public CodeSystemImport(){
         super();
     }
     
@@ -40,20 +37,14 @@ public abstract class CodeSystemImport extends AbstractImport
         }
     }
     
-    public CodeSystem getCodeSystem()
-    {
+    public CodeSystem getCodeSystem(){
         if(this.codesystem != null)
-        {
             return this.codesystem;
-        }
         else
-        {
             return new CodeSystem();
-        }
     }
     
-    public void setCodeSystem(CodeSystem cs)
-    {
+    public void setCodeSystem(CodeSystem cs){
         this.codesystem = cs;
     }
 }

@@ -240,11 +240,9 @@ public class TerminologyReleaseManager{
                 else
                     LOGGER.info("CS (" + this.targetCS.getName() + ") found on pub, versions size: " + this.targetCS.getCodeSystemVersions().size());
                     
-                //ANCHOR
-                ExportType exportedCodeSystem = this.getExportedCodeSystemFromCollab(CStoExport);
+                ExportType exportedCodeSystem = getExportedCodeSystemFromCollab(CStoExport);
 
-                if (exportedCodeSystem == null)
-                {
+                if (exportedCodeSystem == null){
                     returnInfo.setSuccess(false);
                     returnInfo.setMessage("CodeSystem konnte nicht exportiert werden. CSID: "
                             + proposedObject.getProposal().getVocabularyIdTwo()
@@ -255,36 +253,29 @@ public class TerminologyReleaseManager{
                     return returnInfo;
                 }
 
-                de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importCodeSystem(CStoExport.getCodeSystemVersions().get(0), exportedCodeSystem);
+                de.fhdo.terminologie.ws.administrationPub.ReturnType importReturn = this.importCodeSystem(CStoExport.getCodeSystemVersions().get(0), exportedCodeSystem);
 
-                if (this.targetCS.getCodeSystemVersions() != null)
-                {
-                    LOGGER.info("DABACA not null, size = " + this.targetCS.getCodeSystemVersions().size());
-                    this.removeTempCodeSystemVersion();
-                }
-
-                if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))
-                {
+                if (targetCS.getCodeSystemVersions() != null)
+                    removeTempCodeSystemVersion();
+                
+                if (importReturn.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK)){
                     returnInfo.setSuccess(true);
-                    returnInfo.setMessage(ret_import.getMessage());
+                    returnInfo.setMessage(importReturn.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (006) -----");
                     return returnInfo;
                 }
-                else
-                {
+                else{
                     returnInfo.setSuccess(false);
-                    returnInfo.setMessage(ret_import.getMessage());
+                    returnInfo.setMessage(importReturn.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (007) -----");
                     return returnInfo;
                 }
             }
-            else if (proposedObject.getClassname().equals("ValueSetVersion"))
-            {
-                ValueSet vsToExport = this.getValueSetToExport(proposedObject.getProposal().getVocabularyName(), proposedObject.getProposal().getVocabularyId());
+            else if (proposedObject.getClassname().equals("ValueSetVersion")){
+                ValueSet VStoExport = this.getValueSetToExport(proposedObject.getProposal().getVocabularyName(), proposedObject.getProposal().getVocabularyId());
 
-                //check if CS was found on Collab plattform
-                if ((vsToExport.getId() == null) || (vsToExport.getValueSetVersions().isEmpty()))
-                {
+                //Check if VS was found on collab plattform
+                if ((VStoExport.getId() == null) || (VStoExport.getValueSetVersions().isEmpty())){
                     returnInfo.setSuccess(false);
                     returnInfo.setMessage("ValueSet für Transfer nicht gefunden.\nVSID: "
                             + proposedObject.getProposal().getVocabularyIdTwo()
@@ -294,11 +285,10 @@ public class TerminologyReleaseManager{
                     LOGGER.info("----- transferTerminologyToPublicServer finished (008) -----");
                     return returnInfo;
                 }
-                
-                ArrayList<String> missingEntries = this.areValueSetContentsPresentOnPubPlattform(vsToExport);
+        
+                ArrayList<String> missingEntries = this.areValueSetContentsPresentOnPubPlattform(VStoExport);
 
-                if (!missingEntries.isEmpty())
-                {
+                if (!missingEntries.isEmpty()){
                     returnInfo.setSuccess(false);
                     String message = "ValueSet kann nicht freigegeben werden, da benötigte CodeSystem(e) auf der Publikationsplattform fehlen.\n"
                             + "VSID: " + proposedObject.getProposal().getVocabularyIdTwo() + "\n"
@@ -306,15 +296,12 @@ public class TerminologyReleaseManager{
                             + "ValueSet: " + proposedObject.getProposal().getVocabularyName() + "\n"
                             + "Fehlende Codes: " + missingEntries.size() + "\n";
                     
-                    int i = 0;
-                    for(String s : missingEntries)
-                    {
-                        message += s+"\n";
-                        i++;
-                        if(i == 10)
-                        {
+                    int maxMissingShownCounter = 0;
+                    for(String entry : missingEntries){
+                        message += entry+"\n";
+                        maxMissingShownCounter++;
+                        if(maxMissingShownCounter == 10)
                             break;
-                        }
                     }
                     
                     returnInfo.setMessage(message);
@@ -322,275 +309,179 @@ public class TerminologyReleaseManager{
                     return returnInfo;
                 }
 
-                List<de.fhdo.terminologie.ws.searchPub.ValueSet> result = this.getTargetValueSetFromPub(vsToExport.getName());
+                List<de.fhdo.terminologie.ws.searchPub.ValueSet> result = getTargetValueSetFromPub(VStoExport.getName());
 
-                boolean exists = false;
-                if ((result != null) && (result.size() == 1))
-                {
-                    //check if name of found CS and CS to be exported are identical
-                    for (de.fhdo.terminologie.ws.searchPub.ValueSet vs : result)
-                    {
-                        if (vs.getName().equals(vsToExport.getName()))
-                        {
-                            exists = true;
+                if ((result != null) && (result.size() == 1)){
+                    //Check if name of found CS and CS to be exported are identical
+                    for (de.fhdo.terminologie.ws.searchPub.ValueSet VS : result)
+                        if (VS.getName().equals(VStoExport.getName())){
+                            this.targetVS = result.get(0);
+                            break;
                         }
-                    }
-
-                    if (exists)
-                    {
-                        this.targetVS = result.get(0);
-                        exists = true;
-                    }
                 }
-                else if ((result == null) || (result.isEmpty()))
-                {
-                    //kein CodeSystem gefunden
+                else if (result == null || result.isEmpty()){
+                    //No CS found
                     this.targetVS = null;
-                    exists = false;
                 }
-                else if (result.size() > 1)
-                {
+                else if (result.size() > 1){
                     //checks if the CS name is identical
-                    for (de.fhdo.terminologie.ws.searchPub.ValueSet vs : result)
-                    {
-                        if (vs.getName().equals(vsToExport.getName()))
-                        {
-                            exists = true;
-                            this.targetVS = vs;
+                    for (de.fhdo.terminologie.ws.searchPub.ValueSet VS : result)
+                        if (VS.getName().equals(VStoExport.getName())){
+                            this.targetVS = VS;
                         }
-                    }
 
-                    if (!exists)
-                    {
-                        //mehrere CodeSysteme gefunden
+                    if (this.targetVS == null){
+                        //User has to choose one from multiple
                         Map map = new HashMap();
                         map.put("targets", result);
-                        map.put("source", vsToExport.getName());
+                        map.put("source", VStoExport.getName());
 
                         Window win = (Window) Executions.createComponents("/collaboration/publication/selectTargetPopup.zul", null, map);
                         ((SelectTargetPopup) win).setReleaseManager(this);
 
                         win.doModal();
                         win.setVisible(false);
-
-                        if (this.targetVS != null)
-                        {
-                            exists = true;
-                        }
                     }
                 }
 
-                if ((this.targetVS == null) && (!exists))
-                {
+                if (this.targetVS == null){
                     returnInfo.setSuccess(false);
-                    returnInfo.setMessage("ValueSet konnte auf der Publikationsplattform nicht gefunden werden. (" + vsToExport.getName() + ")");
+                    returnInfo.setMessage("ValueSet konnte auf der Publikationsplattform nicht gefunden werden. (" + VStoExport.getName() + ")");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (010) -----");
                     return returnInfo;
                 }
 
-                ExportType exportedValueSet = this.getExportedValueSet(vsToExport);
+                ExportType exportedValueSet = this.getExportedValueSet(VStoExport);
 
-                if (exportedValueSet == null)
-                {
+                if (exportedValueSet == null){
                     returnInfo.setSuccess(false);
                     returnInfo.setMessage("ValueSet konnte nicht exportiert werden.\nVSID: "
-                            + proposedObject.getProposal().getVocabularyIdTwo()
-                            + ",\n VSV ID: "
-                            + proposedObject.getProposal().getVocabularyId()
-                            + "\nValueSet: " + proposedObject.getProposal().getVocabularyName());
+                        + proposedObject.getProposal().getVocabularyIdTwo()
+                        + ",\n VSV ID: "
+                        + proposedObject.getProposal().getVocabularyId()
+                        + "\nValueSet: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (011) -----");
                     return returnInfo;
                 }
 
-                de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importValueSet(vsToExport.getValueSetVersions().get(0), exportedValueSet);
+                de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importValueSet(VStoExport.getValueSetVersions().get(0), exportedValueSet);
 
                 if (this.targetVS.getValueSetVersions() != null)
-                {
                     this.removeTempValueSetVersion();
-                }
 
-                if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))
-                {
+                if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK)){
                     returnInfo.setSuccess(true);
                     returnInfo.setMessage(ret_import.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (012) -----");
                     return returnInfo;
                 }
-                else
-                {
+                else{
                     returnInfo.setSuccess(false);
                     returnInfo.setMessage(ret_import.getMessage());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (013) -----");
                     return returnInfo;
                 }
-
             }
-            else if (proposedObject.getClassname().equals("CodeSystem"))
-            {
+            else if (proposedObject.getClassname().equals("CodeSystem")){
                 CodeSystem csToExport = this.getCodeSystemToExport(proposedObject.getProposal().getVocabularyIdTwo(), null);
 
-                //check if CS was found on Collab plattform
-                if ((csToExport.getId() == null) || (csToExport.getCodeSystemVersions().isEmpty()))
-                {
+                //Check if CS was found on collab plattform
+                if ((csToExport.getId() == null) || (csToExport.getCodeSystemVersions().isEmpty())){
                     returnInfo.setSuccess(false);
                     returnInfo.setMessage("CodeSystem für Transfer nicht gefunden.\nCSID: "
-                            + proposedObject.getProposal().getVocabularyIdTwo()
-                            + ",\n CSV ID: "
-                            + proposedObject.getProposal().getVocabularyId()
-                            + "\nCodeSystem: " + proposedObject.getProposal().getVocabularyName());
+                        + proposedObject.getProposal().getVocabularyIdTwo()
+                        + ",\n CSV ID: "
+                        + proposedObject.getProposal().getVocabularyId()
+                        + "\nCodeSystem: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (014) -----");
                     return returnInfo;
                 }
 
-                List<de.fhdo.terminologie.ws.searchPub.CodeSystem> result = this.getTargetCodeSystemFromPub(csToExport.getName());
+                List<de.fhdo.terminologie.ws.searchPub.CodeSystem> CSlist = this.getTargetCodeSystemFromPub(csToExport.getName());
 
-                boolean exists = false;
-                if ((result != null) && (result.size() == 1))
-                {
-                    //check if name of found CS and CS to be exported are identical
-                    for (de.fhdo.terminologie.ws.searchPub.CodeSystem cs : result)
-                    {
-                        if (cs.getName().equals(csToExport.getName()))
-                        {
-                            exists = true;
-                        }
-                    }
-
-                    if (exists)
-                    {
-                        this.targetCS = result.get(0);
-                        if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
-                        exists = true;
-                    }
-                }
-                else if ((result == null) || (result.isEmpty()))
-                {
-                    //kein CodeSystem gefunden
+                
+                if (CSlist != null && CSlist.size() == 1) //Check if name of found CS and CS to be exported are identical
+                    if (CSlist.get(0).getName().equals(csToExport.getName()))
+                        this.targetCS = CSlist.get(0);
+                else if (CSlist.isEmpty()) //No CS found
                     this.targetCS = null;
-                    exists = false;
-                    //Messagebox.show("Kein Ziel-Codesystem gefunden. Transfer nicht möglich.", "Status ändern", Messagebox.OK, Messagebox.ERROR);
-                }
-                else if (result.size() > 1)
-                {
-                    //checks if the CS name is identical
-                    for (de.fhdo.terminologie.ws.searchPub.CodeSystem cs : result)
-                    {
-                        if (cs.getName().equals(csToExport.getName()))
-                        {
-                            exists = true;
-                            this.targetCS = cs;
-                            if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
+                else if (CSlist.size() > 1) //Checks if the CS name is identical
+                    for (de.fhdo.terminologie.ws.searchPub.CodeSystem CS : CSlist)
+                        if (CS.getName().equals(csToExport.getName())){
+                            this.targetCS = CS;
+                            break;
                         }
-                    }
-                }
-
-                if ((this.targetCS == null) && (!exists))
-                {
-                    LOGGER.info("DABACA wird TEMPORÄRES SYSTEM ERSTELLT?");
+                
+                if (this.targetCS == null){
                     this.createTempCodeSystemVersionOnPub(csToExport);
-                    //now target CS has to be set
-                    if (this.targetCS != null)
-                    {
+                    //Target CS has to be set
+                    if (this.targetCS != null){
                         returnInfo.setSuccess(true);
                         returnInfo.setMessage("CodeSystem successfully created.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (015) -----");
                         return returnInfo;
                     }
-                    else
-                    {
+                    else{
                         returnInfo.setSuccess(false);
                         returnInfo.setMessage("CodeSystem konnte auf Publikationsumgebung nicht erstellt werden.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (016) -----");
                         return returnInfo;
                     }
                 }
-                else
-                {
+                else{
                     returnInfo.setSuccess(true);
                     returnInfo.setMessage("CodeSystem already exists.");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (017) -----");
                     return returnInfo;
                 }
             }
-            else if (proposedObject.getClassname().equals("ValueSet"))
-            {
+            else if (proposedObject.getClassname().equals("ValueSet")){
                 ValueSet vsToExport = this.getValueSetToExport(proposedObject.getProposal().getVocabularyName(), null);
 
-                //check if CS was found on Collab plattform
-                if ((vsToExport.getId() == null) || (vsToExport.getValueSetVersions().isEmpty()))
-                {
+                //Check if VS was found on collab plattform
+                if (vsToExport.getId() == null || vsToExport.getValueSetVersions().isEmpty()){
                     returnInfo.setSuccess(false);
                     returnInfo.setMessage("ValueSet für Transfer nicht gefunden. VSID: "
-                            + proposedObject.getProposal().getVocabularyIdTwo()
-                            + ", VSV ID: "
-                            + proposedObject.getProposal().getVocabularyId()
-                            + "ValueSet: " + proposedObject.getProposal().getVocabularyName());
+                        + proposedObject.getProposal().getVocabularyIdTwo()
+                        + ", VSV ID: "
+                        + proposedObject.getProposal().getVocabularyId()
+                        + "ValueSet: " + proposedObject.getProposal().getVocabularyName());
                     LOGGER.info("----- transferTerminologyToPublicServer finished (018) -----");
                     return returnInfo;
                 }
 
-                List<de.fhdo.terminologie.ws.searchPub.ValueSet> result = this.getTargetValueSetFromPub(vsToExport.getName());
+                List<de.fhdo.terminologie.ws.searchPub.ValueSet> VSlist = this.getTargetValueSetFromPub(vsToExport.getName());
 
-                boolean exists = false;
-                if ((result != null) && (result.size() == 1))
-                {
-                    //check if name of found CS and CS to be exported are identical
-                    for (de.fhdo.terminologie.ws.searchPub.ValueSet vs : result)
-                    {
-                        if (vs.getName().equals(vsToExport.getName()))
-                        {
-                            exists = true;
-                        }
-                    }
-
-                    if (exists)
-                    {
-                        this.targetVS = result.get(0);
-                        exists = true;
-                    }
+                if (VSlist != null && VSlist.size() == 1){ //Check if name of found VS and VS to be exported are identical
+                    if(VSlist.get(0).getName().equals(vsToExport.getName()))
+                        this.targetVS = VSlist.get(0);
                 }
-                else if ((result == null) || (result.isEmpty()))
-                {
-                    //kein CodeSystem gefunden
+                else if (VSlist == null || VSlist.isEmpty()) //No VS found
                     this.targetVS = null;
-                    exists = false;
-                }
-                else if (result.size() > 1)
-                {
-                    //checks if the CS name is identical
-                    for (de.fhdo.terminologie.ws.searchPub.ValueSet vs : result)
-                    {
-                        if (vs.getName().equals(vsToExport.getName()))
-                        {
-                            exists = true;
-                            this.targetVS = vs;
+                else if (VSlist.size() > 1) //Multiple VS found
+                    for (de.fhdo.terminologie.ws.searchPub.ValueSet VS : VSlist)
+                        if (VS.getName().equals(vsToExport.getName())){
+                            this.targetVS = VS;
+                            break;
                         }
-                    }
-                }
 
-                if ((this.targetVS == null) && (!exists))
-                {
+                if (this.targetVS == null){
                     this.createTempValueSetVersionOnPub(vsToExport);
-                    //now target CS has to be set                    
-                    if (this.targetVS != null)
-                    {
+                    //Target VS has to be set                    
+                    if (this.targetVS != null){
                         returnInfo.setSuccess(true);
                         returnInfo.setMessage("ValueSet successfully created.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (019) -----");
                         return returnInfo;
                     }
-                    else
-                    {
+                    else{
                         returnInfo.setSuccess(false);
                         returnInfo.setMessage("ValueSet konnte auf Publikationsumgebung nicht erstellt werden.");
                         LOGGER.info("----- transferTerminologyToPublicServer finished (020) -----");
                         return returnInfo;
                     }
                 }
-                else
-                {
+                else{
                     returnInfo.setSuccess(true);
                     returnInfo.setMessage("ValueSet already exists.");
                     LOGGER.info("----- transferTerminologyToPublicServer finished (021) -----");
@@ -598,16 +489,13 @@ public class TerminologyReleaseManager{
                 }
             }
         }
-        catch (ServerSOAPFaultException ex)
-        {
-            LOGGER.error(ex);
+        catch (ServerSOAPFaultException ex){
+            LOGGER.error("Error [0099]: " + ex.getLocalizedMessage());
             returnInfo.setSuccess(false);
             returnInfo.setMessage("Die Antwort des Servers ist fehlerhaft.");
         }
-        catch (Exception ex)
-        {
-            //TODO set message
-            LOGGER.error(ex);
+        catch (Exception ex){
+            LOGGER.error("Error [0101]: " + ex.getLocalizedMessage());
             returnInfo.setSuccess(false);
             returnInfo.setMessage("An Error occured.");
         }
@@ -624,63 +512,48 @@ public class TerminologyReleaseManager{
      * @return
      * @throws ServerSOAPFaultException
      */
-    private CodeSystem getCodeSystemToExport(Long codesystemId, Long codesystemVersionId) throws ServerSOAPFaultException
-    {
+    private CodeSystem getCodeSystemToExport(Long codesystemId, Long codesystemVersionId) throws ServerSOAPFaultException{
         LOGGER.info("+++++ getCodeSystemToExport started +++++");
-        LOGGER.info("TermBrowser: TRANSFER: Trying to find CodeSystem and Version in collab plattform");
-        LOGGER.info("TermBrowser: CS ID: " + codesystemId);
-        LOGGER.info("TermBrowser: CSV ID: " + codesystemVersionId);
+        LOGGER.info("Trying to find code system and version in collab plattform, CS-ID=" + codesystemId + ", CSV-ID=" + codesystemVersionId);
 
-        de.fhdo.terminologie.ws.search.Search port_search = WebServiceUrlHelper.getInstance().getSearchServicePort();
-        de.fhdo.terminologie.ws.search.ListCodeSystemsRequestType request_search = new de.fhdo.terminologie.ws.search.ListCodeSystemsRequestType();
-        request_search.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
-        request_search.getLogin().setSessionID(this.sessionId);
-        request_search.setCodeSystem(new CodeSystem());
-        request_search.getCodeSystem().setId(codesystemId);
-        //3.2.17
-        request_search.setLoginAlreadyChecked(true);
+        de.fhdo.terminologie.ws.search.Search searchPort = WebServiceUrlHelper.getInstance().getSearchServicePort();
+        de.fhdo.terminologie.ws.search.ListCodeSystemsRequestType searchRequest = new de.fhdo.terminologie.ws.search.ListCodeSystemsRequestType();
+        searchRequest.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
+        searchRequest.getLogin().setSessionID(this.sessionId);
+        searchRequest.setCodeSystem(new CodeSystem());
+        searchRequest.getCodeSystem().setId(codesystemId);
         
-        de.fhdo.terminologie.ws.search.ListCodeSystemsResponse.Return resp = port_search.listCodeSystems(request_search);
+        de.fhdo.terminologie.ws.search.ListCodeSystemsResponse.Return resp = searchPort.listCodeSystems(searchRequest);
         
         if ((resp.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.search.Status.OK)
-                && (resp.getCodeSystem() != null)
-                && (resp.getCodeSystem().size() == 1))
-        {
-            if (codesystemVersionId != null)
-            {
-                CodeSystemVersion csv_search = null;
-                for (CodeSystemVersion csv_temp : resp.getCodeSystem().get(0).getCodeSystemVersions())
-                {
-                    if (csv_temp.getVersionId().equals(codesystemVersionId))
-                    {
-                        csv_search = csv_temp;
-                        //3.2.20 added break
+        && (resp.getCodeSystem() != null)
+        && (resp.getCodeSystem().size() == 1)){
+            if (codesystemVersionId != null){
+                CodeSystemVersion CSVsearch = null;
+                for (CodeSystemVersion CSVbuffer : resp.getCodeSystem().get(0).getCodeSystemVersions())
+                    if (CSVbuffer.getVersionId().equals(codesystemVersionId)){
+                        CSVsearch = CSVbuffer;
                         break;
                     }
-                }
-
-                if (csv_search != null)
-                {
-                    CodeSystem cs = resp.getCodeSystem().get(0);
-                    cs.getCodeSystemVersions().clear();
-                    cs.getCodeSystemVersions().add(csv_search);
+                
+                if (CSVsearch != null){
+                    CodeSystem CS = resp.getCodeSystem().get(0);
+                    CS.getCodeSystemVersions().clear();
+                    CS.getCodeSystemVersions().add(CSVsearch);
                     LOGGER.info("----- getCodeSystemToExport finished (001) -----");
-                    return cs;
+                    return CS;
                 }
-                else
-                {
+                else{
                     LOGGER.info("----- getCodeSystemToExport finished (002) -----");
                     return new CodeSystem();
                 }
             }
-            else
-            {
+            else{
                 LOGGER.info("----- getCodeSystemToExport finished (003) -----");
                 return resp.getCodeSystem().get(0);
             }
         }
-        else
-        {
+        else{
             LOGGER.info("----- getCodeSystemToExport finished (004) -----");
             return new CodeSystem();
         }
@@ -759,33 +632,29 @@ public class TerminologyReleaseManager{
                 }
             }
         }
-        else{
-            //WS-Aufrur von hier login already checked entfernen ANCHOR2
+        else
             response = WebServiceHelper.exportCodeSystemContent(requestExportCS);
-        }
+        
         LOGGER.info("----- getExportedCodeSystem finished (001) -----");
         return response.getExportInfos();
     }
 
     
     //3.2.21
-    private de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType request_searchPubThread;
+    //private de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType request_searchPubThread;
     /**
      * TODO
      * */
-    private List<de.fhdo.terminologie.ws.searchPub.CodeSystem> getTargetCodeSystemFromPub(String codesystemName) throws ServerSOAPFaultException
-    {
+    private List<de.fhdo.terminologie.ws.searchPub.CodeSystem> getTargetCodeSystemFromPub(String codesystemName) throws ServerSOAPFaultException{
         LOGGER.info("+++++ getTargetCodeSystemFromPub started +++++");
         final de.fhdo.terminologie.ws.searchPub.Search port_searchPub = WebServiceUrlHelper.getInstance().getSearchPubServicePort();
         //3.2.21
         //de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType request_searchPub = new de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType();
-        request_searchPubThread = new de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType();
+        de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType request_searchPubThread = new de.fhdo.terminologie.ws.searchPub.ListCodeSystemsRequestType();
         request_searchPubThread.setLogin(new de.fhdo.terminologie.ws.searchPub.LoginType());
         request_searchPubThread.getLogin().setSessionID(this.pubSessionId);
         request_searchPubThread.setCodeSystem(new de.fhdo.terminologie.ws.searchPub.CodeSystem());
         request_searchPubThread.getCodeSystem().setName(codesystemName);
-        //3.2.17
-        request_searchPubThread.setLoginAlreadyChecked(true);
         
         //de.fhdo.terminologie.ws.searchPub.ListCodeSystemsResponse.Return respSearchPub = port_searchPub.listCodeSystems(request_searchPub);
         //de.fhdo.terminologie.ws.searchPub.ListCodeSystemsResponse.Return respSearchPub;
@@ -794,103 +663,90 @@ public class TerminologyReleaseManager{
         //3.2.21 start
         try{
             Thread thread = new Thread(){
-              @Override
-              public void run(){
-                  port_searchPub.listCodeSystemsPub(request_searchPubThread);
-              }
+                @Override
+                public void run(){
+                    port_searchPub.listCodeSystemsPub(request_searchPubThread);
+                }
             };
             thread.start();
             
             boolean searchRunning = true;
             int counter = 1;
             while(searchRunning){
-                Thread.sleep(2*1000);
+                Thread.sleep(100);
                 searchRunning = port_searchPub.checkListCodeSystemsPubRunning();
-                LOGGER.info("Pub-listCodeSystems running for " + counter*2 + " seconds");
+                if(counter%50 == 0)
+                    LOGGER.info("Pub-listCodeSystems running for " + counter/10 + " seconds");
                 counter++;
             }
             respSearchPub = port_searchPub.getListCodeSystemsPubReturn();
         }
         catch(Exception e){ 
-            LOGGER.info("Error: " + e.getLocalizedMessage());
+            LOGGER.info("Error [0089]: " + e.getLocalizedMessage());
         }
-        //3.2.21 end
         //3.2.21 end
 
         if (respSearchPub!=null
-                && respSearchPub.getReturnInfos()!=null 
-                && respSearchPub.getReturnInfos().getStatus()!=null 
-                && respSearchPub.getReturnInfos().getStatus().equals(Status.OK))
-        {
+        && respSearchPub.getReturnInfos()!=null 
+        && respSearchPub.getReturnInfos().getStatus()!=null 
+        && respSearchPub.getReturnInfos().getStatus().equals(Status.OK)){
             LOGGER.info("----- getTargetCodeSystemFromPub finished (001) -----");
             return respSearchPub.getCodeSystem();
         }
-        else
-        {
+        else{
             LOGGER.info("----- getTargetCodeSystemFromPub finished (002) -----");
-            return new ArrayList<de.fhdo.terminologie.ws.searchPub.CodeSystem>();
+            return new ArrayList<>();
         }
     }
 
-    //3.2.20
-    de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType requestThread;
-    
-    private de.fhdo.terminologie.ws.administrationPub.ReturnType importCodeSystem(CodeSystemVersion csv, ExportType exportedCs) throws ServerSOAPFaultException
-    {
+    private de.fhdo.terminologie.ws.administrationPub.ReturnType importCodeSystem(CodeSystemVersion csv, ExportType exportedCs) throws ServerSOAPFaultException{
         LOGGER.info("+++++ importCodeSystem started +++++");
         //de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
+        
         // Login
         de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType request = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
-        //3.2.17
-        request.setLoginAlreadyChecked(true);
         
         // Codesystem
         request.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
         request.getCodeSystem().setId(this.targetCS.getId());
 
         request.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
-        if (this.targetCS.getName().contains("LOINC"))
-        {
+        if (this.targetCS.getName().contains("LOINC")){
             request.getImportInfos().setOrder(true);
             request.getImportInfos().setRole(CODES.ROLE_ADMIN);
         }
         else
-        {
             request.getImportInfos().setRole(CODES.ROLE_TRANSFER);
-        }
 
-        de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion csv_pub = new de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion();
-        csv_pub.setName(csv.getName());
-        request.getCodeSystem().getCodeSystemVersions().add(csv_pub);
+        de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion CSVpub = new de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion();
+        CSVpub.setName(csv.getName());
+        request.getCodeSystem().getCodeSystemVersions().add(CSVpub);
         request.getImportInfos().setFormatId(exportedCs.getFormatId());
-        request.getCodeSystem().setName(this.targetCS.getName());
+        request.getCodeSystem().setName(targetCS.getName());
         request.getImportInfos().setFilecontent(exportedCs.getFilecontent());
-        request.setImportId(this.importId);
+        request.setImportId(importId);
 
         //3.2.20 next line
         //de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return();
         //3.2.20 added try catch and thread
-        requestThread = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
+        
+        de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType requestThread = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
         requestThread.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         requestThread.getLogin().setSessionID(this.pubSessionId);
-        //3.2.17
-        requestThread.setLoginAlreadyChecked(true);
         requestThread.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
         requestThread.getCodeSystem().setId(this.targetCS.getId());
 
         requestThread.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
-        if (this.targetCS.getName().contains("LOINC"))
-        {
+        if (this.targetCS.getName().contains("LOINC")){
             requestThread.getImportInfos().setOrder(true);
             requestThread.getImportInfos().setRole(CODES.ROLE_ADMIN);
         }
         else
-        {
             requestThread.getImportInfos().setRole(CODES.ROLE_TRANSFER);
-        }
-        requestThread.getCodeSystem().getCodeSystemVersions().add(csv_pub);
+        
+        requestThread.getCodeSystem().getCodeSystemVersions().add(CSVpub);
         requestThread.getImportInfos().setFormatId(exportedCs.getFormatId());
         requestThread.getCodeSystem().setName(this.targetCS.getName());
         requestThread.getImportInfos().setFilecontent(exportedCs.getFilecontent());
@@ -914,43 +770,46 @@ public class TerminologyReleaseManager{
             boolean importRunning = true;
             int counter = 1;
             while(importRunning){
-                Thread.sleep(5*1000);
+                Thread.sleep(100);
                 importRunning = importPort.checkImportRunning();
-                LOGGER.info("Pub-importCodeSystem running for " + counter*5 + " seconds");
+                if(counter%50 == 0)
+                    LOGGER.info("Pub-importCodeSystem running for " + counter*5 + " seconds");
                 counter++;
             }
             ret_importThread = importPort.getPubImportResponse();
-            
         }
         catch(Exception e){
-            LOGGER.info("Exception caught while importing CodeSystem on pub and communicating back to collab");
+            LOGGER.error("Error [0074]: " + e.getLocalizedMessage());
         }
-        LOGGER.info("----- importCodeSystem finished (001) -----");
-        return ret_importThread.getReturnInfos();
+        if(ret_importThread!=null){
+            LOGGER.info("----- importCodeSystem finished (001) -----");
+            return ret_importThread.getReturnInfos();
+        }
+        else{
+            LOGGER.info("----- importCodeSystem finished (002) -----");
+            return null;
+        }
     }
 
-    private void createTempCodeSystemVersionOnPub(CodeSystem cs)
-    {
+    private void createTempCodeSystemVersionOnPub(CodeSystem CS){
         LOGGER.info("+++++ createTempCodeSystemVersionOnPub started +++++");
         final de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType request = new de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
 
-        de.fhdo.terminologie.ws.authoringPub.CodeSystem cs_pub = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
-        cs_pub.setName(cs.getName());
-        cs_pub.setDescription(cs.getDescription());
-        cs_pub.setDescriptionEng(cs.getDescriptionEng());
-        cs_pub.setIncompleteCS(cs.isIncompleteCS());
-        cs_pub.setResponsibleOrganization(cs.getResponsibleOrganization());
-        cs_pub.setWebsite(cs.getWebsite());
-        cs_pub.setAutoRelease(cs.isAutoRelease());
-        cs_pub.setCodeSystemType(cs.getCodeSystemType());
-        de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion csv_pub = new de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion();
-        csv_pub.setName("Temp_import");
-        cs_pub.getCodeSystemVersions().add(csv_pub);
-        request.setCodeSystem(cs_pub);
-        //3.2.17 added
-        request.setLoginAlreadyChecked(true);
+        de.fhdo.terminologie.ws.authoringPub.CodeSystem CStemp = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
+        CStemp.setName(CS.getName());
+        CStemp.setDescription(CS.getDescription());
+        CStemp.setDescriptionEng(CS.getDescriptionEng());
+        CStemp.setIncompleteCS(CS.isIncompleteCS());
+        CStemp.setResponsibleOrganization(CS.getResponsibleOrganization());
+        CStemp.setWebsite(CS.getWebsite());
+        CStemp.setAutoRelease(CS.isAutoRelease());
+        CStemp.setCodeSystemType(CS.getCodeSystemType());
+        de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion CSVtemp = new de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion();
+        CSVtemp.setName("Temp_import");
+        CStemp.getCodeSystemVersions().add(CSVtemp);
+        request.setCodeSystem(CStemp);
         
         //de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
 
@@ -960,75 +819,58 @@ public class TerminologyReleaseManager{
         //de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
         //de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType resp_remove = port.removeTerminologyOrConcept(req_remove);
 
-        final de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
+        final de.fhdo.terminologie.ws.authoringPub.Authoring authoringPort = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
         GetCreateCodeSystemPubResponseResponse.Return ret_pub = null;
         try{
-            //DABACA DEBUG MELDUNGEN ENTFERNEN
-            LOGGER.debug("Initializing thread");
             Thread thread = new Thread(){
-              @Override
-              public void run(){
-                  port.createCodeSystemPub(request);
-              }
+                @Override
+                public void run(){
+                    authoringPort.createCodeSystemPub(request);
+                }
             };
-            LOGGER.debug("Starting thread");
             thread.start();
 
             boolean createRunning = true;
             int counter = 1;
-            LOGGER.debug("Starting createRunning");
             while(createRunning){
-                Thread.sleep(2*1000);
-                LOGGER.debug("Checking running import");
-                createRunning = port.getCreateCodeSystemPubRunning();
-                LOGGER.info("Pub-createCodeSystem running for " + counter*2 + " seconds");
+                Thread.sleep(100);
+                createRunning = authoringPort.getCreateCodeSystemPubRunning();
+                if(counter%50==0)
+                    LOGGER.info("Pub-createCodeSystem running for " + counter/10 + " seconds");
                 counter++;
             }
-            LOGGER.debug("Getting response");
-            ret_pub = port.getCreateCodeSystemPubResponse();
-            LOGGER.debug("Got response");
+            ret_pub = authoringPort.getCreateCodeSystemPubResponse();
         }
         catch(Exception e){
-            LOGGER.info("Exception caught while creating code-system on pub and communicating back to collab");
+            LOGGER.error("Error [0096]: " + e.getLocalizedMessage());
         }
         //3.2.21 end
-        //3.2.21 end
         
-        if (ret_pub.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
-        {
+        if (ret_pub!=null && ret_pub.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK)){
             targetCS = new de.fhdo.terminologie.ws.searchPub.CodeSystem();
             targetCS.setId(ret_pub.getCodeSystem().getId());
-            if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
         }
         LOGGER.info("----- createTempCodeSystemVersionOnPub finished (001) -----");
     }
 
-    private void removeTempCodeSystemVersion()
-    {
+    private void removeTempCodeSystemVersion(){
         LOGGER.info("+++++ removeTempCodeSystemVersion started +++++");
-        LOGGER.info("dabaca size of codesystemversion = " + this.targetCS.getCodeSystemVersions().size());
-        for (de.fhdo.terminologie.ws.searchPub.CodeSystemVersion v : this.targetCS.getCodeSystemVersions())
-        {
-            //3.2.26 changed from equals to contains
-            if (v.getName().contains("Temp_import"))
-            {
-                LOGGER.info("dabaca temp removal started");
-                final de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType req_remove = new de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType();
-                req_remove.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
-                req_remove.getLogin().setSessionID(this.pubSessionId);
-                //3.2.17 added
-                req_remove.setLoginAlreadyChecked(true);
+        for(de.fhdo.terminologie.ws.searchPub.CodeSystemVersion CSversion : targetCS.getCodeSystemVersions()){
+            
+            if (CSversion.getName().contains("Temp_import")){
+                final de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType removeRequest = new de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType();
+                removeRequest.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
+                removeRequest.getLogin().setSessionID(this.pubSessionId);
 
-                req_remove.setDeleteInfo(new de.fhdo.terminologie.ws.authoringPub.DeleteInfo());
-                de.fhdo.terminologie.ws.authoringPub.CodeSystem cs_remove = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
-                cs_remove.setId(this.targetCS.getId());
-                de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion csv_remove = new de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion();
-                csv_remove.setVersionId(v.getVersionId());
-                cs_remove.getCodeSystemVersions().add(csv_remove);
+                removeRequest.setDeleteInfo(new de.fhdo.terminologie.ws.authoringPub.DeleteInfo());
+                de.fhdo.terminologie.ws.authoringPub.CodeSystem CSremove = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
+                CSremove.setId(this.targetCS.getId());
+                de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion CSversionRemove = new de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion();
+                CSversionRemove.setVersionId(CSversion.getVersionId());
+                CSremove.getCodeSystemVersions().add(CSversionRemove);
 
-                req_remove.getDeleteInfo().setCodeSystem(cs_remove);
-                req_remove.getDeleteInfo().setType(de.fhdo.terminologie.ws.authoringPub.Type.CODE_SYSTEM_VERSION);
+                removeRequest.getDeleteInfo().setCodeSystem(CSremove);
+                removeRequest.getDeleteInfo().setType(de.fhdo.terminologie.ws.authoringPub.Type.CODE_SYSTEM_VERSION);
 
                 //3.2.21 start
                 //de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
@@ -1040,7 +882,7 @@ public class TerminologyReleaseManager{
                     Thread thread = new Thread(){
                       @Override
                       public void run(){
-                          removeTMPport.removeTerminologyOrConcept(req_remove);
+                          removeTMPport.removeTerminologyOrConcept(removeRequest);
                       }
                     };
                     thread.start();
@@ -1048,33 +890,26 @@ public class TerminologyReleaseManager{
                     boolean removalRunning = true;
                     int counter = 1;
                     while(removalRunning){
-                        Thread.sleep(2*1000);
+                        Thread.sleep(100);
                         removalRunning = removeTMPport.getRemoveTerminologyOrConceptPubRunning();
-                        LOGGER.info("Pub-removeTerminologyOrConcept running for " + counter*2 + " seconds");
+                        if(counter%50==0)
+                            LOGGER.info("Pub-removeTerminologyOrConcept running for " + counter*5 + " seconds");
                         counter++;
                     }
                     resp_remove = removeTMPport.getRemoveTerminologyOrConceptPubResponse();
-
                 }
                 catch(Exception e){
-                    LOGGER.info("Exception caught while removing code-system on pub and communicating back to collab");
+                    LOGGER.error("Error [0075]: " + e.getLocalizedMessage());
                 }
-                //3.2.21 end
                 //3.2.21 end
                 
-                if (resp_remove.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
-                {
+                if (resp_remove!=null && resp_remove.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
                     LOGGER.info("TermBrowser: Temp Version erfolgreich entfernt.");
-                }
                 else
-                {
                     LOGGER.error("TermBrowser: Löschen der Version fehlgeschlagen. ");
-                }
             }
             else
-            {
-                LOGGER.info("dabaca csv not removed, not temporary: " + v.getName());
-            }
+                LOGGER.info("dabaca csv not removed, not temporary: " + CSversion.getName());
         }
         LOGGER.info("----- removeTempCodeSystemVersion finished (001) -----");
     }
@@ -1082,23 +917,21 @@ public class TerminologyReleaseManager{
     private void removeTempValueSetVersion()
     {
         LOGGER.info("+++++ removeTempValueSetVersion started +++++");
-        for (de.fhdo.terminologie.ws.searchPub.ValueSetVersion v : targetVS.getValueSetVersions())
-        {
-            if (v.getName().equals("Temp_import"))
-            {
-                final de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType req_remove = new de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType();
-                req_remove.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
-                req_remove.getLogin().setSessionID(this.pubSessionId);
+        for (de.fhdo.terminologie.ws.searchPub.ValueSetVersion VSversion : targetVS.getValueSetVersions()){
+            if (VSversion.getName().contains("Temp_import")){
+                final de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType removeRequest = new de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType();
+                removeRequest.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
+                removeRequest.getLogin().setSessionID(this.pubSessionId);
 
-                req_remove.setDeleteInfo(new de.fhdo.terminologie.ws.authoringPub.DeleteInfo());
-                de.fhdo.terminologie.ws.authoringPub.ValueSet vs_remove = new de.fhdo.terminologie.ws.authoringPub.ValueSet();
-                vs_remove.setId(targetVS.getId());
-                de.fhdo.terminologie.ws.authoringPub.ValueSetVersion vsv_remove = new de.fhdo.terminologie.ws.authoringPub.ValueSetVersion();
-                vsv_remove.setVersionId(v.getVersionId());
-                vs_remove.getValueSetVersions().add(vsv_remove);
+                removeRequest.setDeleteInfo(new de.fhdo.terminologie.ws.authoringPub.DeleteInfo());
+                de.fhdo.terminologie.ws.authoringPub.ValueSet VStoRemove = new de.fhdo.terminologie.ws.authoringPub.ValueSet();
+                VStoRemove.setId(targetVS.getId());
+                de.fhdo.terminologie.ws.authoringPub.ValueSetVersion VSVtoRemove = new de.fhdo.terminologie.ws.authoringPub.ValueSetVersion();
+                VSVtoRemove.setVersionId(VSversion.getVersionId());
+                VStoRemove.getValueSetVersions().add(VSVtoRemove);
 
-                req_remove.getDeleteInfo().setValueSet(vs_remove);
-                req_remove.getDeleteInfo().setType(de.fhdo.terminologie.ws.authoringPub.Type.VALUE_SET_VERSION);
+                removeRequest.getDeleteInfo().setValueSet(VStoRemove);
+                removeRequest.getDeleteInfo().setType(de.fhdo.terminologie.ws.authoringPub.Type.VALUE_SET_VERSION);
 
                 final de.fhdo.terminologie.ws.authoringPub.Authoring removePort = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
 
@@ -1109,142 +942,109 @@ public class TerminologyReleaseManager{
                 RemoveTerminologyOrConceptResponseType resp_remove = null;
                 try{
                     Thread thread = new Thread(){
-                      @Override
-                      public void run(){
-                          removePort.removeTerminologyOrConcept(req_remove);
-                      }
+                        @Override
+                        public void run(){
+                            removePort.removeTerminologyOrConcept(removeRequest);
+                        }
                     };
                     thread.start();
 
                     boolean removalRunning = true;
                     int counter = 1;
                     while(removalRunning){
-                        Thread.sleep(2*1000);
+                        Thread.sleep(100);
                         removalRunning = removePort.getRemoveTerminologyOrConceptPubRunning();
-                        LOGGER.info("Pub-removeTerminologyOrConcept running for " + counter*2 + " seconds");
+                        if(counter%50 == 0)
+                            LOGGER.info("Pub-removeTerminologyOrConcept running for " + counter/10 + " seconds");
                         counter++;
                     }
                     resp_remove = removePort.getRemoveTerminologyOrConceptPubResponse();
-
                 }
                 catch(Exception e){
-                    LOGGER.info("Exception caught while removing terminology or concept on pub and communicating back to collab");
+                    LOGGER.error("Error [0086]: " + e.getLocalizedMessage());
                 }
-                //3.2.21 end
                 //3.2.21 end
                 
-                if (resp_remove.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
-                {
-                    LOGGER.info("TermBrowser: Temp Version erfolgreich entfernt.");
-                }
+                if (resp_remove!=null && resp_remove.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
+                    LOGGER.info("TempVersion removed successfully");
                 else
-                {
-                    LOGGER.error("TermBrowser: Löschen der Version fehlgeschlagen. ");
-                }
+                    LOGGER.error("Error [0102]: TempVersion removal failed");
             }
         }
         LOGGER.info("----- removeTempValueSetVersion finished (001) -----");
     }
 
-    private ValueSet getValueSetToExport(String valuesetName, Long valuesetVersionId) throws ServerSOAPFaultException
-    {
+    private ValueSet getValueSetToExport(String valuesetName, Long valuesetVersionId) throws ServerSOAPFaultException{
         LOGGER.info("+++++ getValueSetToExport started +++++");
-        LOGGER.info("TermBrowser: TRANSFER: Trying to find ValueSet and Version in collab plattform");
-        LOGGER.info("TermBrowser: VS ID: " + valuesetName);
-        LOGGER.info("TermBrowser: VSV ID: " + valuesetVersionId);
+        LOGGER.info("Trying to find ValueSet and Version in collab plattform: VS-name = " + valuesetName + " VSV-ID = " + valuesetVersionId);
 
-        ListValueSetsRequestType req_vs = new ListValueSetsRequestType();
-        req_vs.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
-        req_vs.getLogin().setSessionID(this.sessionId);
+        ListValueSetsRequestType requestValueSet = new ListValueSetsRequestType();
+        requestValueSet.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
+        requestValueSet.getLogin().setSessionID(this.sessionId);
 
-        ValueSet vs_search = new ValueSet();
-        //vs.setId(po.getClassId());
-        vs_search.setName(valuesetName);
-        req_vs.setValueSet(vs_search);
+        ValueSet searchVS = new ValueSet();
+        searchVS.setName(valuesetName);
+        requestValueSet.setValueSet(searchVS);
 
-        //3.2.17 added
-        req_vs.setLoginAlreadyChecked(true);
-        
-        de.fhdo.terminologie.ws.search.Search port = WebServiceUrlHelper.getInstance().getSearchServicePort();
+        de.fhdo.terminologie.ws.search.Search searchPort = WebServiceUrlHelper.getInstance().getSearchServicePort();
 
-        ListValueSetsResponse.Return ret_vs = port.listValueSets(req_vs);
+        ListValueSetsResponse.Return returnValueSet = searchPort.listValueSets(requestValueSet);
 
-        if ((ret_vs.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.search.Status.OK)
-                && (ret_vs.getValueSet() != null)
-                && (ret_vs.getValueSet().size() == 1))
-        {
-            if (valuesetVersionId != null)
-            {
-                ValueSetVersion vsv_search = null;
-                for (ValueSetVersion vsv_temp : ret_vs.getValueSet().get(0).getValueSetVersions())
-                {
-                    if (vsv_temp.getVersionId().equals(valuesetVersionId))
-                    {
-                        vsv_search = vsv_temp;
-                    }
-                }
+        if ((returnValueSet.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.search.Status.OK)
+        && (returnValueSet.getValueSet() != null)
+        && (returnValueSet.getValueSet().size() == 1)){
+            if (valuesetVersionId != null){
+                ValueSetVersion VSVsearch = null;
+                for (ValueSetVersion VSVbuffer : returnValueSet.getValueSet().get(0).getValueSetVersions())
+                    if (VSVbuffer.getVersionId().equals(valuesetVersionId))
+                        VSVsearch = VSVbuffer;
 
-                if (vsv_search != null)
-                {
-                    ValueSet vs = ret_vs.getValueSet().get(0);
-                    vs.getValueSetVersions().clear();
-                    vs.getValueSetVersions().add(vsv_search);
+                if (VSVsearch != null){
+                    ValueSet VS = returnValueSet.getValueSet().get(0);
+                    VS.getValueSetVersions().clear();
+                    VS.getValueSetVersions().add(VSVsearch);
                     LOGGER.info("----- getValueSetToExport finished (001) -----");
-                    return vs;
+                    return VS;
                 }
-                else
-                {
+                else{
                     LOGGER.info("----- getValueSetToExport finished (002) -----");
                     return new ValueSet();
                 }
             }
-            else
-            {
+            else{
                 LOGGER.info("----- getValueSetToExport finished (003) -----");
-                return ret_vs.getValueSet().get(0);
+                return returnValueSet.getValueSet().get(0);
             }
         }
-        else if(ret_vs.getValueSet().size() > 1)
-        {
-            for(ValueSet v : ret_vs.getValueSet())
-            {
-                if(v.getName().equals(valuesetName))
-                {
-                    if (valuesetVersionId != null)
-                    {
-                        ValueSetVersion vsv_search = null;
-                        for (ValueSetVersion vsv_temp : v.getValueSetVersions())
-                        {
-                            if (vsv_temp.getVersionId().equals(valuesetVersionId))
-                            {
-                                vsv_search = vsv_temp;
-                            }
-                        }
+        else if(returnValueSet.getValueSet().size() > 1){
+            for(ValueSet VSbuffer : returnValueSet.getValueSet()){
+                if(VSbuffer.getName().equals(valuesetName)){
+                    if (valuesetVersionId != null){
+                        ValueSetVersion VSVsearch = null;
+                        for (ValueSetVersion VSVbuffer : VSbuffer.getValueSetVersions())
+                            if (VSVbuffer.getVersionId().equals(valuesetVersionId))
+                                VSVsearch = VSVbuffer;
 
-                        if (vsv_search != null)
-                        {
-                            ValueSet vs = v;
-                            vs.getValueSetVersions().clear();
-                            vs.getValueSetVersions().add(vsv_search);
+                        if (VSVsearch != null){
+                            ValueSet VS = VSbuffer;
+                            VS.getValueSetVersions().clear();
+                            VS.getValueSetVersions().add(VSVsearch);
                             LOGGER.info("----- getValueSetToExport finished (004) -----");
-                            return vs;
+                            return VS;
                         }
-                        else
-                        {
+                        else{
                             LOGGER.info("----- getValueSetToExport finished (005) -----");
                             return new ValueSet();
                         }
                     }
-                    else
-                    {
+                    else{
                         LOGGER.info("----- getValueSetToExport finished (006) -----");
-                        return ret_vs.getValueSet().get(0);
+                        return returnValueSet.getValueSet().get(0);
                     }
                 }
             }
         }
-        else
-        {
+        else{
             LOGGER.info("----- getValueSetToExport finished (007) -----");
             return new ValueSet();
         }
@@ -1253,100 +1053,90 @@ public class TerminologyReleaseManager{
         return new ValueSet();
     }
 
-    private ExportType getExportedValueSet(ValueSet valueSet) throws ServerSOAPFaultException
-    {
+    /**
+     * 
+     * @param valueSet
+     * @return
+     * @throws ServerSOAPFaultException 
+     */
+    private ExportType getExportedValueSet(ValueSet valueSet) throws ServerSOAPFaultException{
         LOGGER.info("+++++ getExportedValueSet started +++++");
+        
         Long valuesetId = valueSet.getId();
         Long valueSetVersionId = valueSet.getValueSetVersions().get(0).getVersionId();
 
-        LOGGER.info("TermBrowser: TRANSFER: Trying to export ValueSet and Version from collab plattform");
-        LOGGER.info("TermBrowser: VS ID: " + valuesetId);
-        LOGGER.info("TermBrowser: VSV ID: " + valueSetVersionId);
+        LOGGER.info("Trying to export value set and version from collab plattform, VS-ID = " + valuesetId + ", VSV-ID = " + valueSetVersionId);
 
-        ExportValueSetContentRequestType req_export_vs = new ExportValueSetContentRequestType();
+        ExportValueSetContentRequestType exportVSRequest = new ExportValueSetContentRequestType();
 
         // Login
-        req_export_vs.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
-        req_export_vs.getLogin().setSessionID(this.pubSessionId);
+        exportVSRequest.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
+        exportVSRequest.getLogin().setSessionID(this.pubSessionId);
+        exportVSRequest.setValueSet(new ValueSet());
+        exportVSRequest.getValueSet().setId(valuesetId);
 
-        req_export_vs.setValueSet(new ValueSet());
-        req_export_vs.getValueSet().setId(valuesetId);
+        ValueSetVersion VSV = new ValueSetVersion();
+        VSV.setVersionId(valueSetVersionId);
+        exportVSRequest.getValueSet().getValueSetVersions().add(VSV);
 
-        ValueSetVersion vsv = new ValueSetVersion();
-        vsv.setVersionId(valueSetVersionId);
-        req_export_vs.getValueSet().getValueSetVersions().add(vsv);
-
-        // Export Type
+        // Export Type TODO formatID durch statischen wert ersetzen 
         ExportType eType = new ExportType();
-        eType.setFormatId(195l);            // TODO 193 = ClaML, 194 = CSV, 195 = SVS
+        eType.setFormatId(195L);
         eType.setUpdateCheck(false);
-        req_export_vs.setExportInfos(eType);
+        exportVSRequest.setExportInfos(eType);
 
-        // Optional: ExportParameter
-        ExportParameterType eParameterType = new ExportParameterType();
-        eParameterType.setAssociationInfos("");
-        eParameterType.setCodeSystemInfos(false);
-        eParameterType.setTranslations(false);
-        req_export_vs.setExportParameter(eParameterType);
-
-        LOGGER.debug("TermBrowser - calling export-service");
-
-        //3.2.17
-        req_export_vs.setLoginAlreadyChecked(true);
+        // Optional: export parameter
+        ExportParameterType exportParameterType = new ExportParameterType();
+        exportParameterType.setAssociationInfos("");
+        exportParameterType.setCodeSystemInfos(false);
+        exportParameterType.setTranslations(false);
+        exportVSRequest.setExportParameter(exportParameterType);
         
-        // WS-Aufruf
-        ExportValueSetContentResponse.Return response = WebServiceHelper.exportValueSetContent(req_export_vs);
+        // Webservice call
+        ExportValueSetContentResponse.Return response = WebServiceHelper.exportValueSetContent(exportVSRequest);
 
         LOGGER.info("----- getExportedValueSet finished (001) -----");
         return response.getExportInfos();
     }
 
     /**
-     * checks if the ValueSet Codes are already present in CodeSystems on the
+     * Checks if the ValueSet Codes are already present in code systems on the
      * Pub Plattform
      *
      * @param valueSet
      * @return
      */
-    private ArrayList<String> areValueSetContentsPresentOnPubPlattform(ValueSet valueSet)
-    {
+    private ArrayList<String> areValueSetContentsPresentOnPubPlattform(ValueSet valueSet){
         LOGGER.info("+++++ areValueSetContentsPresentOnPubPlattform started +++++");
-        ArrayList<String> missingEntries = new ArrayList<String>();
+        ArrayList<String> missingEntries = new ArrayList<>();
         
-        ListValueSetContentsRequestType requestVsContent = new ListValueSetContentsRequestType();
-        requestVsContent.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
-        requestVsContent.getLogin().setSessionID(this.sessionId);
+        ListValueSetContentsRequestType requestVScontent = new ListValueSetContentsRequestType();
+        requestVScontent.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
+        requestVScontent.getLogin().setSessionID(this.sessionId);
 
-        requestVsContent.setValueSet(valueSet);
-        requestVsContent.setReadMetadataLevel(false);
+        requestVScontent.setValueSet(valueSet);
+        requestVScontent.setReadMetadataLevel(false);
 
-        Search search_port = WebServiceUrlHelper.getInstance().getSearchServicePort();
-
-        //3.2.17 added
-        requestVsContent.setLoginAlreadyChecked(true);
+        Search searchPort = WebServiceUrlHelper.getInstance().getSearchServicePort();
         
-        ListValueSetContentsResponse.Return responseVsContent = search_port.listValueSetContents(requestVsContent);
+        ListValueSetContentsResponse.Return responseVScontent = searchPort.listValueSetContents(requestVScontent);
 
-        if (responseVsContent.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.search.Status.OK))
-        {
-            Iterator<CodeSystemEntity> it = responseVsContent.getCodeSystemEntity().iterator();
+        if (responseVScontent.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.search.Status.OK)){
+            Iterator<CodeSystemEntity> VScontentIterator = responseVScontent.getCodeSystemEntity().iterator();
             final de.fhdo.terminologie.ws.searchPub.Search portSearchPub = WebServiceUrlHelper.getInstance().getSearchPubServicePort();
 
-            do
-            {
-                CodeSystemEntity cse = it.next();
+            do{
+                CodeSystemEntity CSentity = VScontentIterator.next();
                 final ListGloballySearchedConceptsRequestType parameter = new ListGloballySearchedConceptsRequestType();
 
-                //CS Global Search
+                //CS global search
                 parameter.setCodeSystemConceptSearch(true);
 
                 parameter.setLogin(new de.fhdo.terminologie.ws.searchPub.LoginType());
                 parameter.getLogin().setSessionID(this.pubSessionId);
 
-                parameter.setCode(cse.getCodeSystemEntityVersions().get(0).getCodeSystemConcepts().get(0).getCode());
+                parameter.setCode(CSentity.getCodeSystemEntityVersions().get(0).getCodeSystemConcepts().get(0).getCode());
                 parameter.setTerm("");
-                //3.2.17
-                parameter.setLoginAlreadyChecked(true);
                 
                 //PUB ÄNDERUNGEN
                 //ListGloballySearchedConceptsResponse.Return response = portSearchPub.listGloballySearchedConcepts(parameter);
@@ -1354,116 +1144,112 @@ public class TerminologyReleaseManager{
                 GetListGloballySearchedConceptsResponseResponse.Return response = null;
                 try{
                     Thread thread = new Thread(){
-                      @Override
-                      public void run(){
-                          portSearchPub.listGloballySearchedConceptsPub(parameter);
-                      }
+                        @Override
+                        public void run(){
+                            portSearchPub.listGloballySearchedConceptsPub(parameter);
+                        }
                     };
                     thread.start();
 
                     boolean listRunning = true;
                     int counter = 1;
                     while(listRunning){
-                        Thread.sleep(2*1000);
+                        Thread.sleep(100);
                         listRunning = portSearchPub.isListGloballySearchedConceptsRunning();
-                        LOGGER.info("Pub-listGloballySearchedConcepts running for " + counter*2 + " seconds");
+                        if(counter%50 == 0)
+                            LOGGER.info("Pub-listGloballySearchedConcepts running for " + counter*5 + " seconds");
                         counter++;
                     }
                     response = portSearchPub.getListGloballySearchedConceptsResponse();
-
                 }
                 catch(Exception e){
-                    LOGGER.info("Exception caught while listing Value-Sets on pub and communicating back to collab");
+                    LOGGER.error("Error [0079]: " + e.getLocalizedMessage());
                 }
                 //3.2.21 end
-                //3.2.21 end
-                
-                
-                if (response.getReturnInfos().getStatus().equals(Status.OK))
-                {
-                    if (response.getGlobalSearchResultEntry().isEmpty())
-                    {
+                                
+                if (response!=null && response.getReturnInfos().getStatus().equals(Status.OK))
+                    if (response.getGlobalSearchResultEntry().isEmpty()){
                         missingEntries.add(parameter.getCode());
-                        LOGGER.info("TermBrowser: TerminologyReleaseManager.areValueSetContentsPresentOnPubPlattform: Code" + parameter.getCode() + " nicht gefunden");
+                        LOGGER.info("Code" + parameter.getCode() + " not found.");
                     }
-                }
                 else
-                {
                     missingEntries.add(parameter.getCode());
-                }
             }
-            while (it.hasNext());
+            while (VScontentIterator.hasNext());
         }
         LOGGER.info("----- areValueSetContentsPresentOnPubPlatform finished (001) -----");
         return missingEntries;
     }
 
-    private List<de.fhdo.terminologie.ws.searchPub.ValueSet> getTargetValueSetFromPub(String valuesetName) throws ServerSOAPFaultException
-    {
+    private List<de.fhdo.terminologie.ws.searchPub.ValueSet> getTargetValueSetFromPub(String valuesetName) throws ServerSOAPFaultException{
         LOGGER.info("+++++ getTargetValueSetFromPub started +++++");
-        final de.fhdo.terminologie.ws.searchPub.Search port_searchPub = WebServiceUrlHelper.getInstance().getSearchPubServicePort();
-        final de.fhdo.terminologie.ws.searchPub.ListValueSetsRequestType request_searchPub = new de.fhdo.terminologie.ws.searchPub.ListValueSetsRequestType();
-        request_searchPub.setLogin(new de.fhdo.terminologie.ws.searchPub.LoginType());
-        request_searchPub.getLogin().setSessionID(this.pubSessionId);
-        request_searchPub.setValueSet(new de.fhdo.terminologie.ws.searchPub.ValueSet());
-        request_searchPub.getValueSet().setName(valuesetName);
-        //3.2.17 added
-        request_searchPub.setLoginAlreadyChecked(true);
+        final de.fhdo.terminologie.ws.searchPub.Search searchPortPub = WebServiceUrlHelper.getInstance().getSearchPubServicePort();
+        final de.fhdo.terminologie.ws.searchPub.ListValueSetsRequestType searchRequestPub = new de.fhdo.terminologie.ws.searchPub.ListValueSetsRequestType();
+        
+        searchRequestPub.setLogin(new de.fhdo.terminologie.ws.searchPub.LoginType());
+        searchRequestPub.getLogin().setSessionID(this.pubSessionId);
+        searchRequestPub.setValueSet(new de.fhdo.terminologie.ws.searchPub.ValueSet());
+        searchRequestPub.getValueSet().setName(valuesetName);
         
         //de.fhdo.terminologie.ws.searchPub.ListValueSetsResponse.Return respSearchPub = port_searchPub.listValueSets(request_searchPub);
         GetListValueSetsPubResponeResponse.Return respSearchPub = null;
         //3.2.21 start
         try{
             Thread thread = new Thread(){
-              @Override
-              public void run(){
-                  port_searchPub.listValueSetsPub(request_searchPub);
-              }
+                @Override
+                public void run(){
+                    searchPortPub.listValueSetsPub(searchRequestPub);
+                }
             };
             thread.start();
 
             boolean listRunning = true;
             int counter = 1;
             while(listRunning){
-                Thread.sleep(2*1000);
-                listRunning = port_searchPub.isListValueSetsPubRunning();
-                LOGGER.info("Pub-listValueSets running for " + counter*2 + " seconds");
+                Thread.sleep(100);
+                listRunning = searchPortPub.isListValueSetsPubRunning();
+                if(counter%50 == 0)
+                    LOGGER.info("Pub-listValueSets running for " + counter/10 + " seconds");
                 counter++;
             }
-            respSearchPub = port_searchPub.getListValueSetsPubRespone();
-
+            respSearchPub = searchPortPub.getListValueSetsPubRespone();
         }
         catch(Exception e){
-            LOGGER.info("Exception caught while listing Value-Sets on pub and communicating back to collab");
+            LOGGER.error("Error [0080]: " + e.getLocalizedMessage());
         }
         //3.2.21 end
-        //3.2.21 end
         
-        if (respSearchPub.getReturnInfos().getStatus().equals(Status.OK))
-        {
+        if (respSearchPub!=null && respSearchPub.getReturnInfos().getStatus().equals(Status.OK)){
             LOGGER.info("----- getTargetValueSetFromPub finished (001) -----");
             return respSearchPub.getValueSet();
         }
-        else
-        {
+        else{
             LOGGER.info("----- getTargetValueSetFromPub finished (002) -----");
-            return new ArrayList<de.fhdo.terminologie.ws.searchPub.ValueSet>();
+            return new ArrayList<>();
         }
     }
 
-    private de.fhdo.terminologie.ws.administrationPub.ReturnType importValueSet(ValueSetVersion vsv, ExportType exportedVs) throws ServerSOAPFaultException
-    {
+    /**
+     * TODO
+     * @param vsv
+     * @param exportedVs
+     * @return
+     * @throws ServerSOAPFaultException 
+     */
+    private de.fhdo.terminologie.ws.administrationPub.ReturnType importValueSet(ValueSetVersion vsv, ExportType exportedVs) throws ServerSOAPFaultException{
         LOGGER.info("+++++ importValueSet started +++++");
-        final de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
-        // Login
+        final de.fhdo.terminologie.ws.administrationPub.Administration administrationPort = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
+        
+        //Login
         final de.fhdo.terminologie.ws.administrationPub.ImportValueSetRequestType request = new de.fhdo.terminologie.ws.administrationPub.ImportValueSetRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
 
-        // Codesystem
+        //Value set
         request.setValueSet(new de.fhdo.terminologie.ws.administrationPub.ValueSet());
         request.getValueSet().setId(this.targetVS.getId());
 
+        //TODO export format durch statischen wert ersetzen
         request.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
         request.getImportInfos().setRole(CODES.ROLE_TRANSFER);
         request.getImportInfos().setFormatId(301l); //export formatId != import formatId; 195 != 301
@@ -1471,67 +1257,69 @@ public class TerminologyReleaseManager{
         request.getImportInfos().setOrder(Boolean.TRUE);
         request.setImportId(this.importId);
 
-        de.fhdo.terminologie.ws.administrationPub.ValueSetVersion vsv_pub = new de.fhdo.terminologie.ws.administrationPub.ValueSetVersion();
-        vsv_pub.setName(vsv.getName());
-        request.getValueSet().getValueSetVersions().add(vsv_pub);
-
-        //3.2.17 added
-        request.setLoginAlreadyChecked(true);
+        de.fhdo.terminologie.ws.administrationPub.ValueSetVersion VSVpub = new de.fhdo.terminologie.ws.administrationPub.ValueSetVersion();
+        VSVpub.setName(vsv.getName());
+        request.getValueSet().getValueSetVersions().add(VSVpub);
         
         //de.fhdo.terminologie.ws.administrationPub.ImportValueSetResponse.Return ret_import = port.importValueSet(request);
         //3.2.21 start
         GetImportValueSetPubResponseResponse.Return response = null;
         try{
             Thread thread = new Thread(){
-              @Override
-              public void run(){
-                  port.importValueSetPub(request);
-              }
+                @Override
+                public void run(){
+                    administrationPort.importValueSetPub(request);
+                }
             };
             thread.start();
 
             boolean importRunning = true;
             int counter = 1;
             while(importRunning){
-                Thread.sleep(2*1000);
-                importRunning = port.isImportValueSetPubRunning();
-                LOGGER.info("Pub-importValueSet running for " + counter*2 + " seconds");
+                Thread.sleep(100);
+                importRunning = administrationPort.isImportValueSetPubRunning();
+                if(counter%50 == 0)
+                    LOGGER.info("Pub-importValueSet running for " + counter/10 + " seconds");
                 counter++;
             }
-            response = port.getImportValueSetPubResponse();
-
+            response = administrationPort.getImportValueSetPubResponse();
         }
         catch(Exception e){
-            LOGGER.info("Exception caught while listing Value-Sets on pub and communicating back to collab");
+            LOGGER.error("Error [0083]: " + e.getLocalizedMessage());
         }
         //3.2.21 end        
-        //3.2.21 end        
         
-        LOGGER.info("----- importValueSet finished (001) -----");
-        return response.getReturnInfos();
+        if(response != null){
+            LOGGER.info("----- importValueSet finished (001) -----");
+            return response.getReturnInfos();
+        }
+        else{
+            LOGGER.info("----- importValueSet finished (002) -----");
+            return null;
+        }
     }
 
-    private void createTempValueSetVersionOnPub(ValueSet vs)
-    {
+    private void createTempValueSetVersionOnPub(ValueSet VS){
         LOGGER.info("+++++ createTempValueSetVersionOnPub started +++++");
+        
         final de.fhdo.terminologie.ws.authoringPub.CreateValueSetRequestType request = new de.fhdo.terminologie.ws.authoringPub.CreateValueSetRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
 
-        de.fhdo.terminologie.ws.authoringPub.ValueSet vs_pub = new de.fhdo.terminologie.ws.authoringPub.ValueSet();
-        vs_pub.setName(vs.getName());
-        vs_pub.setDescription(vs.getDescription());
-        vs_pub.setDescriptionEng(vs.getDescriptionEng());
-        vs_pub.setResponsibleOrganization(vs.getResponsibleOrganization());
-        vs_pub.setWebsite(vs.getWebsite());
-        vs_pub.setAutoRelease(vs.isAutoRelease());
+        de.fhdo.terminologie.ws.authoringPub.ValueSet VStemp = new de.fhdo.terminologie.ws.authoringPub.ValueSet();
+        VStemp.setName(VS.getName());
+        VStemp.setDescription(VS.getDescription());
+        VStemp.setDescriptionEng(VS.getDescriptionEng());
+        VStemp.setResponsibleOrganization(VS.getResponsibleOrganization());
+        VStemp.setWebsite(VS.getWebsite());
+        VStemp.setAutoRelease(VS.isAutoRelease());
 
-        de.fhdo.terminologie.ws.authoringPub.ValueSetVersion vsv_pub = new de.fhdo.terminologie.ws.authoringPub.ValueSetVersion();
-        vsv_pub.setName("Temp_import");
-        vs_pub.getValueSetVersions().add(vsv_pub);
-        request.setValueSet(vs_pub);
+        de.fhdo.terminologie.ws.authoringPub.ValueSetVersion VSVtemp = new de.fhdo.terminologie.ws.authoringPub.ValueSetVersion();
+        VSVtemp.setName("Temp_import");
+        VStemp.getValueSetVersions().add(VSVtemp);
+        
+        request.setValueSet(VStemp);
 
-        //PUBCHANGE
         final de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
         //de.fhdo.terminologie.ws.authoringPub.CreateValueSetResponse.Return ret_pub = port.createValueSet(request);
 
@@ -1539,32 +1327,31 @@ public class TerminologyReleaseManager{
         GetCreateValueSetPubResponseResponse.Return ret_pub = null;
         try{
             Thread thread = new Thread(){
-              @Override
-              public void run(){
-                  port.createValueSetPub(request);
-              }
+                @Override
+                public void run(){
+                    port.createValueSetPub(request);
+                }
             };
             thread.start();
 
             boolean importRunning = true;
             int counter = 1;
             while(importRunning){
-                Thread.sleep(2*1000);
+                Thread.sleep(100);
                 importRunning = port.isCreateValueSetPubRunning();
-                LOGGER.info("Pub-createValueSet running for " + counter*2 + " seconds");
+                if(counter%50 == 0)
+                    LOGGER.info("Pub-createValueSet running for " + counter/10 + " seconds");
                 counter++;
             }
             ret_pub = port.getCreateValueSetPubResponse();
 
         }
         catch(Exception e){
-            LOGGER.info("Exception caught while listing Value-Sets on pub and communicating back to collab");
+            LOGGER.error("Error [0095]: " + e.getLocalizedMessage());
         }
         //3.2.21 end     
-        //3.2.21 end     
         
-        if (ret_pub.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
-        {
+        if (ret_pub!=null && ret_pub.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK)){
             this.targetVS = new de.fhdo.terminologie.ws.searchPub.ValueSet();
             this.targetVS.setId(ret_pub.getValueSet().getId());
         }

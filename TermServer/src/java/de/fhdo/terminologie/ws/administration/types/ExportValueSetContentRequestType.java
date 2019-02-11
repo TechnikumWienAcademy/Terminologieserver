@@ -44,16 +44,7 @@ public class ExportValueSetContentRequestType
   private LoginType login;
   private ValueSet valueSet;
   private ExportParameterType exportParameter;
-  private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
-
+  
   /**
    * @return the exportInfos
    */

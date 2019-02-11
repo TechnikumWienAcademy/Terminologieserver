@@ -58,7 +58,7 @@ public class UpdateValueSetStatus
 
     // Check login
     //3.2.17 added second check
-    if (parameter != null && !parameter.isLoginAlreadyChecked())
+    if (parameter != null)
     {
       if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
         return response;

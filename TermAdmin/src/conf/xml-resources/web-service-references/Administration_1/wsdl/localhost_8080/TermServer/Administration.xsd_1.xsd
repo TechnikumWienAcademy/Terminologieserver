@@ -170,7 +170,6 @@
 <xs:element name="exportInfos" type="tns:exportType" minOccurs="0"/>
 <xs:element name="exportParameter" type="tns:exportParameterType" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 

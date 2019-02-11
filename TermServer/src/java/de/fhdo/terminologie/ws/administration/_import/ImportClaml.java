@@ -827,9 +827,6 @@ public class ImportClaml
     ccatrt.setCodeSystemEntity(etAssoc);
 
     ccatrt.setLogin(login);
-    
-    //3.2.17 added
-    ccatrt.setLoginAlreadyChecked(true);
 
     CreateConceptAssociationType ccat = new CreateConceptAssociationType();
     this.ccatrespt = ccat.CreateConceptAssociationType(ccatrt, hb_session);
@@ -1069,9 +1066,6 @@ public class ImportClaml
     request.setCodeSystem(codeSystem);
     request.setCodeSystemEntity(cse);
     request.setLogin(login);
-
-    //3.2.17
-    request.setLoginAlreadyChecked(true);
     
     //Konzept erstellen
     CreateConcept cc = new CreateConcept();
@@ -1145,9 +1139,6 @@ public class ImportClaml
     request.setCodeSystem(codeSystem);
     request.setCodeSystemEntity(cse);
     request.setLogin(login);
-
-    //3.2.17
-    request.setLoginAlreadyChecked(true);
     
     //Konzept erstellen
     CreateConcept cc = new CreateConcept();

@@ -86,7 +86,7 @@ public class CreateConceptAssociationType
     }
     
     //3.2.17 added last parameter
-    cc.CreateConceptOrAssociationType(responseCC, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session, parameter.isLoginAlreadyChecked());
+    cc.CreateConceptOrAssociationType(responseCC, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session);
     
     response.setReturnInfos(responseCC.getReturnInfos());
     response.setCodeSystemEntity(responseCC.getCodeSystemEntity());

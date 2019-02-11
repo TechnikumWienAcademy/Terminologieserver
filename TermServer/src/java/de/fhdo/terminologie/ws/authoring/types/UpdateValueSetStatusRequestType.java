@@ -30,16 +30,6 @@ public class UpdateValueSetStatusRequestType
 {
   private LoginType login;
   private ValueSet valueSet;
-  //3.2.17 added
-  private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
   
   /**
    * @return the login

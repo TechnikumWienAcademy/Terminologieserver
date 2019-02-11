@@ -52,16 +52,6 @@ public class ImportCodeSystemRequestType
     private LoginType login;
     private CodeSystem codeSystem;
     private Long importId;
-    //3.2.17 added
-    private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
     
     public Long getImportId() {
         return importId;

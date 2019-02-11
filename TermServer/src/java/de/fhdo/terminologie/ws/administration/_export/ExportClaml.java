@@ -60,8 +60,6 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 import de.fhdo.terminologie.ws.types.ReturnType.Status;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -69,7 +67,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
@@ -341,29 +338,36 @@ public class ExportClaml{
         return returnInfos;
     }
 
-    private Meta createClaMLMetadata(String name, String value)
-    {
-        //ANCHOR
+    /**
+     * TODO
+     * @param name
+     * @param value
+     * @return 
+     */
+    private Meta createClaMLMetadata(String name, String value){
         Meta meta = new Meta();
         meta.setName(name);
         meta.setValue(checkString(value));
         return meta;
     }
 
-    private String getClamlVersionFromCS(CodeSystem cs)
-    {
-        String s = "";
+    /**
+     * Gets the CS version from the CS and returns it as string.
+     * @param CS the code system from which to return the claml version.
+     * @return the claml version of the CS version as string.
+     */
+    private String getClamlVersionFromCS(CodeSystem CS){
+        String clamlVersion = "";
 
-        try
-        {
-            CodeSystemVersion csv = cs.getCodeSystemVersions().iterator().next();
-            s = csv.getName().replaceAll(cs.getName(), "").trim();
+        try{
+            CodeSystemVersion CSversion = CS.getCodeSystemVersions().iterator().next();
+            clamlVersion = CSversion.getName().replaceAll(CS.getName(), "").trim();
         }
-        catch (Exception e)
-        {
+        catch (Exception e){
+            LOGGER.error("Error [0073]: " + e.getLocalizedMessage());
         }
 
-        return s;
+        return clamlVersion;
     }
     
     /**
@@ -487,14 +491,18 @@ public class ExportClaml{
         LOGGER.info("----- createConcepts finished (001) -----");
     }
 
-    private void createMetadata(String name, String value, clamlBindingXSD.Class clazz)
-    {
-        if (value != null && value.length() > 0 && name != null && name.length() > 0)
-        {
-            Meta m = new Meta();
-            m.setName(name);
-            m.setValue(checkString(value));
-            clazz.getMeta().add(m);
+    /**
+     * Creates a set of meta, setting its name and value before adding it to the class.
+     * @param name name of the meta.
+     * @param value value of the meta.
+     * @param clazz the class to which to add the meta.
+     */
+    private void createMetadata(String name, String value, clamlBindingXSD.Class clazz){
+        if (value != null && value.length() > 0 && name != null && name.length() > 0){
+            Meta meta = new Meta();
+            meta.setName(name);
+            meta.setValue(checkString(value));
+            clazz.getMeta().add(meta);
         }
     }
 

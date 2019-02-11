@@ -68,8 +68,8 @@ public class ImportCodeSystem{
     // Login-Informationen auswerten (gilt f�r jeden Webservice)
     boolean loggedIn = false;
     LoginInfoType loginInfoType = null;
-    //3.2.17 added second check
-    if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
+    
+    if (parameter != null && parameter.getLogin() != null)
     {
       loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
       loggedIn = loginInfoType != null;
@@ -77,7 +77,7 @@ public class ImportCodeSystem{
       if (loggedIn)
       {
 
-        if (loginInfoType.getTermUser().isIsAdmin())
+        if (loginInfoType!=null && loginInfoType.getTermUser().isIsAdmin())
         {
           loggedIn = true;
         }
@@ -86,11 +86,7 @@ public class ImportCodeSystem{
           loggedIn = false;
         }
       }
-    }
-    //3.2.17 added second check
-    if(parameter !=null && parameter.isLoginAlreadyChecked())
-        loggedIn = parameter.isLoginAlreadyChecked();
-    
+    }    
     
     LOGGER.debug("Eingeloggt: " + loggedIn);
 

@@ -30,16 +30,6 @@ public class UpdateCodeSystemVersionStatusRequestType
 {
   private LoginType login;
   private CodeSystem codeSystem;
-  //3.2.17 added
-  private boolean loginAlreadyChecked;
-
-  public void setLoginAlreadyChecked(boolean paraLoginAlreadyChecked){
-      loginAlreadyChecked = paraLoginAlreadyChecked;
-  }
-  
-  public boolean getLoginAlreadyChecked(){
-      return loginAlreadyChecked;
-  }
   
   public UpdateCodeSystemVersionStatusRequestType()
   {

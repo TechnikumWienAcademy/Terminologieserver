@@ -368,8 +368,6 @@ public class ImportVSSVS
 
                 //ConceptLinking
                 CreateValueSetContentRequestType request = new CreateValueSetContentRequestType();
-                //3.2.17 added
-                request.setLoginAlreadyChecked(true);
                 
                 request.setLogin(parameter.getLogin());
 

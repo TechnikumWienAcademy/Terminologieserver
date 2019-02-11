@@ -36,311 +36,233 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 /**
- *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de) / warends
+ * V 3.3 RDY
+ * @author Robert Mützner
+ * @author Warends
  */
-public class ListValueSets
-{
+public class ListValueSets{
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-    public ListValueSetsResponseType ListValueSets(ListValueSetsRequestType parameter)
-    {
-        if (logger.isInfoEnabled())
-        {
-            logger.info("====== ListValueSets gestartet ======");
-        }
+    /**
+     * Retrieves the value sets which fit the parameter from the database and then sorts them before returning them.
+     * @param parameter the request parameter with information about which value set should be requested.
+     * @return the list of value sets which fit the parameters.
+     */
+    public ListValueSetsResponseType ListValueSets(ListValueSetsRequestType parameter){
+        LOGGER.info("+++++ ListValueSets started +++++");
         
-        // Return-Informationen anlegen
+        //Creating return information
         ListValueSetsResponseType response = new ListValueSetsResponseType();
         response.setReturnInfos(new ReturnType());
         
-        // Parameter prüfen
-        if (validateParameter(parameter, response) == false)
-        {
-            return response; // Fehler bei den Parametern
+        //Checking parameters
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- ListValueSets finished (001) -----");
+            return response; //Faulty parameters
         }
 
-        // Login-Informationen auswerten (gilt für jeden Webservice)
+        //Check login (like every webservice)
         boolean loggedIn = false;
-
-        //3.2.17 added
-        if(parameter != null && parameter.isLoginAlreadyChecked()){
-            loggedIn = true;
-        }
-        
-        //3.2.17 added second check
-        LoginInfoType loginInfoType = null;
-        if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
-        {
+        LoginInfoType loginInfoType ;
+        if (parameter != null && parameter.getLogin() != null){
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
         }
 
-        try
-        {
-            // Hibernate-Block, Session öffnen
+        try{
             org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
-            //hb_session.getTransaction().begin();
+            java.util.List<ValueSet> VSlist = null;
 
-            java.util.List<ValueSet> liste = null;
-
-            try
-            {
-                String hql = "select distinct vs from ValueSet vs";
-                hql += " join fetch vs.valueSetVersions vsv";
+            try{
+                String HQL_valueSet_search = "select distinct vs from ValueSet vs";
+                HQL_valueSet_search += " join fetch vs.valueSetVersions vsv";
 
                 HQLParameterHelper parameterHelper = new HQLParameterHelper();
 
-                if (parameter != null && parameter.getValueSet() != null)
-                {
+                if (parameter != null && parameter.getValueSet() != null){
                     parameterHelper.addParameter("vs.", "name", parameter.getValueSet().getName());
                     parameterHelper.addParameter("vs.", "description", parameter.getValueSet().getDescription());
 
-                    if (parameter.getValueSet().getValueSetVersions() != null && parameter.getValueSet().getValueSetVersions().size() > 0)
-                    {
-                        ValueSetVersion vsvFilter = (ValueSetVersion) parameter.getValueSet().getValueSetVersions().toArray()[0];
+                    if (parameter.getValueSet().getValueSetVersions() != null && parameter.getValueSet().getValueSetVersions().size() > 0){
+                        ValueSetVersion VSVfilter = (ValueSetVersion) parameter.getValueSet().getValueSetVersions().toArray()[0];
 
-                        parameterHelper.addParameter("vsv.", "releaseDate", vsvFilter.getReleaseDate());
-                        parameterHelper.addParameter("vsv.", "statusDate", vsvFilter.getStatusDate());
-                        parameterHelper.addParameter("vsv.", "previousVersionId", vsvFilter.getPreviousVersionId());
-                        //parameterHelper.addParameter("vsv.", "status", vsvFilter.getStatus());
-                        parameterHelper.addParameter("vsv.", "validityRange", vsvFilter.getValidityRange());
+                        parameterHelper.addParameter("vsv.", "releaseDate", VSVfilter.getReleaseDate());
+                        parameterHelper.addParameter("vsv.", "statusDate", VSVfilter.getStatusDate());
+                        parameterHelper.addParameter("vsv.", "previousVersionId", VSVfilter.getPreviousVersionId());
+                        parameterHelper.addParameter("vsv.", "validityRange", VSVfilter.getValidityRange());
                     }
                 }
 
-                if (loggedIn == false)
-                {
+                if (!loggedIn){
                     parameterHelper.addParameter("vs.", "status", Definitions.STATUS_CODES.ACTIVE.getCode());
                     parameterHelper.addParameter("vsv.", "status", Definitions.STATUS_CODES.ACTIVE.getCode());
                 }
 
-                // Parameter hinzufügen (immer mit AND verbunden)
-                hql += parameterHelper.getWhere("");
+                //Adding parameters, always with AND
+                HQL_valueSet_search += parameterHelper.getWhere("");
+                LOGGER.debug("HQL: " + HQL_valueSet_search);
 
-                logger.debug("HQL: " + hql);
+                org.hibernate.Query Q_valueSet_search = hb_session.createQuery(HQL_valueSet_search);
+                Q_valueSet_search.setReadOnly(true);
 
-                // Query erstellen
-                org.hibernate.Query q = hb_session.createQuery(hql);
-                //Matthias: set readOnly
-                q.setReadOnly(true);
+                //Now the parameters can be set via the helper
+                parameterHelper.applyParameter(Q_valueSet_search);
 
-                // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
-                parameterHelper.applyParameter(q);
-
-                liste = q.list();
-                //hb_session.getTransaction().commit();
+                VSlist = Q_valueSet_search.list();
             }
-            catch (Exception e)
-            {
-                //hb_session.getTransaction().rollback();
-                // Fehlermeldung an den Aufrufer weiterleiten
+            catch (Exception e){ 
+                LOGGER.error("Error [0075]: " + e.getLocalizedMessage());
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
                 response.getReturnInfos().setMessage("Fehler bei 'ListValueSets', Hibernate: " + e.getLocalizedMessage());
-
-                logger.error("Fehler bei 'ListValueSets', Hibernate: " + e.getLocalizedMessage());
             }
-            finally
-            {
-                hb_session.close();
+            finally{
+                if(hb_session.isOpen())
+                    hb_session.close();
             }
 
-            int anzahl = 0;
-            if (liste != null)
-            {
-                for(int i = 0; i< liste.size(); i++)
-                {
-                    if(liste.get(i).getValueSetVersions().size() > 1)
-                    {
-                         //sorting VS Versions by their id
-                        ArrayList<ValueSetVersion> list = new ArrayList(liste.get(i).getValueSetVersions());
-                        Collections.sort(list, new Comparator<ValueSetVersion>(){
-                            public int compare(ValueSetVersion vsv1, ValueSetVersion vsv2)
-                            {
+            int VScount;
+            if (VSlist != null){
+                for (ValueSet VS : VSlist) {
+                    if (VS.getValueSetVersions().size() > 1) {
+                        //Sorting VS versions by their id
+                        ArrayList<ValueSetVersion> VSversionList = new ArrayList(VS.getValueSetVersions());
+                        Collections.sort(VSversionList, new Comparator<ValueSetVersion>(){
+                            @Override
+                            public int compare(ValueSetVersion vsv1, ValueSetVersion vsv2){
                                 return (vsv1.getVersionId() < vsv2.getVersionId() ? -1 : (vsv1.getVersionId().equals(vsv2.getVersionId()) ? 0 : 1));
                             }
                         });
-                        
-                        liste.get(i).setValueSetVersions(new LinkedHashSet<ValueSetVersion>(list));
+                        VS.setValueSetVersions(new LinkedHashSet<ValueSetVersion>(VSversionList));
                     }
                 }
                 
-                anzahl = liste.size();
-                Iterator<ValueSet> itVS = liste.iterator();
+                VScount = VSlist.size();
+                Iterator<ValueSet> VSiterator = VSlist.iterator();
 
-                while (itVS.hasNext())
-                {
-                    ValueSet vs = itVS.next();
-                    vs.setMetadataParameters(null);
-//          vs.setValueSetVersions(null);
-//          vs.setDescription(null);
-//          vs.setStatus(null);
-//          vs.setStatusDate(null);
+                while (VSiterator.hasNext()){
+                    ValueSet VS = VSiterator.next();
+                    VS.setMetadataParameters(null);
+                    
+                    //Valueset versions
+                    if (VS.getValueSetVersions() != null){   
+                        Iterator<ValueSetVersion> VSViterator = VS.getValueSetVersions().iterator();
+                        ValueSetVersion VSV;
+                        while (VSViterator.hasNext()){
+                            VSV = VSViterator.next();
 
-                    //Matthias: check if current Version is member of codeSystemVersion --> Status ==1
-                    boolean validCurrentVersion = false;
-
-                    // ValueSetVersions
-                    if (vs.getValueSetVersions() != null)
-                    {   
-                        Iterator<ValueSetVersion> itVSV = vs.getValueSetVersions().iterator();
-                        ValueSetVersion vsv;
-                        while (itVSV.hasNext())
-                        {
-                            vsv = itVSV.next();
-
-                            if (!loggedIn && vsv.getStatus() != null && vsv.getStatus().intValue() != Definitions.STATUS_CODES.ACTIVE.getCode())
-                            {
-                                // Nicht sichtbar, also von der Ergebnismenge entfernen
-                                itVSV.remove();
+                            if (!loggedIn && VSV.getStatus() != null && VSV.getStatus() != Definitions.STATUS_CODES.ACTIVE.getCode()){
+                                //Not visible, has to be removed from the result
+                                VSViterator.remove();
                             }
-                            else
-                            {
-                                // Nicht anzuzeigende Beziehungen null setzen
-                                vsv.setValueSet(null);
-                                vsv.setConceptValueSetMemberships(null);
-                                vs.setCurrentVersionId(vsv.getVersionId());
+                            else{
+                                //Relationships which should not be shown are set to null
+                                VSV.setValueSet(null);
+                                VSV.setConceptValueSetMemberships(null);
+                                VS.setCurrentVersionId(VSV.getVersionId());
                             }
-                            
                         }
-
-                        //parameterHelper.addParameter("vsv.", "status", Definitions.STATUS_CODES.ACTIVE.getCode());
                     }
                 }
 
                 // Liste der Response beifügen
-                response.setValueSet(liste);
-                response.getReturnInfos().setCount(liste.size());
-                
+                response.setValueSet(VSlist);
+                response.getReturnInfos().setCount(VSlist.size());
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
                 response.getReturnInfos().setStatus(ReturnType.Status.OK);
-                response.getReturnInfos().setMessage("ValueSets erfolgreich gelesen, Anzahl: " + anzahl);
-                response.getReturnInfos().setCount(anzahl);
+                response.getReturnInfos().setMessage("ValueSets erfolgreich gelesen, Anzahl: " + VScount);
+                response.getReturnInfos().setCount(VScount);
             }
-
         }
-        catch (Exception e)
-        {
-            // Fehlermeldung an den Aufrufer weiterleiten
+        catch (Exception e){
+            LOGGER.error("Error [0076]: " + e.getLocalizedMessage());
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler bei 'ListValueSets': " + e.getLocalizedMessage());
-
-            logger.error("Fehler bei 'ListValueSets': " + e.getLocalizedMessage());
-            e.printStackTrace();
         }
-
+        LOGGER.info("----- listValueSets finished (001) -----");
         return response;
     }
 
-    private boolean validateParameter(ListValueSetsRequestType Request, ListValueSetsResponseType Response)
-    {
-        boolean erfolg = true;
-        if (Request != null)
-        {
-
-            if (Request.getLogin() != null)
-            {
-                if (Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0)
-                {
-                    Response.getReturnInfos().setMessage(
-                            "Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
-                    erfolg = false;
+    /**
+     * Checks the parameters, some are allowed to be set and are required, others must not be set.
+     * @param Request the parameters to be checked.
+     * @param Response information about the check is stored here.
+     * @return true if the parameters passed the test, else false.
+     */
+    private boolean validateParameter(ListValueSetsRequestType Request, ListValueSetsResponseType Response){
+        boolean passed = true;
+        if (Request != null){
+            if (Request.getLogin() != null){
+                if (Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0){
+                    Response.getReturnInfos().setMessage("Die Session-ID darf nicht leer sein, wenn ein Login-Type angegeben ist!");
+                    passed = false;
                 }
             }
 
-            if (Request.getValueSet() != null && Request.getValueSet().getValueSetVersions() != null)
-            {
-                if (Request.getValueSet().getValueSetVersions().size() > 1)
-                {
-                    Response.getReturnInfos().setMessage(
-                            "Es darf maximal eine ValueSetVersion angegeben sein!");
-                    erfolg = false;
-
+            if (Request.getValueSet() != null && Request.getValueSet().getValueSetVersions() != null){
+                if (Request.getValueSet().getValueSetVersions().size() > 1){
+                    Response.getReturnInfos().setMessage("Es darf maximal eine ValueSetVersion angegeben sein!");
+                    passed = false;
                 }
-                else
-                {
-                    if (Request.getValueSet().getValueSetVersions().size() != 0)
-                    {
-                        ValueSetVersion vsv = (ValueSetVersion) Request.getValueSet().getValueSetVersions().toArray()[0];
+                else{
+                    if(!Request.getValueSet().getValueSetVersions().isEmpty()){
+                        ValueSetVersion VSversion = (ValueSetVersion) Request.getValueSet().getValueSetVersions().toArray()[0];
 
-                        // folgende Parameter dürfen nicht angegeben sein:
-                        if (vsv.getVersionId() != null)
-                        {
-                            Response.getReturnInfos().setMessage(
-                                    "ValueSetVersion VersionId darf nicht angegeben sein!");
-                            erfolg = false;
+                        if (VSversion.getVersionId() != null){
+                            Response.getReturnInfos().setMessage("ValueSetVersion VersionId darf nicht angegeben sein!");
+                            passed = false;
                         }
 
-                        if (vsv.getInsertTimestamp() != null)
-                        {
-                            Response.getReturnInfos().setMessage(
-                                    "ValueSetVersion InsertTimestamp darf nicht angegeben sein!");
-                            erfolg = false;
+                        if (VSversion.getInsertTimestamp() != null){
+                            Response.getReturnInfos().setMessage("ValueSetVersion InsertTimestamp darf nicht angegeben sein!");
+                            passed = false;
                         }
 
-                        if (vsv.getPreferredLanguageId() != null)
-                        {
-                            Response.getReturnInfos().setMessage(
-                                    "ValueSetVersion PreferredLanguageId darf nicht angegeben sein!");
-                            erfolg = false;
+                        if (VSversion.getPreferredLanguageId() != null){
+                            Response.getReturnInfos().setMessage("ValueSetVersion PreferredLanguageId darf nicht angegeben sein!");
+                            passed = false;
                         }
 
-                        if (vsv.getValidityRange() != null)
-                        {
-                            Response.getReturnInfos().setMessage(
-                                    "ValueSetVersion ValidityRange darf nicht angegeben sein!");
-                            erfolg = false;
+                        if (VSversion.getValidityRange() != null){
+                            Response.getReturnInfos().setMessage("ValueSetVersion ValidityRange darf nicht angegeben sein!");
+                            passed = false;
                         }
 
-                        if ((vsv.getStatus() != null) && (Request.getLogin() == null))
-                        {
-                            Response.getReturnInfos().setMessage(
-                                    "ValueSetVersion StatusDate darf nicht angegeben sein!");
-                            erfolg = false;
+                        if (VSversion.getStatus() != null && Request.getLogin() == null){
+                            Response.getReturnInfos().setMessage("ValueSetVersion StatusDate darf nicht angegeben sein!");
+                            passed = false;
                         }
-
                     }
 
-                    if (Request.getValueSet().getId() != null)
-                    {
-                        Response.getReturnInfos().setMessage(
-                                "ValueSet Id darf nicht angegeben sein!");
-                        erfolg = false;
+                    if (Request.getValueSet().getId() != null){
+                        Response.getReturnInfos().setMessage("ValueSet Id darf nicht angegeben sein!");
+                        passed = false;
                     }
 
-                    if (Request.getValueSet().getCurrentVersionId() != null)
-                    {
-                        Response.getReturnInfos().setMessage(
-                                "ValueSet CurrentVersionId darf nicht angegeben sein!");
-                        erfolg = false;
+                    if (Request.getValueSet().getCurrentVersionId() != null){
+                        Response.getReturnInfos().setMessage("ValueSet CurrentVersionId darf nicht angegeben sein!");
+                        passed = false;
                     }
 
-                    if (Request.getValueSet().getStatus() != null)
-                    {
-                        Response.getReturnInfos().setMessage(
-                                "ValueSet Status darf nicht angegeben sein!");
-                        erfolg = false;
+                    if (Request.getValueSet().getStatus() != null){
+                        Response.getReturnInfos().setMessage("ValueSet Status darf nicht angegeben sein!");
+                        passed = false;
                     }
 
-                    if (Request.getValueSet().getStatusDate() != null)
-                    {
-                        Response.getReturnInfos().setMessage(
-                                "ValueSet StatusDate darf nicht angegeben sein!");
-                        erfolg = false;
+                    if (Request.getValueSet().getStatusDate() != null){
+                        Response.getReturnInfos().setMessage("ValueSet StatusDate darf nicht angegeben sein!");
+                        passed = false;
                     }
-
                 }
             }
         }
 
-        if (erfolg == false)
-        {
+        if (!passed){
             Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
         }
-
-        return erfolg;
+        return passed;
     }
 }

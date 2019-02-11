@@ -23,7 +23,6 @@ import de.fhdo.collaboration.db.classes.Status;
 import de.fhdo.collaboration.db.HibernateUtil;
 import de.fhdo.collaboration.db.classes.Role;
 import de.fhdo.collaboration.db.classes.Statusrel;
-import de.fhdo.logging.LoggingOutput;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,246 +34,190 @@ import org.hibernate.Session;
  *
  * @author Robert Mützner
  */
-public class ProposalStatus
-{
+public class ProposalStatus{
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-  private static ProposalStatus instance;
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static ProposalStatus instance;
+    private Map<Long, Status> statusMap;
+    private Map<Long, Statusrel> statusrelMap;
 
-  public static ProposalStatus getInstance()
-  {
-    if (instance == null)
-      instance = new ProposalStatus();
+    public static ProposalStatus getInstance(){
+        if (instance == null)
+            instance = new ProposalStatus();
 
-    return instance;
-  }
-  // Klasse
-  //private List<Status> statusList;
-  private Map<Long, Status> statusMap;
-  private Map<Long, Statusrel> statusrelMap;
-
-  public ProposalStatus()
-  {
-    statusMap = null;
-    initData();
-  }
+        return instance;
+    }
+    
+    public ProposalStatus(){
+        statusMap = null;
+        initData();
+    }
   
-  public void reloadData()
-  {
-    statusMap = null;
-  }
+    public void reloadData(){
+        statusMap = null;
+        initData();
+    }
 
-  private void initData()
-  {
-    if (statusMap == null)
-    {
-      // Daten laden
-      Session hb_session = HibernateUtil.getSessionFactory().openSession();
-      //hb_session.getTransaction().begin();
-      try
-      {
-        statusMap = new HashMap<Long, Status>();
-        statusrelMap = new HashMap<Long, Statusrel>();
+    private void initData(){
+        if (statusMap == null){
+            //Loading data
+            Session hb_session = HibernateUtil.getSessionFactory().openSession();
+            try{
+              statusMap = new HashMap<>();
+              statusrelMap = new HashMap<>();
 
-        String hql = "select distinct s from Status s"
-                + " left join fetch s.statusrelsForStatusIdFrom rel"
-                + " left join fetch rel.action";
-                //+ " left join fetch rel.statusByStatusIdTo";
+              String HQL_status_search = "select distinct s from Status s"
+                  + " left join fetch s.statusrelsForStatusIdFrom rel"
+                  + " left join fetch rel.action";
 
-        List<Status> statusList = hb_session.createQuery(hql).list();
+              List<Status> statusList = hb_session.createQuery(HQL_status_search).list();
 
-        for (Status status : statusList)
-        {
-          statusMap.put(status.getId(), status);
-          
-          /*for(Statusrel rel : status.getStatusrelsForStatusIdFrom())
-          {
-            logger.debug("Status: " + status.getId() + " von " + rel.getStatusByStatusIdFrom().getId() + " zu " + rel.getStatusByStatusIdTo().getId());
-          }*/
+              for (Status status : statusList)
+                  statusMap.put(status.getId(), status);
+
+              HQL_status_search = "select distinct rel from Statusrel rel"
+                  + " left join fetch rel.roles roles"
+                  + " left join fetch rel.action";
+
+              List<Statusrel> statusRelList = hb_session.createQuery(HQL_status_search).list();
+
+              for (Statusrel statusRel : statusRelList)
+                  statusrelMap.put(statusRel.getId(), statusRel);
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0098]: " + e.getLocalizedMessage());
+            }
+            finally{
+                if(hb_session.isOpen())
+                  hb_session.close();
+            }
         }
+    }
+
+    /**
+     * Calls initData() and then gets the status string which fits the status value key.
+     * @param status the value key which is used to find the status string.
+     * @return the status string fitting the value key.
+    */
+    public String getStatusStr(long status){
+        initData();
+
+        if (statusMap.containsKey(status))
+            return statusMap.get(status).getStatus();
+
+        return "";
+    }
+  
+    public Status getStatus(long status){
+        initData();
+
+        if (statusMap.containsKey(status))
+            return statusMap.get(status);
+
+        return null;
+    }
+
+    public Object getHeaderFilter(){
+        initData();
+    
+        try{
+            String statusMapStrings[] = new String[statusMap.values().size()];
+            int count = 0;
+            for(Status status : statusMap.values())
+                statusMapStrings[count++] = status.getStatus();
+            return statusMapStrings;
+        }
+        catch (Exception e){
+            LOGGER.error("Error [0097]: " + e.getLocalizedMessage());
+        }
+        return "String";
+    }
+  
+    public Set<Statusrel> getStatusChilds(long status){
+        initData();
+
+        if (statusMap.containsKey(status))
+            return statusMap.get(status).getStatusrelsForStatusIdFrom();
+    
+        return new HashSet<>();
+    }
+  
+    public Statusrel getStatusRel(long statusFrom, long statusTo){
+        initData();
+    
+        for(Statusrel rel : statusrelMap.values())
+            if(rel.getStatusByStatusIdFrom().getId() == statusFrom &&
+            rel.getStatusByStatusIdTo().getId() == statusTo)// Statusänderung
+                return rel;
+    
+        return null;
+    }
+
+    /**
+     * TODO check welche version stimmt
+     * @param statusFrom
+     * @param statusTo
+     * @return 
+     */
+    public boolean isStatusChangePossible(long statusFrom, long statusTo){
+        initData();
+      
+        //3.2.26 
+        if(getStatusRel(statusFrom,statusTo)!=null)
+            return true;
+        else
+            return false;
         
-        hql = "select distinct rel from Statusrel rel"
-                + " left join fetch rel.roles roles"
-                + " left join fetch rel.action";
-
-        List<Statusrel> statusrelList = hb_session.createQuery(hql).list();
-
-        for (Statusrel rel : statusrelList)
-        {
-          statusrelMap.put(rel.getId(), rel);
+        /*if(getStatusRel(statusFrom, statusTo)!=null)
+            return false;
+        else 
+            return true;*/
+    }
+  
+    public boolean isUserAllowed(Statusrel rel, long collabUserId){
+        initData();
+    
+        boolean allowed = false;
+        LOGGER.debug("isUserAllowed() with userId: " + collabUserId);
+    
+        Session hb_session = HibernateUtil.getSessionFactory().openSession();
+        try{
+            String HQL = "select distinct r from Role r"
+                + " join r.collaborationusers cu"
+                + " where cu.id=" + collabUserId;
+      
+            LOGGER.debug("HQL: " + HQL);
+      
+            List<Role> roleList = hb_session.createQuery(HQL).list();
+      
+            for(Role role : roleList){ 
+                for(Role roleCompare : rel.getRoles())
+                    if(role.getId().equals(roleCompare.getId())){
+                        allowed = true;
+                        break;
+                    }
+                if(allowed)
+                    break;
+            }
         }
-      //hb_session.getTransaction().commit();
-      }
-      catch (Exception e)
-      {
-        //hb_session.getTransaction().rollback();
-          LoggingOutput.outputException(e, this);
-      }
-      finally
-      {
-        hb_session.close();
-      }
-    }
-  }
-
-  /**
-   * Liest den Status-Text von einem Zahlenwert
-   *
-   * @param status
-   * @return
-   */
-  public String getStatusStr(long status)
-  {
-    initData();
-
-    if (statusMap.containsKey(status))
-    {
-      return statusMap.get(status).getStatus();
-    }
-
-    return "";
-  }
-  
-  public Status getStatus(long status)
-  {
-    initData();
-
-    if (statusMap.containsKey(status))
-    {
-      return statusMap.get(status);
-    }
-
-    return null;
-  }
-
-  public Object getHeaderFilter()
-  {
-    initData();
-    try
-    {
-      String s[] = new String[statusMap.values().size()];
-      int count = 0;
-      for(Status status : statusMap.values())
-      {
-        s[count++] = status.getStatus();
-      }
-      return s;
-    }
-    catch (Exception e)
-    {
-    }
-    return "String";
-  }
-  
-  public Set<Statusrel> getStatusChilds(long status)
-  {
-    initData();
-
-    if (statusMap.containsKey(status))
-    {
-      return statusMap.get(status).getStatusrelsForStatusIdFrom();
-    }
-
-    return new HashSet<Statusrel>();
-  }
-  
-  public Statusrel getStatusRel(long statusFrom, long statusTo)
-  {
-    initData();
+        catch (Exception ex){
+            LOGGER.error("Error [0100]: " + ex.getLocalizedMessage());
+        }
+        finally{
+            if(hb_session.isOpen())
+                hb_session.close();
+        }
     
-    for(Statusrel rel : statusrelMap.values())
-    {
-      if(rel.getStatusByStatusIdFrom().getId().longValue() == statusFrom &&
-         rel.getStatusByStatusIdTo().getId().longValue() == statusTo)
-      {
-        // Statusänderung
-        return rel;
-      }
+        return allowed;
     }
-    
-    return null;
-  }
   
-  public boolean isStatusChangePossible(long statusFrom, long statusTo)
-  {
-    initData();
+    public long getStatusIDFromString(String text){
+        initData();
     
-    if(getStatusRel(statusFrom, statusTo) == null)
-      return false;
-    else return true;
-  }
-  
-  public boolean isUserAllowed(Statusrel rel, long collabUserId)
-  {
-    initData();
-    
-    boolean erlaubt = false;
-    if(logger.isDebugEnabled())
-      logger.debug("isUserAllowed() mit userId: " + collabUserId);
-    
-    Session hb_session = HibernateUtil.getSessionFactory().openSession();
-    //hb_session.getTransaction().begin();
-    try
-    {
-      String hql = "select distinct r from Role r"
-              + " join r.collaborationusers cu"
-              + " where cu.id=" + collabUserId;
-      
-      if(logger.isDebugEnabled())
-        logger.debug("HQL: " + hql);
-      
-      List<Role> roleList = hb_session.createQuery(hql).list();
-      
-      //if(logger.isDebugEnabled())
-      //  logger.debug("Anzahl: " + roleList.size());
-      
-      for(Role role : roleList)
-      {
-        //if(logger.isDebugEnabled())
-        //  logger.debug("Rolle: " + role.getName() + ", id: " + role.getId());
+        for(Status status: statusMap.values())
+            if(status.getStatus().equals(text))
+                return status.getId();
         
-        for(Role roleCompare : rel.getRoles())
-        {
-          //if(logger.isDebugEnabled())
-          //  logger.debug("  vergleiche mit Rolle: " + roleCompare.getName() + ", id: " + roleCompare.getId());
-          
-          if(role.getId().longValue() == roleCompare.getId().longValue())
-          {
-            // Berechtigung vorhanden
-            erlaubt = true;
-            break;
-          }
-        }
-        if(erlaubt)
-          break;
-      }
-      //hb_session.getTransaction().commit();
+        return 0L;
     }
-    catch (Exception ex)
-    {
-      //hb_session.getTransaction().rollback();
-        LoggingOutput.outputException(ex, this);
-    }
-    finally
-    {
-      // Session schließen
-      hb_session.close();
-    }
-    
-    return erlaubt;
-  }
-  
-  public long getStatusIDFromString(String text)
-  {
-    initData();
-    
-    for(Status s: statusMap.values())
-    {
-      if(s.getStatus().equals(text))
-      {
-        return s.getId();
-      }
-    }
-    return 0L;
-  }
 }

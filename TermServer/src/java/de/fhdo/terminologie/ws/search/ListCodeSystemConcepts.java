@@ -95,7 +95,7 @@ public class ListCodeSystemConcepts
         boolean loggedIn = false;
         LoginInfoType loginInfoType = null;
         //3.2.17 added second check
-        if (parameter != null && !parameter.isLoginAlreadyChecked() && parameter.getLogin() != null)
+        if (parameter != null && parameter.getLogin() != null)
         {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin(), session);
             loggedIn = loginInfoType != null;

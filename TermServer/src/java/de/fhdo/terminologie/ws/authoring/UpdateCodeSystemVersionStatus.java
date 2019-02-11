@@ -48,7 +48,7 @@ public class UpdateCodeSystemVersionStatus
 
     // Check login    
     //3.2.17 added second check
-    if (parameter != null && !parameter.getLoginAlreadyChecked())
+    if (parameter != null)
     {
       if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
         return response;

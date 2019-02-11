@@ -24,7 +24,7 @@ import de.fhdo.terminologie.ws.types.LoginType;
 
 /**
  *
- * @author warends
+ * @author Warends
  */
 public class ReturnCodeSystemDetailsRequestType {
     private LoginType login;

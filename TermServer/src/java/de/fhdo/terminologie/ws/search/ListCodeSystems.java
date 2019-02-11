@@ -37,12 +37,11 @@ import java.util.LinkedHashSet;
 
 /**
  *
- * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
+ * @author Robert Mützner
  */
-public class ListCodeSystems
-{
+public class ListCodeSystems{
 
-    final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
     /**
      * Listet Vokabulare des Terminologieservers auf
@@ -53,262 +52,177 @@ public class ListCodeSystems
      */
     public ListCodeSystemsResponseType ListCodeSystems(ListCodeSystemsRequestType parameter)
     {
-        if (logger.isInfoEnabled())
-        {
-            logger.info("====== ListCodeSystems gestartet ======");
-        }
-
-        // Return-Informationen anlegen
+        LOGGER.info("+++++ ListCodeSystems started +++++");
+        
+        //Creating return informationen
         ListCodeSystemsResponseType response = new ListCodeSystemsResponseType();
         response.setReturnInfos(new ReturnType());
 
-        // Parameter prüfen
-        if (validateParameter(parameter, response) == false)
-        {
-            return response; // Fehler bei den Parametern
-        }
-
-        // Login-Informationen auswerten (gilt für jeden Webservice)
+        //Checking login information (does every webservice)
         boolean loggedIn = false;
         boolean isAdmin = false;
         LoginInfoType loginInfoType = null;
-        //3.2.17 added second check
-        if (parameter != null && !parameter.getLoginAlreadyChecked() && parameter.getLogin() != null)
-        {
+        if (parameter != null && parameter.getLogin() != null){
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
             if (loggedIn)
-            {
                 isAdmin = loginInfoType.getTermUser().isIsAdmin();
-            }
         }
+        
+        try{
+            java.util.List<CodeSystem> codeSystemList = null;
 
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Benutzer ist eingeloggt: " + loggedIn);
-        }
-
-        try
-        {
-            java.util.List<CodeSystem> list = null;
-
-            // Hibernate-Block, Session öffnen
             org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
-            //hb_session.getTransaction().begin();
 
-            try // 2. try-catch-Block zum Abfangen von Hibernate-Fehlern
-            {
-                // HQL erstellen
-                String hql = "select distinct cs from CodeSystem cs";
-                hql += " join fetch cs.codeSystemVersions csv";
+            try{
+                //Creating HQL
+                String HQL = "select distinct cs from CodeSystem cs";
+                HQL += " join fetch cs.codeSystemVersions csv";
 
                 if (loggedIn)
-                {
-                    hql += " left outer join csv.licencedUsers lu";
-                }
-
-                // Parameter dem Helper hinzufügen
-                // bitte immer den Helper verwenden oder manuell Parameter per Query.setString() hinzufügen,
-                // sonst sind SQL-Injections möglich
+                    HQL += " left outer join csv.licencedUsers lu";
+                
+                //Adding parameters via helper or manually (Query.setString()), otherwise SQL-Injections  are possible
                 HQLParameterHelper parameterHelper = new HQLParameterHelper();
 
-                if (parameter != null && parameter.getCodeSystem() != null)
-                {
-                    // Hier alle Parameter aus der Cross-Reference einfügen
-                    // addParameter(String Prefix, String DBField, Object Value)
+                if (parameter != null && parameter.getCodeSystem() != null){
+                    //Adding all parameters from the cross-referense: addParameter(String Prefix, String DBField, Object Value)
                     parameterHelper.addParameter("cs.", "id", parameter.getCodeSystem().getId());
                     parameterHelper.addParameter("cs.", "name", parameter.getCodeSystem().getName());
                     parameterHelper.addParameter("cs.", "description", parameter.getCodeSystem().getDescription());
-                    parameterHelper.addParameter("cs.", "insertTimestamp", parameter.getCodeSystem().getInsertTimestamp()); // z.B. '2011-09-26T15:40:00'
+                    parameterHelper.addParameter("cs.", "insertTimestamp", parameter.getCodeSystem().getInsertTimestamp()); //Like '2011-09-26T15:40:00'
 
-                    if (parameter.getCodeSystem().getCodeSystemVersions() != null
-                            && parameter.getCodeSystem().getCodeSystemVersions().size() > 0)
-                    {
-                        CodeSystemVersion csv = (CodeSystemVersion) parameter.getCodeSystem().getCodeSystemVersions().toArray()[0];
+                    if (parameter.getCodeSystem().getCodeSystemVersions() != null && parameter.getCodeSystem().getCodeSystemVersions().size() > 0){
+                        CodeSystemVersion CSversion = (CodeSystemVersion) parameter.getCodeSystem().getCodeSystemVersions().toArray()[0];
 
-                        parameterHelper.addParameter("csv.", "description", csv.getDescription());
-                        parameterHelper.addParameter("csv.", "expiredDate", csv.getExpirationDate());
-                        parameterHelper.addParameter("csv.", "insertTimestamp", csv.getInsertTimestamp());
-                        parameterHelper.addParameter("csv.", "description", csv.getLicenceHolder());
-                        parameterHelper.addParameter("csv.", "name", csv.getName());
-                        parameterHelper.addParameter("csv.", "oid", csv.getOid());
-                        parameterHelper.addParameter("csv.", "preferredLanguageId", csv.getPreferredLanguageId());
-                        parameterHelper.addParameter("csv.", "releaseDate", csv.getReleaseDate());
-                        parameterHelper.addParameter("csv.", "source", csv.getSource());
-                        parameterHelper.addParameter("csv.", "underLicence", csv.getUnderLicence());
-                        parameterHelper.addParameter("csv.", "validityRange", csv.getValidityRange());
+                        parameterHelper.addParameter("csv.", "description", CSversion.getDescription());
+                        parameterHelper.addParameter("csv.", "expiredDate", CSversion.getExpirationDate());
+                        parameterHelper.addParameter("csv.", "insertTimestamp", CSversion.getInsertTimestamp());
+                        parameterHelper.addParameter("csv.", "description", CSversion.getLicenceHolder());
+                        parameterHelper.addParameter("csv.", "name", CSversion.getName());
+                        parameterHelper.addParameter("csv.", "oid", CSversion.getOid());
+                        parameterHelper.addParameter("csv.", "preferredLanguageId", CSversion.getPreferredLanguageId());
+                        parameterHelper.addParameter("csv.", "releaseDate", CSversion.getReleaseDate());
+                        parameterHelper.addParameter("csv.", "source", CSversion.getSource());
+                        parameterHelper.addParameter("csv.", "underLicence", CSversion.getUnderLicence());
+                        parameterHelper.addParameter("csv.", "validityRange", CSversion.getValidityRange());
 
-                        if (loggedIn)  // nur möglich, wenn eingeloggt
-                        {
-                            parameterHelper.addParameter("csv.", "status", csv.getStatus());
-                        }
+                        if (loggedIn)
+                            parameterHelper.addParameter("csv.", "status", CSversion.getStatus());
                     }
                 }
 
-                // hier: immer nur aktive Vokabulare abrufen
-                if (isAdmin == false)
-                {
+                //Only listing active vocabulary if not admin
+                if (!isAdmin)
                     parameterHelper.addParameter("csv.", "status", Definitions.STATUS_CODES.ACTIVE.getCode());
-                }
 
-                if (loggedIn == false)
-                {
-                    // ohne Login keine Vokabulare mit Lizenzen abrufen
+                //Only listing unlicenced vocabulary if not logged in
+                if (!loggedIn)
                     parameterHelper.addParameter("csv.", "underLicence", 0);
-                }
 
-                // Parameter hinzufügen (immer mit AND verbunden)
+                //Adding parameters (connected through AND)
                 String where = parameterHelper.getWhere("");
-                hql += where;
+                HQL += where;
 
-                if (loggedIn)
-                {
-                    // jetzt auf eine gültige Lizenz prüfen
-                    // muss manuell hinzugefügt werden (für Helper zu komplex, wg. OR)
-                    logger.debug("WHERE: " + where);
+                if (loggedIn){
+                    //Checking for valid licence, has to be added manually, too complex for helper
                     if (where.length() > 2)
-                    {
-                        hql += " AND ";
-                    }
+                        HQL += " AND ";
                     else
-                    {
-                        hql += " WHERE ";
-                    }
+                        HQL += " WHERE ";
 
-                    hql += " (csv.underLicence = 0 OR ";
-                    hql += " (lu.validFrom < '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
-                    hql += " AND lu.validTo > '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
-                    hql += " AND lu.id.codeSystemVersionId=csv.versionId";
-                    hql += " AND lu.id.userId=" + loginInfoType.getTermUser().getId();
-                    hql += " ))";
+                    HQL += " (csv.underLicence = 0 OR ";
+                    HQL += " (lu.validFrom < '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
+                    HQL += " AND lu.validTo > '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
+                    HQL += " AND lu.id.codeSystemVersionId=csv.versionId";
+                    HQL += " AND lu.id.userId=" + loginInfoType.getTermUser().getId();
+                    HQL += " ))";
                 }
-                hql += " ORDER BY cs.name, csv.name";
+                HQL += " ORDER BY cs.name, csv.name";
 
-                // Query erstellen
-                org.hibernate.Query q = hb_session.createQuery(hql);
-                //Matthias: readOnly
-                q.setReadOnly(true);
+                //Creating query
+                org.hibernate.Query Q_codeSystem_search = hb_session.createQuery(HQL);
+                Q_codeSystem_search.setReadOnly(true);
 
-                // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
-                parameterHelper.applyParameter(q);
+                //Parameters can be set now via helper
+                parameterHelper.applyParameter(Q_codeSystem_search);
 
-                // Datenbank-Aufruf durchführen
-                list = (java.util.List<CodeSystem>) q.list();
-
-                // Hibernate-Block wird in 'finally' geschlossen, erst danach
-                // Auswertung der Daten
-                // Achtung: hiernach können keine Tabellen/Daten mehr nachgeladen werden
-                //hb_session.getTransaction().commit();
+                //Execute query
+                codeSystemList = (java.util.List<CodeSystem>) Q_codeSystem_search.list();
             }
-            catch (Exception e)
-            {
-                //hb_session.getTransaction().rollback();
-                // Fehlermeldung an den Aufrufer weiterleiten
+            catch (Exception e){
+                LOGGER.error("Error [0087]: " + e.getLocalizedMessage());
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
                 response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems', Hibernate: " + e.getLocalizedMessage());
-
-                logger.error("Fehler bei 'ListCodeSystems', Hibernate: " + e.getLocalizedMessage());
             }
-            finally
-            {
-                // Transaktion abschließen
-
-                hb_session.close();
+            finally{
+                if(hb_session.isOpen())
+                    hb_session.close();
             }
 
-            // Ergebnis auswerten
-            // Später wird die Klassenstruktur von Jaxb in die XML-Struktur umgewandelt
-            // dafür müssen nichtbenötigte Beziehungen gelöscht werden (auf null setzen)
-            int anzahl = 0;
-            if (list != null)
-            {
-                for(int i = 0; i< list.size(); i++)
-                {
-                    if(list.get(i).getCodeSystemVersions().size() > 1)
-                    {
-                         //sorting VS Versions by their id
-                        ArrayList<CodeSystemVersion> liste = new ArrayList(list.get(i).getCodeSystemVersions());
-                        Collections.sort(liste, new Comparator<CodeSystemVersion>(){
-                            public int compare(CodeSystemVersion csv1, CodeSystemVersion csv2)
-                            {
+            //Later the class structure is transformed by Jaxb, so the unused relationships have to be set to null
+            if (codeSystemList != null){
+                for (CodeSystem codeSystem : codeSystemList) {
+                    if (codeSystem.getCodeSystemVersions().size() > 1) {
+                        //Sorting CS versions by their id
+                        ArrayList<CodeSystemVersion> CSversions = new ArrayList(codeSystem.getCodeSystemVersions());
+                        Collections.sort(CSversions, new Comparator<CodeSystemVersion>(){
+                            @Override
+                            public int compare(CodeSystemVersion csv1, CodeSystemVersion csv2){
                                 return (csv1.getVersionId() < csv2.getVersionId() ? -1 : (csv1.getVersionId().equals(csv2.getVersionId()) ? 0 : 1));
                             }
                         });
-                        list.get(i).setCodeSystemVersions(new LinkedHashSet<CodeSystemVersion>(liste));
+                        codeSystem.setCodeSystemVersions(new LinkedHashSet<CodeSystemVersion>(CSversions));
                     }
                 }
                 
-                anzahl = list.size();
-                Iterator<CodeSystem> iterator = list.iterator();
+                Iterator<CodeSystem> CSlistIterator = codeSystemList.iterator();
                 
-                while (iterator.hasNext())
-                {
-                    CodeSystem cs = iterator.next();
+                while (CSlistIterator.hasNext()){
+                    CodeSystem CS = CSlistIterator.next();
 
-                    //logger.debug("CS: " + cs.getName());
-                    //Matthias: check if current Version is member of codeSystemVersion --> Status ==1
-                    boolean validCurrentVersion = false;
-
-                    if (cs.getCodeSystemVersions() != null)
+                    if (CS.getCodeSystemVersions() != null)
                     {
-                        Iterator<CodeSystemVersion> iteratorVV = cs.getCodeSystemVersions().iterator();
+                        Iterator<CodeSystemVersion> CSversionsIterator = CS.getCodeSystemVersions().iterator();
 
-                        while (iteratorVV.hasNext())
-                        {
-                            CodeSystemVersion csv = iteratorVV.next();
+                        while (CSversionsIterator.hasNext()){
+                            CodeSystemVersion CSV = CSversionsIterator.next();
 
-                            //logger.debug("CSV: " + csv.getName());
-                            //logger.debug("ValidityRange: " + csv.getValidityRange());
-                            // Nicht anzuzeigende Beziehungen null setzen
-                            if (!loggedIn && csv.getStatus() != null && csv.getStatus().intValue() != Definitions.STATUS_CODES.ACTIVE.getCode())
-                            {
-                                // Nicht sichtbar, also von der Ergebnismenge entfernen
-                                iteratorVV.remove();
-                            }
-                            else
-                            {
-                                csv.setLicenceTypes(null);
-                                csv.setLicencedUsers(null);
-                                csv.setCodeSystemVersionEntityMemberships(null);
-                                csv.setCodeSystem(null);
-                                cs.setCurrentVersionId(csv.getVersionId());
+                            //Set values to null which should not be shown
+                            if (!loggedIn && CSV.getStatus() != null && CSV.getStatus() != Definitions.STATUS_CODES.ACTIVE.getCode())
+                                CSversionsIterator.remove();
+                            else{
+                                CSV.setLicenceTypes(null);
+                                CSV.setLicencedUsers(null);
+                                CSV.setCodeSystemVersionEntityMemberships(null);
+                                CSV.setCodeSystem(null);
+                                CS.setCurrentVersionId(CSV.getVersionId());
                             }
                         }
                     }
                     
-                    cs.setDomainValues(null);  // Keine zugehörigen Domänen zurückgeben
-                    cs.setMetadataParameters(null);
+                    CS.setDomainValues(null);  //Not returning domains
+                    CS.setMetadataParameters(null);
 
-                    // bereinigte Liste der Antwort beifügen
-                    response.setCodeSystem(list);
-                    response.getReturnInfos().setCount(list.size());
+                    //Adding cleaned list to response
+                    response.setCodeSystem(codeSystemList);
+                    response.getReturnInfos().setCount(codeSystemList.size());
                 }
 
-                // Status an den Aufrufer weitergeben
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
                 response.getReturnInfos().setStatus(ReturnType.Status.OK);
                 response.getReturnInfos().setMessage("CodeSysteme erfolgreich gelesen");
             }
         }
-        catch (Exception e)
-        {
-            // Fehlermeldung an den Aufrufer weiterleiten
+        catch (Exception e){
+            LOGGER.error("Error [0088]: " + e.getLocalizedMessage());
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems': " + e.getLocalizedMessage());
-
-            logger.error("Fehler bei 'ListCodeSystems': " + e.getLocalizedMessage());
         }
 
+        LOGGER.info("----- ListCodeSystems finished (001) -----");
         return response;
-    }
-
-    private boolean validateParameter(ListCodeSystemsRequestType Request,
-            ListCodeSystemsResponseType Response)
-    {
-        // hier muss nichts geprüft werden, da man bei der Suche auch
-        // alle Angaben leer lassen kann
-        return true;
     }
 }

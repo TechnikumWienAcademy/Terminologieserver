@@ -43,15 +43,6 @@ public class ImportValueSetRequestType
     private LoginType login;
     private ValueSet valueSet;
     private Long importId;
-    private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
 
     /**
      * @return the importInfos

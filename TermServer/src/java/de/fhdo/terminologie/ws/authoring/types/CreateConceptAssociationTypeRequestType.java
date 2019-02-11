@@ -35,18 +35,6 @@ public class CreateConceptAssociationTypeRequestType
   private CodeSystem codeSystem;
   private CodeSystemEntity codeSystemEntity;
   private List<Property> property;
-  //3.2.17 added
-  private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
-  
-  
   
   /**
    * @return the login

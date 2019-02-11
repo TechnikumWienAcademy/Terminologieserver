@@ -42,17 +42,6 @@ public class ListGloballySearchedConceptsRequestType
   
   @XmlElement(required = false)
   private String code;
-  
-  @XmlElement(required = false)
-  private boolean loginAlreadyChecked;
-
-    public boolean isLoginAlreadyChecked() {
-        return loginAlreadyChecked;
-    }
-
-    public void setLoginAlreadyChecked(boolean loginAlreadyChecked) {
-        this.loginAlreadyChecked = loginAlreadyChecked;
-    }
 
     public LoginType getLogin() {
         return login;

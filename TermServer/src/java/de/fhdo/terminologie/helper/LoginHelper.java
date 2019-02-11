@@ -86,7 +86,7 @@ public class LoginHelper{
             LOGGER.debug("User is logged in? " + loggedIn);
         }
 
-        if (loggedIn == false && loginRequired){
+        if (loggedIn == false && loginRequired && returnType != null){
             returnType.setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             returnType.setStatus(ReturnType.Status.OK);
             returnType.setMessage("Sie müssen mit Administrationsrechten am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");

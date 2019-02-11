@@ -74,27 +74,25 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author puraner
+ * @author Stefan Puraner
  */
-public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImport
-{
+public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImport{
 
     //Properties
-    private HashMap _referenceMap;
-    private HashMap _metaDataMap;
-    private HashMap<Long, MetadataParameter> _metadataParameterMap;
-    private HashMap<String, String> _clamlMetaData;
-    private ConcurrentHashMap<String, clamlBindingXSD.Class> _clamlClassMap;
+    private final HashMap _referenceMap;
+    private final HashMap _metaDataMap;
+    private final HashMap<Long, MetadataParameter> _metadataParameterMap;
+    private final HashMap<String, String> _clamlMetaData;
+    private final ConcurrentHashMap<String, clamlBindingXSD.Class> _clamlClassMap;
     private AssociationType _assoctypeTaxonomy;
-    private HashMap _ccatresptHashmap;
+    private final HashMap _ccatresptHashmap;
     private CreateConceptAssociationTypeResponseType _ccatrespt;
     private CreateConceptAssociationTypeResponseType _ccatresptTaxonomy;
-    private HashMap _assoctypeHashmap;
+    private final HashMap _assoctypeHashmap;
     private CreateConceptResponseType _ccsResponse;
     private int _metadataCounter = 0;
 
-    public ImportClamlNew()
-    {
+    public ImportClamlNew(){
         super();
         this._referenceMap = new HashMap();
         this._metaDataMap = new HashMap();
@@ -107,70 +105,59 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     }
 
     @Override
-    public void setImportData(ImportCodeSystemRequestType request)
-    {
-        LOGGER.info("setImportData-function started");
+    public void setImportData(ImportCodeSystemRequestType request){
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
 
         this.codesystem = request.getCodeSystem();
         this.fileContent = request.getImportInfos().getFilecontent();
-        LOGGER.debug("setImportData-function finished");
     }
 
     @Override
-    public void startImport() throws ImportException, ImportParameterValidationException
-    {
-        LOGGER.info("startImport-function started");
-        //creating Hibernate Session and starting transaction
-        try
-        {
-            //3.2.20 next line
-            LOGGER.debug("Opening hibernate-session and validating parameters started");
+    public void startImport() throws ImportException, ImportParameterValidationException{
+        LOGGER.info("+++++ startImport started +++++");
+        
+        //Creating Hibernate Session and starting transaction
+        try{
             this.hb_session = HibernateUtil.getSessionFactory().openSession();
             this.hb_session.getTransaction().begin();
             this.hb_session.setFlushMode(FlushMode.COMMIT);
             this.validateParameters();
-            //3.2.20 next line
-            LOGGER.debug("Opening hibernate-session and validating parameters finished");
         }
-        catch (HibernateException ex)
-        {
-            LOGGER.error(ex);
+        catch (HibernateException ex){
+            LOGGER.error("Error [0103]: " + ex);
             this.rollbackHibernateTransaction();
             this.closeHibernateSession();
-            throw new ImportException(ex.getLocalizedMessage());
-            
+            throw ex;
         }
-        catch (ImportParameterValidationException ex)
-        {
-            LOGGER.error(ex);
+        catch (ImportParameterValidationException ex){
+            LOGGER.error("Error [0104]: " + ex);
             this.rollbackHibernateTransaction();
             this.closeHibernateSession();
             throw ex;
         }
         
-        //adding status of import to statuslist
+        //Adding status of import to statuslist
         this.status.setImportRunning(true);
         StaticStatusList.addStatus(this.getImportId(), this.status);
                
-        try
-        {
+        try{
             LOGGER.debug("Opening file and creating ByteArrayInputStream");
-            InputStream is = new ByteArrayInputStream(this.fileContent);
+            InputStream inputStream = new ByteArrayInputStream(this.fileContent);
 
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.parse(is);
+            Document doc = docBuilder.parse(inputStream);
             NodeList list = doc.getElementsByTagName("Class");
 
             LOGGER.info("Total of " + list.getLength() + " will be imported.");
             this.setTotalCountInStatusList(list.getLength(), this.getImportId());
 
-            LOGGER.info("loadClamlXML()");
-            is = new ByteArrayInputStream(this.fileContent);
-            this.loadClamlXML(is);
+            LOGGER.debug("loadClamlXML()");
+            inputStream = new ByteArrayInputStream(this.fileContent);
+            this.loadClamlXML(inputStream);
+            //ANKER
 
             this.status = StaticStatusList.getStatus(this.getImportId());
 
@@ -267,13 +254,14 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     /**
      * Importiert die ClaML-XML Datei
      */
-    private void loadClamlXML(InputStream is) throws Exception
-    {
+    private void loadClamlXML(InputStream inputStream) throws Exception{
+        LOGGER.info("+++++ loadClamlXML started +++++");
+        
         LOGGER.debug("Create JAXBContext");
 
         clamlBindingXSD.Class clazz = null;
-        clamlBindingXSD.Rubric rubi = null;
-        clamlBindingXSD.RubricKinds rks = new clamlBindingXSD.RubricKinds();
+        clamlBindingXSD.Rubric rubric = null;
+        clamlBindingXSD.RubricKinds rubricKinds = new clamlBindingXSD.RubricKinds();
 
         // First create a new XMLInputFactory
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -282,298 +270,207 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
 
         // Setup a new eventReader
-        XMLEventReader eventReader = inputFactory.createXMLEventReader(is);
+        XMLEventReader eventReader = inputFactory.createXMLEventReader(inputStream);
 
         // Read the XML document
         LOGGER.debug("Analyze data");
 
-        //Attribute für CreateCodeSystem
+        //Attributes for CreateCodeSystem
         String authority = "";
         String uid = "";
 
         int countEvery = 0;
         
-        while (eventReader.hasNext())
-        {
+        while (eventReader.hasNext()){
             this.status = StaticStatusList.getStatus(this.getImportId());
             if (this.status != null && this.status.isCancel())
-            {
                 break;
-            }
             
             XMLEvent event = eventReader.nextEvent();
 
-            if (event.isStartElement())
-            {
+            if (event.isStartElement()){
                 StartElement startElement = event.asStartElement();
                 String startElementName = startElement.getName().toString();
 
-                if (startElementName.equals("Title"))
-                {
-                    Date datum = new Date();
+                if (startElementName.equals("Title")){
+                    Date date = new Date();
                     String title = "";
                     String versionName = "";
 
                     // We read the attributes from this tag and add the date attribute to our object
                     Iterator<Attribute> attributes = startElement.getAttributes();
-                    while (attributes.hasNext())
-                    {
+                    while (attributes.hasNext()){
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("name"))
-                        {
                             title = attribute.getValue();
-                        }
+                        
                         if (attribute.getName().toString().equals("version"))
-                        {
                             versionName = attribute.getValue();                            
-                        }
-                        if (attribute.getName().toString().equals("date"))
-                        {
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        
+                        if (attribute.getName().toString().equals("date")){
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                             if (!attribute.getValue().equals(""))
-                            {
-                                datum = sdf.parse(attribute.getValue());
-                            }
+                                date = dateFormat.parse(attribute.getValue());
                         }
                     }
 
                     event = eventReader.nextEvent();
 
-                    //Matthias 23.04.2015, 
-                    //if <Title>-Element does not have content --> description will be set to ""
-                    if (event.isEndElement())
-                    {
-                        this.createCodeSystem(title, uid, versionName, datum, authority, "");
+                    //If <Title>-element does not have content --> description will be set to ""
+                    if (event.isEndElement()){
+                        this.createCodeSystem(title, uid, versionName, date, authority, "");
                         continue;
                     }
 
                     String description = event.asCharacters().getData();
-                    this.createCodeSystem(title, uid, versionName, datum, authority, description);
+                    this.createCodeSystem(title, uid, versionName, date, authority, description);
                 }
-                else if (startElementName.equals("Identifier"))
-                {
-                    // We read the attributes from this tag and add the date attribute to our object
+                else if (startElementName.equals("Identifier")){
+                    //We read the attributes from this tag and add the date attribute to our object
                     Iterator<Attribute> attributes = startElement.getAttributes();
-                    while (attributes.hasNext())
-                    {
+                    while (attributes.hasNext()){
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("authority"))
-                        {
                             authority = attribute.getValue();
-                        }
+                        
                         if (attribute.getName().toString().equals("uid"))
-                        {
                             uid = attribute.getValue();
-                        }
                     }
-
                 }
-                else if (startElementName.equals("RubricKind"))
-                {
-                    clamlBindingXSD.RubricKind rk = new clamlBindingXSD.RubricKind();
-
-                    // We read the attributes from this tag and add the date attribute to our object
+                else if (startElementName.equals("RubricKind")){
+                    //We read the attributes from this tag and add the date attribute to our object
+                    clamlBindingXSD.RubricKind rubricKind = new clamlBindingXSD.RubricKind();
                     Iterator<Attribute> attributes = startElement.getAttributes();
-                    while (attributes.hasNext())
-                    {
+                    while (attributes.hasNext()){
                         Attribute attribute = attributes.next();
-                        if (attribute.getName().toString().equals("name"))
-                        {
-                            rk.setName(attribute.getValue());
-                            rks.getRubricKind().add(rk);
+                        if (attribute.getName().toString().equals("name")){
+                            rubricKind.setName(attribute.getValue());
+                            rubricKinds.getRubricKind().add(rubricKind);
                         }
                     }
                 }
-                //  if (startElement.getName().toString().equals("Class") || startElement.getName().toString().equals("Modifier") ||startElement.getName().toString().equals("Class") || startElement.getName().toString().equals("ModifierClass") ) {
-                else if (startElementName.equals("Class"))
-                {
+                else if (startElementName.equals("Class")){
                     clazz = new clamlBindingXSD.Class();
 
                     // We read the attributes from this tag and add the date attribute to our object
                     Iterator<Attribute> attributes = startElement.getAttributes();
-                    while (attributes.hasNext())
-                    {
+                    while (attributes.hasNext()){
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("code"))
-                        {
                             clazz.setCode(attribute.getValue());                    
-                        }
                         if (attribute.getName().toString().equals("kind"))
-                        {
                             clazz.setKind(attribute.getValue());                                                        
-                        }
                     }
                 }
-                else if (startElementName.equals("Rubric"))
-                {
-                    if (clazz != null)
-                    {
-                        rubi = new clamlBindingXSD.Rubric();
+                else if (startElementName.equals("Rubric")){
+                    if (clazz != null){
+                        rubric = new clamlBindingXSD.Rubric();
                         // We read the attributes from this tag and add the date attribute to our object
                         Iterator<Attribute> attributes = startElement.getAttributes();
-                        while (attributes.hasNext())
-                        {
+                        while (attributes.hasNext()){
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("kind"))
-                            {
-                                rubi.setKind(attribute.getValue());
-                            }
+                                rubric.setKind(attribute.getValue());
                         }
-                        clazz.getRubric().add(rubi);
+                        clazz.getRubric().add(rubric);
                     }
-
                 }
-                else if (startElementName.equals("Label"))
-                {
-                    if (rubi != null)
-                    {
+                else if (startElementName.equals("Label")){
+                    if (rubric != null){
                         event = eventReader.nextEvent();
-                        //if(event.isCharacters()){
-                        clamlBindingXSD.Label l = new clamlBindingXSD.Label();
-                        l.getContent().add(event.asCharacters().getData());
+                        clamlBindingXSD.Label label = new clamlBindingXSD.Label();
+                        label.getContent().add(event.asCharacters().getData());
                         
-                        rubi.getLabel().add(l);
+                        rubric.getLabel().add(label);
                         continue;
-                        //}
                     }
-
                 }
-                else if (startElementName.equals("Fragment"))
-                {
-                    if (rubi != null)
-                    {
-                        if (event.isEndElement() == false)
-                        {
+                else if (startElementName.equals("Fragment")){
+                    if (rubric != null){
+                        if (event.isEndElement() == false){
                             event = eventReader.nextEvent();
 
-                            if (event.isEndElement() == false)
-                            {
-                                clamlBindingXSD.Label l = new clamlBindingXSD.Label();
-                                l.getContent().add(event.asCharacters().getData());
-                                rubi.getLabel().add(l);
+                            if (event.isEndElement() == false){
+                                clamlBindingXSD.Label label = new clamlBindingXSD.Label();
+                                label.getContent().add(event.asCharacters().getData());
+                                rubric.getLabel().add(label);
                             }
                             else
-                            {
-                                LOGGER.debug("kein Text, da End-Element");
-                            }
+                                LOGGER.debug("No text, end element reached");
                         }
                         continue;
                     }
-
                 }
-                else if (startElementName.equals("SuperClass"))
-                {
-                    if (clazz != null)
-                    {
-                        clamlBindingXSD.SuperClass sc = new clamlBindingXSD.SuperClass();
+                else if (startElementName.equals("SuperClass")){
+                    if (clazz != null){
+                        clamlBindingXSD.SuperClass superClass = new clamlBindingXSD.SuperClass();
                         Iterator<Attribute> attributes = startElement.getAttributes();
-                        while (attributes.hasNext())
-                        {
+                        while (attributes.hasNext()){
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("code"))
-                            {
-                                sc.setCode(attribute.getValue());
-                            }
+                                superClass.setCode(attribute.getValue());
                         }
 
-                        clazz.getSuperClass().add(sc);
+                        clazz.getSuperClass().add(superClass);
                     }
-
                 }
-                else if (startElementName.equals("SubClass"))
-                {
-                    if (clazz != null)
-                    {
-                        clamlBindingXSD.SubClass sc = new clamlBindingXSD.SubClass();
+                else if (startElementName.equals("SubClass")){
+                    if (clazz != null){
+                        clamlBindingXSD.SubClass subClass = new clamlBindingXSD.SubClass();
                         Iterator<Attribute> attributes = startElement.getAttributes();
-                        while (attributes.hasNext())
-                        {
+                        while (attributes.hasNext()){
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("code"))
-                            {
-                                sc.setCode(attribute.getValue());
-                            }
+                                subClass.setCode(attribute.getValue());
                         }
 
-                        clazz.getSubClass().add(sc);
+                        clazz.getSubClass().add(subClass);
                     }
-
                 }
-                else if (startElementName.equals("Meta"))
-                {
-                    if (clazz != null)
-                    {
+                else if (startElementName.equals("Meta")){
+                    if (clazz != null){
                         Meta meta = new Meta();
                         Iterator<Attribute> attributes = startElement.getAttributes();
-                        while (attributes.hasNext())
-                        {
+                        while (attributes.hasNext()){
                             Attribute attribute = attributes.next();
                             if (attribute.getName().toString().equals("name"))
-                            {
                                 meta.setName(attribute.getValue());
-                            }
                             if (attribute.getName().toString().equals("value"))
-                            {
                                 meta.setValue(attribute.getValue());
-                            }
                         }
                         clazz.getMeta().add(meta);
                     }
-                    else
-                    {
+                    else{
                         //Claml/Metadata
-
                         Iterator<Attribute> attributes = startElement.getAttributes();
                         String name = "";
                         String value = "";
-                        while (attributes.hasNext())
-                        {
+                        while (attributes.hasNext()){
                             Attribute attribute = attributes.next();
 
                             if (attribute.getName().toString().equals("name"))
-                            {
                                 name = attribute.getValue();
-                            }
                             if (attribute.getName().toString().equals("value"))
-                            {
                                 value = attribute.getValue();
-                            }
                         }
-
                         this._clamlMetaData.put(name, value);
                     }
                 }
             } // End start element
-            if (event.isEndElement())
-            {
+            if (event.isEndElement()){
                 EndElement endElement = event.asEndElement();
-                if (endElement.getName().toString().equals("Class"))
-                {
-                    // TODO rm
-                    //if (clazz.getKind() == null || paramter.getClasskinds().indexOf(clazz.getKind().toString()) >= 0)
-
-                    //Matthias: write clazz to map to be processed later
-                    this._clamlClassMap.put(clazz.getCode(), clazz);
-                    LOGGER.info("Concept reading: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
-
-                    /*
-                    // Jetzt Konzept erstellen
-                    this.CreateSingleConcept(clazz);
-                    if (clazz.getMeta() != null && clazz.getMeta().size() > 0)
-                    {
-                        this.createMetaData(clazz);
+                if (endElement.getName().toString().equals("Class")){
+                    //Write clazz to map to be processed later
+                    if(clazz!=null){
+                        this._clamlClassMap.put(clazz.getCode(), clazz);
+                        LOGGER.info("Concept reading: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
                     }
-                    */
                 }
-            }
-            if (event.isEndElement())
-            {
-                EndElement endElement = event.asEndElement();
-                if (endElement.getName().toString().equals("RubricKinds"))
-                {
+                else if (endElement.getName().toString().equals("RubricKinds")){
                     //CreateAssociationType (Unterklasse,Oberklasse)
                     this._assoctypeTaxonomy = this.CreateAssociationType("ist Oberklasse von", "ist Unterklasse von");
-
+                    //ANKER
+                    
                     LOGGER.debug(this._ccatrespt.getReturnInfos().getMessage());
                     if (this._ccatrespt.getReturnInfos().getStatus() == ReturnType.Status.OK)
                     {
@@ -581,7 +478,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         this._ccatresptTaxonomy = this._ccatrespt;
 
                         //AssociationTypes für alle RubricKinds erstellen
-                        Iterator itRubricKinds = rks.getRubricKind().iterator();
+                        Iterator itRubricKinds = rubricKinds.getRubricKind().iterator();
                         //System.out.println("anzrk:" + rks.getRubricKind().size());
                         while (itRubricKinds.hasNext())
                         {
@@ -640,121 +537,86 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
     }
 
-    private void createCodeSystem(String title, String uid, String versionName, Date date, String authority, String description) throws Exception
-    {
-        //3.2.20
-        LOGGER.debug("Creating CodeSystem, title = " + title + " uid = " + uid + " versionName = " + versionName + " date = " + date.toString() + " authority = " + authority + " description = " + description);
+    private void createCodeSystem(String title, String uid, String versionName, Date date, String authority, String description) throws Exception{
+        LOGGER.info("+++++ createCodeSystem started +++++");
         
-        // Codesystem suchen, erst anlegen, wenn nicht vorhanden
-        CreateCodeSystemRequestType request = new CreateCodeSystemRequestType();
+        //Search for CS first, then create it, if it does not exist
+        CreateCodeSystemRequestType createCSrequest = new CreateCodeSystemRequestType();
 
         if (this.codesystem.getId() > 0)
-        {
-            request.setCodeSystem(this.codesystem);
-        }
+            createCSrequest.setCodeSystem(this.codesystem);
         else
-        {
-            request.setCodeSystem(new CodeSystem());
-        }
-        request.getCodeSystem().setName(title);
+            createCSrequest.setCodeSystem(new CodeSystem());
+        
+        createCSrequest.getCodeSystem().setName(title);
 
-        CodeSystemVersion codeSystemVersion = new CodeSystemVersion();
-        codeSystemVersion.setName(title + " " + versionName);
-        //codeSystemVersion.setDescription(description);
-        codeSystemVersion.setSource(authority);
-        codeSystemVersion.setReleaseDate(date);
-        codeSystemVersion.setOid(uid);
+        CodeSystemVersion CSversion = new CodeSystemVersion();
+        CSversion.setName(title + " " + versionName);
+        CSversion.setDescription(description);
+        CSversion.setSource(authority);
+        CSversion.setReleaseDate(date);
+        CSversion.setOid(uid);
 
         if (this.getImportType().getRole() == null || !this.getImportType().getRole().equals(CODES.ROLE_TRANSFER))
-        {
-            codeSystemVersion.setStatus(Definitions.STATUS_CODES.INACTIVE.getCode());
-        }
+            CSversion.setStatus(Definitions.STATUS_CODES.INACTIVE.getCode());
         else
-        {
-            codeSystemVersion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
-        }
+            CSversion.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
 
         if (this._clamlMetaData.get("description") != null)
-        {
-            codeSystemVersion.setDescription(this._clamlMetaData.get("description"));
-        }
+            CSversion.setDescription(this._clamlMetaData.get("description"));
 
         if (this._clamlMetaData.get("unvollstaendig") != null)
-        {
             if (this._clamlMetaData.get("unvollstaendig").equals("true"))
-            {
-                request.getCodeSystem().setIncompleteCS(true);
-            }
+                createCSrequest.getCodeSystem().setIncompleteCS(true);
             else
-            {
-                request.getCodeSystem().setIncompleteCS(false);
-            }
-        }
+                createCSrequest.getCodeSystem().setIncompleteCS(false);
 
         if (this._clamlMetaData.get("description_eng") != null)
-        {
-            request.getCodeSystem().setDescriptionEng(this._clamlMetaData.get("description_eng"));
-        }
+            createCSrequest.getCodeSystem().setDescriptionEng(this._clamlMetaData.get("description_eng"));
 
         if (this._clamlMetaData.get("gueltigkeitsbereich") != null)
-        {
-            codeSystemVersion.setValidityRange(ValidityRangeHelper.getValidityRangeIdByName(this._clamlMetaData.get("gueltigkeitsbereich")));
-        }
+            CSversion.setValidityRange(ValidityRangeHelper.getValidityRangeIdByName(this._clamlMetaData.get("gueltigkeitsbereich")));
 
         if (this._clamlMetaData.get("verantw_Org") != null)
-        {
-            request.getCodeSystem().setResponsibleOrganization(this._clamlMetaData.get("verantw_Org"));
-        }
+            createCSrequest.getCodeSystem().setResponsibleOrganization(this._clamlMetaData.get("verantw_Org"));
 
         if (this._clamlMetaData.get("version_description") != null)
-        {
-            codeSystemVersion.setDescription(this._clamlMetaData.get("version_description"));
-        }
+            CSversion.setDescription(this._clamlMetaData.get("version_description"));
 
-        request.getCodeSystem().setCodeSystemVersions(new HashSet<CodeSystemVersion>());
-        request.getCodeSystem().getCodeSystemVersions().add(codeSystemVersion);
+        createCSrequest.getCodeSystem().setCodeSystemVersions(new HashSet<CodeSystemVersion>());
+        createCSrequest.getCodeSystem().getCodeSystemVersions().add(CSversion);
 
-        request.setLogin(this.getLoginType());
-
-        //3.2.17 added
-        request.setLoginAlreadyChecked(true);
+        createCSrequest.setLogin(this.getLoginType());
         
-        //Code System erstellen
-        CreateCodeSystem ccs = new CreateCodeSystem();
-        CreateCodeSystemResponseType resp = ccs.CreateCodeSystem(request, hb_session);
+        //Creating code system
+        CreateCodeSystem createCodeSystem = new CreateCodeSystem();
+        CreateCodeSystemResponseType createCSresponse = createCodeSystem.CreateCodeSystem(createCSrequest, hb_session);
+        
+        LOGGER.debug(createCSresponse.getReturnInfos().getMessage());
 
-        LOGGER.debug(resp.getReturnInfos().getMessage());
+        if (createCSresponse.getReturnInfos().getStatus() != ReturnType.Status.OK)
+            throw new Exception(createCSresponse.getReturnInfos().getMessage());
+        
+        this.codesystem = createCSresponse.getCodeSystem();
 
-        if (resp.getReturnInfos().getStatus() != ReturnType.Status.OK)
-        {
-            throw new Exception(resp.getReturnInfos().getMessage());
+        LOGGER.debug("New CS-ID: " + createCSresponse.getCodeSystem().getId());
+        LOGGER.debug("New CSV-ID: " + ((CodeSystemVersion) createCSresponse.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
+
+        //Read existing metadata and add to map to avoid double entries
+        String HQL_metadataParameter_search = "select distinct mp from MetadataParameter mp "
+            + " where codeSystemId=" + createCSresponse.getCodeSystem().getId();
+        List<MetadataParameter> metadataParameterList = hb_session.createQuery(HQL_metadataParameter_search).list();
+
+        for (MetadataParameter metadataParameter : metadataParameterList){
+            this._metaDataMap.put(metadataParameter.getParamName(), metadataParameter.getId());
+            this._metadataParameterMap.put(metadataParameter.getId(), metadataParameter);
+            LOGGER.debug("Found metadata: " + metadataParameter.getParamName() + ", with id: " + metadataParameter.getId());
         }
-        this.codesystem = resp.getCodeSystem();
-
-        LOGGER.debug("Neue CodeSystem-ID: " + resp.getCodeSystem().getId());
-        LOGGER.debug("Neue CodeSystemVersion-ID: " + ((CodeSystemVersion) resp.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
-
-        // Read existing metadata and add to map to avoid double entries
-        String hql = "select distinct mp from MetadataParameter mp "
-                + " where codeSystemId=" + resp.getCodeSystem().getId();
-        List<MetadataParameter> md_list = hb_session.createQuery(hql).list();
-
-        //3.2.20 next line
-        int metadatacounter = 0;
-        for (MetadataParameter mp : md_list)
-        {
-            this._metaDataMap.put(mp.getParamName(), mp.getId());
-            this._metadataParameterMap.put(mp.getId(), mp);
-            LOGGER.debug("found metadata: " + mp.getParamName() + " with id: " + mp.getId());
-            //3.2.20
-            metadatacounter++;
-        }
-        //3.2.20
-        LOGGER.debug("METADATA-COUNTER = " + metadatacounter);
+        LOGGER.info("----- createCodeSystem finished (001) -----");
     }
     
-    private AssociationType CreateAssociationType(String forwardName, String reverseName)
-    {
+    private AssociationType CreateAssociationType(String forwardName, String reverseName){
+        //ANKER
         //Associationtype erstellen
         //EntityType erstellen
         CodeSystemEntity etAssoc = new CodeSystemEntity();
@@ -792,9 +654,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         ccatrt.setCodeSystemEntity(etAssoc);
 
         ccatrt.setLogin(this.getLoginType());
-
-        //3.2.17 added
-        ccatrt.setLoginAlreadyChecked(true);
         
         CreateConceptAssociationType ccat = new CreateConceptAssociationType();
         this._ccatrespt = ccat.CreateConceptAssociationType(ccatrt, hb_session);
@@ -1020,9 +879,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         request.setCodeSystem(this.codesystem);
         request.setCodeSystemEntity(cse);
         request.setLogin(this.getLoginType());
-
-        //3.2.17
-        request.setLoginAlreadyChecked(true);
         
         //Konzept erstellen
         CreateConcept cc = new CreateConcept();
@@ -1097,9 +953,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         request.setCodeSystem(this.codesystem);
         request.setCodeSystemEntity(cse);
         request.setLogin(this.getLoginType());
-
-        //3.2.17
-        request.setLoginAlreadyChecked(true);
         
         //Konzept erstellen
         CreateConcept cc = new CreateConcept();

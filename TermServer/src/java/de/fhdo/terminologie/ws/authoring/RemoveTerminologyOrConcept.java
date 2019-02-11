@@ -28,7 +28,7 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 
 /**
  * 3.2.26 complete check
- * @author Philipp Urbauer, Dario Bachinger
+ * @author Philipp Urbauer
  */
 public class RemoveTerminologyOrConcept{
     private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
@@ -62,8 +62,7 @@ public class RemoveTerminologyOrConcept{
         }
     
         //Checking login
-        //3.2.17 added second check
-        if (parameter != null && !parameter.isLoginAlreadyChecked())
+        if (parameter != null)
             if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
                 LOGGER.info("----- RemoveTerminologyOrConcept finished (002) -----");
                 return response;
