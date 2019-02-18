@@ -648,7 +648,8 @@ public class ExportValueSetSVS
             }
             finally
             {
-                hb_session.close();
+                if(hb_session.isOpen())
+                    hb_session.close();
             }
 
             if (countExported > 0)

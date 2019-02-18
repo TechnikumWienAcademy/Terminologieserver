@@ -34,132 +34,120 @@ import java.util.Set;
  * TODO Javadoc
  * @author Mathias Aschhoff
  */
-public class UpdateCodeSystemVersionStatus
-{
+public class UpdateCodeSystemVersionStatus{
 
-  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  public UpdateCodeSystemVersionStatusResponseType UpdateCodeSystemVersionStatus(UpdateCodeSystemVersionStatusRequestType parameter)
-  {
-    logger.info("====== UpdateCodeSystemVersionStatus started ======");
+    public UpdateCodeSystemVersionStatusResponseType UpdateCodeSystemVersionStatus(UpdateCodeSystemVersionStatusRequestType parameter){
+        LOGGER.info("+++++ UpdateCodeSystemVersionStatus started +++++");
     
-    UpdateCodeSystemVersionStatusResponseType response = new UpdateCodeSystemVersionStatusResponseType();
-    response.setReturnInfos(new ReturnType());
+        UpdateCodeSystemVersionStatusResponseType response = new UpdateCodeSystemVersionStatusResponseType();
+        response.setReturnInfos(new ReturnType());
 
-    // Check login    
-    //3.2.17 added second check
-    if (parameter != null)
-    {
-      if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
+        // Check login
+        if (parameter != null)
+            if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
+                LOGGER.info("----- UpdateCodeSystemVersionStatus finished (001) -----");
+                return response;
+            }
+
+        //Check parameters
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- UpdateCodeSystemVersionStatus finished (002) -----");
+            return response; // Parameter check failed
+        }
+    
+        if(parameter!=null)
+            try{
+                // Reading code system version from parameters     
+                CodeSystemVersion CSversion = (CodeSystemVersion) parameter.getCodeSystem().getCodeSystemVersions().toArray()[0];
+
+                org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
+                hb_session.getTransaction().begin();
+
+                try{
+                    // Changing status and saving in DB
+                    CodeSystemVersion CSV_db = (CodeSystemVersion) hb_session.get(CodeSystemVersion.class, CSversion.getVersionId());
+                    CSV_db.setStatus(CSversion.getStatus());
+                    hb_session.update(CSV_db);
+                
+                    LastChangeHelper.updateLastChangeDate(true, CSversion.getVersionId(),hb_session);
+                    if(!hb_session.getTransaction().wasCommitted())
+                        hb_session.getTransaction().commit();
+                }
+                catch (Exception ex){
+                    LOGGER.error("Error [0121]", ex);
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus', Hibernate: " + ex.getLocalizedMessage());
+                    
+                    try{
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            hb_session.getTransaction().rollback();
+                    }
+                    catch(Exception e){
+                        LOGGER.error("Error [0122]: Rollback failed", e);
+                    }
+                }
+                finally{
+                    if(hb_session.isOpen())
+                      hb_session.close();
+                }
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+                response.getReturnInfos().setStatus(ReturnType.Status.OK);
+                response.getReturnInfos().setMessage("UpdateCodeSystemVersionStatus erfolgreich");
+            }
+            catch (Exception ex){
+                LOGGER.error("Error [0123]", ex);
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus': " + ex.getLocalizedMessage());
+            }
+        
+        LOGGER.info("----- UpdateCodeSystemVersionStatus finished (003) -----");
         return response;
     }
 
-    //Check parameters
-    if (validateParameter(parameter, response) == false)
-    {
-      return response; // Parameter check failed
-    }
-    
-    try
-    {
-      // Reading code system version from parameters     
-      CodeSystemVersion csv = (CodeSystemVersion) parameter.getCodeSystem().getCodeSystemVersions().toArray()[0];
+    private boolean validateParameter(UpdateCodeSystemVersionStatusRequestType Request, UpdateCodeSystemVersionStatusResponseType Response){
+        boolean passed = true;
 
-      // Opening hibernate session
-      org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
-      hb_session.getTransaction().begin();
-
-      try
-      {
-        // Changing status and saving in DB
-        CodeSystemVersion csv_db = (CodeSystemVersion) hb_session.get(CodeSystemVersion.class, csv.getVersionId());
-        csv_db.setStatus(csv.getStatus());
-        hb_session.update(csv_db);
-                
-        LastChangeHelper.updateLastChangeDate(true, csv.getVersionId(),hb_session);
-        hb_session.getTransaction().commit();
-      }
-      catch (Exception e)
-      {
-            if(!hb_session.getTransaction().wasRolledBack())
-                hb_session.getTransaction().rollback();
-            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-            response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus', Hibernate: " + e.getLocalizedMessage());
-
-            logger.error("Hibernate-error at 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
-      }
-      finally
-      {
-          if(hb_session.isOpen())
-            hb_session.close();
-      }
-      response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-      response.getReturnInfos().setStatus(ReturnType.Status.OK);
-      response.getReturnInfos().setMessage("UpdateCodeSystemVersionStatus erfolgreich");
-    }
-    catch (Exception e)
-    {
-      response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-      response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-      response.getReturnInfos().setMessage("Fehler bei 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
-
-      logger.error("Error at 'UpdateCodeSystemVersionStatus': " + e.getLocalizedMessage());
-    }
-    
-    return response;
-  }
-
-  private boolean validateParameter(UpdateCodeSystemVersionStatusRequestType Request, UpdateCodeSystemVersionStatusResponseType Response)
-  {
-    boolean erfolg = true;
-
-    CodeSystem codeSystem = Request.getCodeSystem();
-    if (codeSystem == null)
-    {
-        Response.getReturnInfos().setMessage("CodeSystem darf nicht NULL sein!");
-        erfolg = false;
-        Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        return erfolg;
-    }
-
-    Set<CodeSystemVersion> csvSet = codeSystem.getCodeSystemVersions();
-    if (csvSet != null)
-    {
-      if (csvSet.size() > 1)
-      {
-            Response.getReturnInfos().setMessage("Die CodeSystem-Version-Liste darf maximal einen Eintrag haben!");
-            erfolg = false;
-      }
-      else if (csvSet.size() == 1)
-      {
-            CodeSystemVersion csv = (CodeSystemVersion) csvSet.toArray()[0];
-
-        if (csv.getVersionId() == null || csv.getVersionId() == 0)
-        {
-            Response.getReturnInfos().setMessage("Es muss eine ID (>0) für die CodeSystem-Version angegeben werden!");
-            erfolg = false;
+        CodeSystem codeSystem = Request.getCodeSystem();
+        if (codeSystem == null){
+            Response.getReturnInfos().setMessage("CodeSystem darf nicht null sein.");
+            Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            passed = false;
+            return passed;
         }
-        if (csv.getStatus() == null)
-        {
-            Response.getReturnInfos().setMessage("Es muss ein Status für die CodeSystem-Version angegeben werden!");
-            erfolg = false;
+
+        Set<CodeSystemVersion> CSversionSet = codeSystem.getCodeSystemVersions();
+        if (CSversionSet != null){
+            if (CSversionSet.size() > 1){
+                Response.getReturnInfos().setMessage("Die CodeSystem-Version-Liste darf maximal einen Eintrag haben.");
+                passed = false;
+            }
+            else if (CSversionSet.size() == 1){
+                CodeSystemVersion CSversion = (CodeSystemVersion) CSversionSet.toArray()[0];
+
+                if (CSversion.getVersionId() == null || CSversion.getVersionId() == 0){
+                    Response.getReturnInfos().setMessage("Es muss eine ID (>0) für die CodeSystem-Version angegeben werden.");
+                    passed = false;
+                }
+                if (CSversion.getStatus() == null){
+                    Response.getReturnInfos().setMessage("Es muss ein Status für die CodeSystem-Version angegeben werden.");
+                    passed = false;
+                }
+            }
         }
-      }
-    }
-    else
-    {
-        Response.getReturnInfos().setMessage("Die CodeSystem-Version-Liste muss mindestens einen Eintrag haben!");
-        erfolg = false;
-    }
+        else{
+            Response.getReturnInfos().setMessage("Die CodeSystem-Version-Liste muss mindestens einen Eintrag haben.");
+            passed = false;
+        }
 
-    if (erfolg == false)
-    {
-        Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-        Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+        if (passed == false){
+            Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+        }
+        return passed;
     }
-
-    return erfolg;
-  }
 }

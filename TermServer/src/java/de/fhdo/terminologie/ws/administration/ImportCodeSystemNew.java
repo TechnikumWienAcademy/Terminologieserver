@@ -200,18 +200,25 @@ public class ImportCodeSystemNew{
             else{
                 response.getReturnInfos().setStatus(ReturnType.Status.OK);
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-                response.getReturnInfos().setMessage("Import abgeschlossen. " + status.getImportCount() + " Konzept(e) importiert.");
                 response.setCodeSystem(importClamlNew.getCodeSystem());
-                response.getReturnInfos().setCount(status.getImportCount());
+                if(status != null){
+                    response.getReturnInfos().setMessage("Import abgeschlossen. " + status.getImportCount() + " Konzept(e) importiert.");
+                    response.getReturnInfos().setCount(status.getImportCount());
+                }
+                else{
+                    response.getReturnInfos().setMessage("Import abgeschlossen. Anzahl der importierten Konzepte unbekannt.");
+                    response.getReturnInfos().setCount(-1);
+                }
             }
         }
         catch (ImportException e){
+            LOGGER.error("Error [0003]", e);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setMessage("Fehler beim Import [0003]: " + e.getLocalizedMessage());
         }
-        catch (ImportParameterValidationException e)
-        {
+        catch (ImportParameterValidationException e){
+            LOGGER.error("Error [0004]", e);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setMessage("Fehler beim Import [0004]: " + e.getLocalizedMessage());

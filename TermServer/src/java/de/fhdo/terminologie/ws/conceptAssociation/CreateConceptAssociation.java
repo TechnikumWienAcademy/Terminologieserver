@@ -86,11 +86,14 @@ public class CreateConceptAssociation {
             try {
                 long associationId = 0;
 
-                org.hibernate.Session hb_session;            
+                org.hibernate.Session hb_session;         
+                boolean hibernateSessionCreated = false;
                 if (session == null) {
+                    hibernateSessionCreated = true;
                     hb_session = HibernateUtil.getSessionFactory().openSession();
                     hb_session.getTransaction().begin();
-                } else 
+                }
+                else
                     hb_session = session;
 
                 CodeSystemEntityVersionAssociation CSEVassoc = parameter.getCodeSystemEntityVersionAssociation();
@@ -132,7 +135,6 @@ public class CreateConceptAssociation {
 
                     if (associationId > 0) {
                         if(CSEVassoc.getAssociationKind() == 2 && CSEVassoc.getAssociationType().getCodeSystemEntityVersionId().equals(4L)){
-
                             //Check parentCSEV isLeaf or children are not shown!
                             CodeSystemEntityVersion CSEVparent = (CodeSystemEntityVersion)hb_session.get(CodeSystemEntityVersion.class, entityVersionId1);
                             if(CSEVparent.getIsLeaf()){
@@ -141,7 +143,7 @@ public class CreateConceptAssociation {
                             }
                         }
 
-                        if(!hb_session.getTransaction().wasCommitted())
+                        if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted())
                             hb_session.getTransaction().commit();
                     } 
                     else{
@@ -154,10 +156,10 @@ public class CreateConceptAssociation {
                     response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
                     response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
                     response.getReturnInfos().setMessage("Fehler bei 'CreateConceptAssociation', Hibernate: " + e.getLocalizedMessage());
-                    LOGGER.error("Error [0107]: " + e.getLocalizedMessage(), e);
+                    LOGGER.error("Error [0107]", e);
                 } 
                 finally {
-                    if (hb_session.isOpen()) 
+                    if (hibernateSessionCreated && hb_session.isOpen()) 
                         hb_session.close();
                 }
 

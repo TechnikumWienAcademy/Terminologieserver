@@ -1,4 +1,10 @@
-﻿Changelog 3.2.27
+﻿Changelog 3.2.28
+	-Bugfixes
+		.) EHTSOID-191: Ein Fehler in der Freigabe wurde entfernt.
+
+Changelog 3.2.27
+	-Bugfixes
+		.) EHTSOID-191: Die Freigabe wurde überarbeitet.
 
 Changelog 3.2.26
 	-Bugfixes

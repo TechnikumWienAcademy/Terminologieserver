@@ -31,7 +31,6 @@ import de.fhdo.terminologie.ws.types.LoginType;
 import de.fhdo.terminologie.ws.types.ReturnType;
 import de.fhdo.terminologie.ws.types.ReturnType.OverallErrorCategory;
 import de.fhdo.terminologie.ws.types.ReturnType.Status;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,282 +38,228 @@ import java.util.UUID;
  *
  * @author Robert Mützner (robert.muetzner@fh-dortmund.de)
  */
-public class Login
-{
+public class Login{
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-    public LoginResponseType Login(LoginRequestType parameter)
-    {
-        if (logger.isInfoEnabled())
-        {
-            logger.info("====== Login gestartet ======");
-        }
+    public LoginResponseType Login(LoginRequestType parameter){
+        LOGGER.info("+++++ Login started +++++");
 
-        // Return-Informationen anlegen
+        //Creating response
         LoginResponseType response = new LoginResponseType();
         response.setReturnInfos(new ReturnType());
 
-        // Parameter prüfen
-        if (validateParameter(parameter, response) == false)
-        {
-            return response; // Fehler bei den Parametern
+        //Checking parameters
+        if (validateParameters(parameter, response) == false){
+            LOGGER.info("----- Login finished (001) -----");
+            return response; //Faulty parameters
         }
 
         response.setLogin(new LoginType());
 
-        try
-        {
-            java.util.List<TermUser> list = null;
+        try{
+            java.util.List<TermUser> userList;
 
-            // Hibernate-Block, Session öffnen
             org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
 
-            try // 2. try-catch-Block zum Abfangen von Hibernate-Fehlern
-            {
-
+            try{
                 Security.checkForDeadSessions(hb_session);
 
-                // HQL erstellen
-                String hql = "select u from TermUser u";
+                //Creating HQL
+                String HQL_termUser_select = "select u from TermUser u";
 
-                // Parameter dem Helper hinzufügen
-                // bitte immer den Helper verwenden oder manuell Parameter per Query.setString() hinzufügen,
-                // sonst sind SQL-Injections möglich
+                //Adding parameters to the helper, always use the helper or do it manually via Query.setString()
+                //Otherwise SQL-injections are possible
                 HQLParameterHelper parameterHelper = new HQLParameterHelper();
 
-                if (parameter != null && parameter.getLogin() != null)
-                {
-                    // Hier alle Parameter aus der Cross-Reference einfügen
-                    // addParameter(String Prefix, String DBField, Object Value)
-                    if (parameter.getLogin().getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME))
-                    {
-                        String[] str = parameter.getLogin().getUsername().split(":");
-                        parameterHelper.addParameter("u.", "name", str[0]);
+                if (parameter != null && parameter.getLogin() != null){
+                    //Adding parameters from the cross reference via addParameter(String Prefix, String DBField, Object Value)
+                    if (parameter.getLogin().getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME)){
+                        String[] usernameArray = parameter.getLogin().getUsername().split(":");
+                        parameterHelper.addParameter("u.", "name", usernameArray[0]);
                     }
                     else
-                    {
                         parameterHelper.addParameter("u.", "name", parameter.getLogin().getUsername());
-                    }
 
                     parameterHelper.addParameter("u.", "passw", parameter.getLogin().getPassword());
                 }
 
-                // Parameter hinzufügen (immer mit AND verbunden)
-                hql += parameterHelper.getWhere("");
+                //Adding parameters (connected with AND)
+                HQL_termUser_select += parameterHelper.getWhere("");
 
-                // Query erstellen
-                org.hibernate.Query q = hb_session.createQuery(hql);
+                //Creating query
+                org.hibernate.Query Q_termUser_select = hb_session.createQuery(HQL_termUser_select);
 
-                // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
-                parameterHelper.applyParameter(q);
+                //Parameters can be set now via the helper
+                parameterHelper.applyParameter(Q_termUser_select);
 
-                // Datenbank-Aufruf durchführen
-                list = (java.util.List<TermUser>) q.list();
+                //Executing database query
+                userList = (java.util.List<TermUser>) Q_termUser_select.list();
 
-                if (list != null && list.size() > 0
-                        && performLogin(list.get(0), parameter.getLogin(), hb_session, response))
-                {
-                    // Login erfolgreich
+                if (userList != null && userList.size() > 0 && parameter != null && performLogin(userList.get(0), parameter.getLogin(), hb_session, response)){
                     response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
                     response.getReturnInfos().setStatus(ReturnType.Status.OK);
                     response.getReturnInfos().setMessage("Login erfolgreich");
                 }
-                else
-                {
+                else{
                     response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
                     response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
                     response.getReturnInfos().setMessage("Benutzername oder Passwort ist falsch");
                 }
-
-                // Hibernate-Block wird in 'finally' geschlossen, erst danach
-                // Auswertung der Daten
-                // Achtung: hiernach können keine Tabellen/Daten mehr nachgeladen werden
             }
-            catch (Exception e)
-            {
-                hb_session.getTransaction().rollback();
-                // Fehlermeldung an den Aufrufer weiterleiten
+            catch (Exception ex){
+                LOGGER.error("Error [0117]", ex);
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-                response.getReturnInfos().setMessage("Fehler bei 'Login', Hibernate: " + e.getLocalizedMessage());
-
-                logger.error("Fehler bei 'Login', Hibernate: " + e.getLocalizedMessage());
+                response.getReturnInfos().setMessage("Fehler bei 'Login', Hibernate: " + ex.getLocalizedMessage());
+                
+                try{
+                    if(!hb_session.getTransaction().wasRolledBack())
+                        hb_session.getTransaction().rollback();
+                }
+                catch(Exception exRollback){
+                    LOGGER.error("Error [0116]: Rollback failed", exRollback);
+                }
             }
-            finally
-            {
-                // Transaktion abschließen
-                hb_session.getTransaction().commit();
-                hb_session.close();
+            finally{
+                if(!hb_session.getTransaction().wasCommitted())
+                    hb_session.getTransaction().commit();
+                if(hb_session.isOpen())
+                    hb_session.close();
             }
         }
-        catch (Exception e)
-        {
-            // Fehlermeldung an den Aufrufer weiterleiten
+        catch (Exception ex){
+            LOGGER.error("Error [0118]", ex);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-            response.getReturnInfos().setMessage("Fehler bei 'Login': " + e.getLocalizedMessage());
-
-            logger.error("Fehler bei 'Login': " + e.getLocalizedMessage());
+            response.getReturnInfos().setMessage("Fehler bei 'Login': " + ex.getLocalizedMessage());
         }
-
+        
+        LOGGER.info("----- Login finished (002) -----");
         return response;
     }
 
-    private boolean performLogin(TermUser user_db, LoginType login,
-            org.hibernate.Session hb_session, LoginResponseType response)
-    {
-        boolean erfolg = true;
-        if (response.getLogin() == null)
-        {
+    private boolean performLogin(TermUser user_db, LoginType login, org.hibernate.Session hb_session, LoginResponseType response){
+        boolean success = true;
+        if (response.getLogin() == null)    
             response.setLogin(new LoginType());
-        }
 
         response.getLogin().setSessionID("");
 
-        // Passwort pruefen
+        //Check password
         String pwHash = user_db.getPassw();
 
-        if (!login.getPassword().equalsIgnoreCase(pwHash))
-        {
+        if (!login.getPassword().equalsIgnoreCase(pwHash)){//Wrong password
             response.getReturnInfos().setMessage("Falsches Passwort!");
-            erfolg = false;
+            success = false;
         }
-        else
-        {
-            // Passwort ist richtig
-
-            // nun Hashwert generieren und in Tabelle mit Verbindung der UserID
-            // speichern
-            String newHash = "";
+        else{//Correct password
+            //Creating hash value and saving in table with userID
+            String newHash;
 
             UUID uuid = UUID.randomUUID();
             newHash = uuid.toString();
-            if (!login.getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME))
-            {
-                List<Session> sessionSet = Security.checkForExistingSessions(hb_session, login, user_db);
+            
+            //Checking for existing sessions and deleting them
+            if (!login.getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME)){
+                List<Session> sessionList = Security.checkForExistingSessions(hb_session, login, user_db);
 
-                if (sessionSet != null && !sessionSet.isEmpty())
-                {
-                    for (Session session : sessionSet)
-                    {
-
+                if (sessionList != null && !sessionList.isEmpty())
+                    for (Session session : sessionList){
                         session.setTermUser(null);
                         hb_session.delete(session);
                     }
-                }
             }
-            else
-            {
-                List<Session> sessionSet = Security.checkForExistingKollabSessions(hb_session, login, user_db);
+            else{
+                List<Session> sessionList = Security.checkForExistingKollabSessions(hb_session, login, user_db);
 
-                if (sessionSet != null && !sessionSet.isEmpty())
-                {
-                    for (Session session : sessionSet)
-                    {
-
+                if (sessionList != null && !sessionList.isEmpty())
+                    for (Session session : sessionList){
                         session.setTermUser(null);
                         hb_session.delete(session);
                     }
-                }
             }
-            // prüfen, ob bereits eine Session für den User existiert
 
             // Neue Session hinzufügen
-            Session st = new Session();
-            st.setSessionId(newHash);
-            st.setLastTimestamp(new java.util.Date());
-            st.setTermUser(new TermUser());
-            st.getTermUser().setId(user_db.getId());
-            st.setIpAddress(login.getIp());
+            Session newSession = new Session();
+            newSession.setSessionId(newHash);
+            newSession.setLastTimestamp(new java.util.Date());
+            newSession.setTermUser(new TermUser());
+            newSession.getTermUser().setId(user_db.getId());
+            newSession.setIpAddress(login.getIp());
 
-            if (login.getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME))
-            {
-                String[] str = login.getUsername().split(":");
-                st.setCollabUsername(str[1]);
+            if (login.getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME)){
+                String[] usernameArray = login.getUsername().split(":");
+                newSession.setCollabUsername(usernameArray[1]);
             }
             else
-            {
-                st.setCollabUsername(null);
-            }
+                newSession.setCollabUsername(null);
 
-            logger.debug("IP-Adress (session): " + st.getIpAddress());
+            LOGGER.debug("IP-adress (session): " + newSession.getIpAddress());
 
-            hb_session.save(st);
+            hb_session.save(newSession);
 
             response.getLogin().setSessionID(newHash);
             response.getLogin().setUsername(user_db.getName());
         }
 
-        return erfolg;
+        return success;
     }
 
-    private boolean validateParameter(
-            LoginRequestType Request,
-            LoginResponseType Response)
-    {
-        boolean erfolg = true;
+    private boolean validateParameters(LoginRequestType Request, LoginResponseType Response){
+        boolean passed = true;
 
         LoginType login = Request.getLogin();
 
-        if (login == null)
-        {
-            Response.getReturnInfos().setMessage("LoginType darf nicht NULL sein!");
-            erfolg = false;
+        if (login == null){
+            Response.getReturnInfos().setMessage("LoginType darf nicht null sein.");
+            passed = false;
         }
-        else if (login.getUsername() == null || login.getUsername().length() == 0)
-        {
-            Response.getReturnInfos().setMessage("Username darf nicht NULL sein!");
-            erfolg = false;
+        else if (login.getUsername() == null || login.getUsername().length() == 0){
+            Response.getReturnInfos().setMessage("Username darf nicht oder leer null sein.");
+            passed = false;
         }
-        else if (login.getPassword() == null || login.getPassword().length() == 0)
-        {
-            Response.getReturnInfos().setMessage("Passwort darf nicht NULL sein!");
-            erfolg = false;
+        else if (login.getPassword() == null || login.getPassword().length() == 0){
+            Response.getReturnInfos().setMessage("Passwort darf nicht null oder leer sein.");
+            passed = false;
         }
 
-        if (erfolg == false)
-        {
+        if (passed == false){
             Response.getReturnInfos().setOverallErrorCategory(OverallErrorCategory.WARN);
             Response.getReturnInfos().setStatus(Status.FAILURE);
         }
 
-        return erfolg;
+        return passed;
     }
 
-    public LoginResponseType checkLogin(LoginRequestType parameter)
-    {
-        if (logger.isInfoEnabled())
-        {
-            logger.info("====== check Login gestartet ======");
-        }
+    public LoginResponseType checkLogin(LoginRequestType parameter){
+        LOGGER.info("+++++ checkLogin started +++++");
 
-        // Return-Informationen anlegen
+        //Creating response
         LoginResponseType response = new LoginResponseType();
         response.setReturnInfos(new ReturnType());
 
         boolean loggedIn = false;
-        LoginInfoType loginInfoType = null;
-        if (parameter != null && parameter.getLogin() != null)
-        {
+        LoginInfoType loginInfoType;
+        if (parameter != null && parameter.getLogin() != null){
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
         }
 
-        logger.debug("Eingeloggt: " + loggedIn);
+        LOGGER.debug("User logged in? " + loggedIn);
 
-        if (loggedIn == false)
-        {
+        if (!loggedIn){
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Benutzer ist nicht angemeldet!");
+            LOGGER.info("----- checkLogin finished (001) -----");
             return response;
         }
-        else
-        {
+        else{
             response.getReturnInfos().setStatus(ReturnType.Status.OK);
             response.getReturnInfos().setMessage("Benutzer ist angemeldet!");
+            LOGGER.info("----- checkLogin finished (002) -----");
             return response;
         }
     }

@@ -164,7 +164,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             if (this.status != null && this.status.isCancel() && !hb_session.getTransaction().wasRolledBack())
                 hb_session.getTransaction().rollback();
             else{
-                if(!hb_session.getTransaction().wasCommitted()){
+                if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted()){
                     hb_session.flush();
                     hb_session.getTransaction().commit();
                 }
@@ -552,6 +552,13 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         //Read existing metadata and add to map to avoid double entries
         String HQL_metadataParameter_search = "select distinct mp from MetadataParameter mp "
             + " where codeSystemId=" + createCSresponse.getCodeSystem().getId();
+        
+        //DABACA
+        if(!hb_session.isOpen()){
+            this.hb_session = HibernateUtil.getSessionFactory().openSession();
+            this.hb_session.getTransaction().begin();
+        }
+            
         List<MetadataParameter> metadataParameterList = hb_session.createQuery(HQL_metadataParameter_search).list();
 
         for (MetadataParameter metadataParameter : metadataParameterList){
@@ -616,15 +623,20 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         try{
             if (this._clamlClassMap.get(clazz.getCode()) != null){
+                LOGGER.info("DABACA 1");
                 this.CreateSingleConcept(clazz);
+                LOGGER.info("DABACA 2");
                 LOGGER.debug("Concept writing: " + clazz.getCode() + "(" + this._clamlClassMap.size() + ")");
+                LOGGER.info("DABACA 3");
                 if (clazz.getMeta() != null && clazz.getMeta().size() > 0)
                     this.createMetaData(clazz);
+                LOGGER.info("DABACA 4");
                 this._clamlClassMap.remove(clazz.getCode());
+                LOGGER.info("DABACA 5");
             }
         }
         catch (Exception ex){
-            LOGGER.error("Error [0109]: " + ex.getLocalizedMessage(), ex);
+            LOGGER.error("Error [0109]", ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         
@@ -659,7 +671,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             if (rubKind.equals(RubricKinds.RUBRICKINDS.preferred.getCode())){
                 rubricFound = true;
                 labelString = getAllRubricStrings(rubric);
-                this.createPreferredTerm(labelString, code, clazz);
+                this.createPreferredTerm(labelString, code, clazz); //ANKER
             }
         }
         if (rubricFound == false && rubric != null){
@@ -1013,11 +1025,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         LOGGER.info("----- createMetaData finished (001) -----");
     }
     
-    private long insertMetaData(String name, String value, String code)
-    {
+    private long insertMetaData(String name, String value, String code){
         this._metadataCounter++;
-        if (this._metadataCounter % 500 == 0)
-        {
+        if (this._metadataCounter % 500 == 0){
             LOGGER.warn("Session flushed");
 
             hb_session.flush();

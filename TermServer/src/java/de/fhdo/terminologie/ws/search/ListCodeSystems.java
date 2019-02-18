@@ -43,15 +43,7 @@ public class ListCodeSystems{
 
     final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-    /**
-     * Listet Vokabulare des Terminologieservers auf
-     *
-     * @param parameter Die Parameter des Webservices
-     * @return Ergebnis des Webservices, alle gefundenen Vokabulare mit
-     * angegebenen Filtern
-     */
-    public ListCodeSystemsResponseType ListCodeSystems(ListCodeSystemsRequestType parameter)
-    {
+    public ListCodeSystemsResponseType ListCodeSystems(ListCodeSystemsRequestType parameter){
         LOGGER.info("+++++ ListCodeSystems started +++++");
         
         //Creating return informationen
@@ -64,23 +56,24 @@ public class ListCodeSystems{
         LoginInfoType loginInfoType = null;
         if (parameter != null && parameter.getLogin() != null){
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
-            loggedIn = loginInfoType != null;
-            if (loggedIn)
+            if (loginInfoType != null){
+                loggedIn = true;
                 isAdmin = loginInfoType.getTermUser().isIsAdmin();
+            }
         }
         
         try{
-            java.util.List<CodeSystem> codeSystemList = null;
+            java.util.List<CodeSystem> CSlist = null;
 
             org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
 
             try{
                 //Creating HQL
-                String HQL = "select distinct cs from CodeSystem cs";
-                HQL += " join fetch cs.codeSystemVersions csv";
+                String HQL_CS_select = "select distinct cs from CodeSystem cs";
+                HQL_CS_select += " join fetch cs.codeSystemVersions csv";
 
-                if (loggedIn)
-                    HQL += " left outer join csv.licencedUsers lu";
+                if (loginInfoType != null)
+                    HQL_CS_select += " left outer join csv.licencedUsers lu";
                 
                 //Adding parameters via helper or manually (Query.setString()), otherwise SQL-Injections  are possible
                 HQLParameterHelper parameterHelper = new HQLParameterHelper();
@@ -107,7 +100,7 @@ public class ListCodeSystems{
                         parameterHelper.addParameter("csv.", "underLicence", CSversion.getUnderLicence());
                         parameterHelper.addParameter("csv.", "validityRange", CSversion.getValidityRange());
 
-                        if (loggedIn)
+                        if (loginInfoType != null)
                             parameterHelper.addParameter("csv.", "status", CSversion.getStatus());
                     }
                 }
@@ -116,45 +109,45 @@ public class ListCodeSystems{
                 if (!isAdmin)
                     parameterHelper.addParameter("csv.", "status", Definitions.STATUS_CODES.ACTIVE.getCode());
 
-                //Only listing unlicenced vocabulary if not logged in
-                if (!loggedIn)
+                //Listing only unlicenced vocabulary if not logged in
+                if (loginInfoType == null)
                     parameterHelper.addParameter("csv.", "underLicence", 0);
 
                 //Adding parameters (connected through AND)
                 String where = parameterHelper.getWhere("");
-                HQL += where;
+                HQL_CS_select += where;
 
-                if (loggedIn){
+                if (loginInfoType!=null){
                     //Checking for valid licence, has to be added manually, too complex for helper
                     if (where.length() > 2)
-                        HQL += " AND ";
+                        HQL_CS_select += " AND ";
                     else
-                        HQL += " WHERE ";
+                        HQL_CS_select += " WHERE ";
 
-                    HQL += " (csv.underLicence = 0 OR ";
-                    HQL += " (lu.validFrom < '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
-                    HQL += " AND lu.validTo > '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
-                    HQL += " AND lu.id.codeSystemVersionId=csv.versionId";
-                    HQL += " AND lu.id.userId=" + loginInfoType.getTermUser().getId();
-                    HQL += " ))";
+                    HQL_CS_select += " (csv.underLicence = 0 OR ";
+                    HQL_CS_select += " (lu.validFrom < '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
+                    HQL_CS_select += " AND lu.validTo > '" + HQLParameterHelper.getSQLDateStr(new java.util.Date()) + "'";
+                    HQL_CS_select += " AND lu.id.codeSystemVersionId=csv.versionId";
+                    HQL_CS_select += " AND lu.id.userId=" + loginInfoType.getTermUser().getId();
+                    HQL_CS_select += " ))";
                 }
-                HQL += " ORDER BY cs.name, csv.name";
+                HQL_CS_select += " ORDER BY cs.name, csv.name";
 
                 //Creating query
-                org.hibernate.Query Q_codeSystem_search = hb_session.createQuery(HQL);
-                Q_codeSystem_search.setReadOnly(true);
+                org.hibernate.Query Q_CS_select = hb_session.createQuery(HQL_CS_select);
+                Q_CS_select.setReadOnly(true);
 
                 //Parameters can be set now via helper
-                parameterHelper.applyParameter(Q_codeSystem_search);
+                parameterHelper.applyParameter(Q_CS_select);
 
                 //Execute query
-                codeSystemList = (java.util.List<CodeSystem>) Q_codeSystem_search.list();
+                CSlist = (java.util.List<CodeSystem>) Q_CS_select.list();
             }
-            catch (Exception e){
-                LOGGER.error("Error [0087]: " + e.getLocalizedMessage());
+            catch (Exception ex){
+                LOGGER.error("Error [0087]", ex);
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-                response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems', Hibernate: " + e.getLocalizedMessage());
+                response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems', Hibernate: " + ex.getLocalizedMessage());
             }
             finally{
                 if(hb_session.isOpen())
@@ -162,8 +155,8 @@ public class ListCodeSystems{
             }
 
             //Later the class structure is transformed by Jaxb, so the unused relationships have to be set to null
-            if (codeSystemList != null){
-                for (CodeSystem codeSystem : codeSystemList) {
+            if (CSlist != null){
+                for (CodeSystem codeSystem : CSlist) {
                     if (codeSystem.getCodeSystemVersions().size() > 1) {
                         //Sorting CS versions by their id
                         ArrayList<CodeSystemVersion> CSversions = new ArrayList(codeSystem.getCodeSystemVersions());
@@ -177,13 +170,12 @@ public class ListCodeSystems{
                     }
                 }
                 
-                Iterator<CodeSystem> CSlistIterator = codeSystemList.iterator();
+                Iterator<CodeSystem> CSlistIterator = CSlist.iterator();
                 
                 while (CSlistIterator.hasNext()){
                     CodeSystem CS = CSlistIterator.next();
 
-                    if (CS.getCodeSystemVersions() != null)
-                    {
+                    if (CS.getCodeSystemVersions() != null){
                         Iterator<CodeSystemVersion> CSversionsIterator = CS.getCodeSystemVersions().iterator();
 
                         while (CSversionsIterator.hasNext()){
@@ -206,8 +198,8 @@ public class ListCodeSystems{
                     CS.setMetadataParameters(null);
 
                     //Adding cleaned list to response
-                    response.setCodeSystem(codeSystemList);
-                    response.getReturnInfos().setCount(codeSystemList.size());
+                    response.setCodeSystem(CSlist);
+                    response.getReturnInfos().setCount(CSlist.size());
                 }
 
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
@@ -215,11 +207,11 @@ public class ListCodeSystems{
                 response.getReturnInfos().setMessage("CodeSysteme erfolgreich gelesen");
             }
         }
-        catch (Exception e){
-            LOGGER.error("Error [0088]: " + e.getLocalizedMessage());
+        catch (Exception ex){
+            LOGGER.error("Error [0088]", ex);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-            response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems': " + e.getLocalizedMessage());
+            response.getReturnInfos().setMessage("Fehler bei 'ListCodeSystems': " + ex.getLocalizedMessage());
         }
 
         LOGGER.info("----- ListCodeSystems finished (001) -----");

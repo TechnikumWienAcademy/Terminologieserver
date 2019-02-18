@@ -33,121 +33,110 @@ import de.fhdo.terminologie.ws.types.ReturnType;
  *
  * @author Philipp Urbauer
  */
-public class UpdateConceptValueSetMembershipStatus
-{
+public class UpdateConceptValueSetMembershipStatus{
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  public UpdateConceptValueSetMembershipStatusResponseType UpdateConceptValueSetMembershipStatus(UpdateConceptValueSetMembershipStatusRequestType parameter)
-  {
-    if (logger.isInfoEnabled())    
-      logger.info("====== UpdateConceptValueSetMembershipStatus gestartet ======");    
+    public UpdateConceptValueSetMembershipStatusResponseType UpdateConceptValueSetMembershipStatus(UpdateConceptValueSetMembershipStatusRequestType parameter){
+        LOGGER.info("+++++ UpdateConceptValueSetMembershipStatus started +++++");    
 
-    UpdateConceptValueSetMembershipStatusResponseType response = new UpdateConceptValueSetMembershipStatusResponseType();
-    response.setReturnInfos(new ReturnType());
+        UpdateConceptValueSetMembershipStatusResponseType response = new UpdateConceptValueSetMembershipStatusResponseType();
+        response.setReturnInfos(new ReturnType());
 
-    //Parameter prüfen
-    if (validateParameter(parameter, response) == false)    
-      return response; // Fehler bei den Parametern
+        // Check parameters
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- UpdateConceptValueSetMembershipStatus finished (001) -----");
+            return response; //Faulty parameters
+        }
     
-    // Login-Informationen auswerten (gilt für jeden Webservice)    
-    if (parameter != null){
-        if(LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
-            return response;    
-        }
-    }
+        // Check login (does every webservice)
+        if (parameter != null)
+            if(LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
+                LOGGER.info("----- UpdateConceptValueSetMembershipStatus finished (002) -----");
+                return response;    
+            }
 
-    try{
-        CodeSystemEntityVersion csev = parameter.getCodeSystemEntityVersion();
-        ConceptValueSetMembership cvsm = csev.getConceptValueSetMemberships().iterator().next();
-      // Hibernate-Block, Session öffnen
-      org.hibernate.Session     hb_session = HibernateUtil.getSessionFactory().openSession();
-      hb_session.getTransaction().begin();
-
-      try
-      {
-        ConceptValueSetMembership cvsm_db = null;
-        if(cvsm.getId() == null){
-        
-                ConceptValueSetMembershipId cvsmId = new ConceptValueSetMembershipId(
-                        cvsm.getCodeSystemEntityVersion().getVersionId(), cvsm.getValueSetVersion().getVersionId());
-                cvsm_db = (ConceptValueSetMembership)hb_session.get(ConceptValueSetMembership.class, cvsmId);
-        }else{
-            cvsm_db = (ConceptValueSetMembership)hb_session.get(ConceptValueSetMembership.class, cvsm.getId());
-        }
-        cvsm_db.setStatus(cvsm.getStatus());
-        if(cvsm.getStatusDate() != null){
-            cvsm_db.setStatusDate(cvsm.getStatusDate());
-        }
-        hb_session.update(cvsm_db);
-        
-        LastChangeHelper.updateLastChangeDate(false, cvsm_db.getId().getValuesetVersionId(),hb_session);
-        hb_session.getTransaction().commit();
-      }
-      catch (Exception e)
-      {
-        hb_session.getTransaction().rollback();
-        // Fehlermeldung an den Aufrufer weiterleiten
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setMessage("Fehler bei 'UpdateConceptValueSetMembershipStatus': " + e.getLocalizedMessage());
-
-        logger.error("Fehler bei 'UpdateConceptValueSetMembershipStatus'-Hibernate: " + e.getLocalizedMessage());
-        
-        e.printStackTrace();
-      }
-      finally
-      {
-        hb_session.close();
-      }
-      if (true) {
-            // Status an den Aufrufer weitergeben
-            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-            response.getReturnInfos().setStatus(ReturnType.Status.OK);
-            response.getReturnInfos().setMessage("Status erfolgreich geändert.");
-        }
+        if(parameter != null)
+            try{
+                CodeSystemEntityVersion CSEV = parameter.getCodeSystemEntityVersion();
+                ConceptValueSetMembership CVSM = CSEV.getConceptValueSetMemberships().iterator().next();
       
+                org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
+                hb_session.getTransaction().begin();
+
+                try{
+                    ConceptValueSetMembership CVSM_db;
+                    if(CVSM.getId() == null){
+                        ConceptValueSetMembershipId CVSM_id = new ConceptValueSetMembershipId(
+                        CVSM.getCodeSystemEntityVersion().getVersionId(), CVSM.getValueSetVersion().getVersionId());
+                        CVSM_db = (ConceptValueSetMembership)hb_session.get(ConceptValueSetMembership.class, CVSM_id);
+                    }
+                    else
+                        CVSM_db = (ConceptValueSetMembership)hb_session.get(ConceptValueSetMembership.class, CVSM.getId());
+                    
+                    CVSM_db.setStatus(CVSM.getStatus());
+                    if(CVSM.getStatusDate() != null)
+                        CVSM_db.setStatusDate(CVSM.getStatusDate());
+                    
+                    hb_session.update(CVSM_db);
+        
+                    LastChangeHelper.updateLastChangeDate(false, CVSM_db.getId().getValuesetVersionId(),hb_session);
+                    
+                    if(!hb_session.getTransaction().wasCommitted())
+                        hb_session.getTransaction().commit();
+                }
+                catch (Exception ex){
+                    LOGGER.error("Error [0130]", ex);
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setMessage("Fehler bei 'UpdateConceptValueSetMembershipStatus': " + ex.getLocalizedMessage());
+                    
+                    try{
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            hb_session.getTransaction().rollback();
+                    }
+                    catch(Exception e){
+                        LOGGER.error("Error [0131]: Rollback failed.", e);
+                    }
+                }
+                finally{
+                    if(hb_session.isOpen())
+                        hb_session.close();
+                }
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+                response.getReturnInfos().setStatus(ReturnType.Status.OK);
+                response.getReturnInfos().setMessage("Status erfolgreich geändert.");
+            }
+            catch (Exception ex){
+                LOGGER.error("Error [0132]", ex);
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                response.getReturnInfos().setMessage("Fehler bei 'UpdateConceptValueSetMembershipStatus': " + ex.getLocalizedMessage());
+            }
+        
+        LOGGER.info("----- UpdateConceptValueSetMembershipStatus finished (003) -----");
+        return response;
     }
-    catch (Exception e)
-    {
-      // Fehlermeldung an den Aufrufer weiterleiten
-      response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-      response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-      response.getReturnInfos().setMessage("Fehler bei 'UpdateConceptValueSetMembershipStatus': " + e.getLocalizedMessage());
 
-      logger.error("Fehler bei 'UpdateConceptValueSetMembershipStatus': " + e.getLocalizedMessage());
-      
-      e.printStackTrace();
-    }
-    return response;
-  }
+    private boolean validateParameter(UpdateConceptValueSetMembershipStatusRequestType Request, UpdateConceptValueSetMembershipStatusResponseType Response){
+        boolean passed = true;
 
-  private boolean validateParameter(UpdateConceptValueSetMembershipStatusRequestType Request, UpdateConceptValueSetMembershipStatusResponseType Response)
-  {
-    boolean erfolg = true;
-
-    
-    CodeSystemEntityVersion csev = Request.getCodeSystemEntityVersion();
-    if(csev != null){
-
-        if(csev.getConceptValueSetMemberships().size() > 1){
-
-            Response.getReturnInfos().setMessage("Es darf nur genau ein ConceptValueSetMembership beinhaltet sein!");
-            erfolg = false;
+        CodeSystemEntityVersion CSEV = Request.getCodeSystemEntityVersion();
+        if(CSEV != null)
+            if(CSEV.getConceptValueSetMemberships().size() > 1){
+                Response.getReturnInfos().setMessage("Es darf nur genau ein ConceptValueSetMembership beinhaltet sein!");
+                passed = false;
+            }
+        else{
+            Response.getReturnInfos().setMessage("CodeSystemEntity-Version darf nicht NULL sein!");
+            passed = false;
         }
-    }
-    else
-    {
-        Response.getReturnInfos().setMessage("CodeSystemEntity-Version darf nicht NULL sein!");
-        erfolg = false;
-    }
     
-    if (erfolg == false)
-    {
-      Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
-      Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-    }
+        if (!passed){
+            Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
+            Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+        }
 
-    return erfolg;
-  }
+        return passed;
+    }
 }

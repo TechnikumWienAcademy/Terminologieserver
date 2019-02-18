@@ -29,58 +29,51 @@ import org.hibernate.Session;
  *
  * @author Philipp Urbauer
  */
-public class LastChangeHelper
-{
+public class LastChangeHelper{
 
-    public static boolean updateLastChangeDate(Boolean isCodeSystemVersion, Long id, Session hb_session)
-    {
-        boolean exists = true;
-        if (hb_session == null)
-        {
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    
+    public static boolean updateLastChangeDate(Boolean isCodeSystemVersion, Long id, Session hb_session){
+        boolean hbOpened = false;
+        if (hb_session == null){
             hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
-            exists = false;
+            hbOpened = true;
         }
         boolean success = false;
-        try
-        {
-            if (isCodeSystemVersion)
-            {
-
-                CodeSystemVersion csv = (CodeSystemVersion) hb_session.get(CodeSystemVersion.class, id);
-                csv.setLastChangeDate(new Date());
-                //Matthias added change of Status Date
-                csv.setStatusDate(new Date());
-                hb_session.update(csv);
-
+        try{
+            if (isCodeSystemVersion){
+                CodeSystemVersion CSversion = (CodeSystemVersion) hb_session.get(CodeSystemVersion.class, id);
+                CSversion.setLastChangeDate(new Date());
+                CSversion.setStatusDate(new Date());
+                hb_session.update(CSversion);
             }
-            else
-            {
-
-                ValueSetVersion vsv = (ValueSetVersion) hb_session.get(ValueSetVersion.class, id);
-                vsv.setLastChangeDate(new Date());
-                hb_session.update(vsv);
+            else{
+                ValueSetVersion VSversion = (ValueSetVersion) hb_session.get(ValueSetVersion.class, id);
+                VSversion.setLastChangeDate(new Date());
+                VSversion.setStatusDate(new Date());
+                hb_session.update(VSversion);
             }
 
-            if (!exists)
-
-            {
+            if (hbOpened && !hb_session.getTransaction().wasCommitted())
                 hb_session.getTransaction().commit();
-            }
 
             success = true;
         }
-        catch (Exception e)
-        {
-            hb_session.getTransaction().rollback();
+        catch (Exception ex){
+            LOGGER.error("Error [0119]", ex);
             success = false;
-        }
-        finally
-        {
-            if (!exists)
-            {
-                hb_session.close();
+            try{
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
             }
+            catch(Exception e){
+                LOGGER.error("Error [0120]: Rollback failed", e);
+            }
+        }
+        finally{
+            if (hbOpened && hb_session.isOpen())
+                hb_session.close();
         }
         return success;
     }

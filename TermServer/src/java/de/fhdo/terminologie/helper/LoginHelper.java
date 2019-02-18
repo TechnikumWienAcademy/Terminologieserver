@@ -120,19 +120,19 @@ public class LoginHelper{
             return null;
         }
         
-        LoginRequestType request = new LoginRequestType();
-        request.setLogin(new de.fhdo.terminologie.ws.idp.authorizationIDP.LoginType());
-        request.getLogin().setSessionID(Login.getSessionID());
-        LOGGER.info("Requested session-id: " + Login.getSessionID());
+        LoginRequestType loginRequest = new LoginRequestType();
+        loginRequest.setLogin(new de.fhdo.terminologie.ws.idp.authorizationIDP.LoginType());
+        loginRequest.getLogin().setSessionID(Login.getSessionID());
+        LOGGER.debug("Requested session-id: " + Login.getSessionID());
         
         GetLoginInfosResponse.Return loginInfos = null;
         try{
             AuthorizationIDP portAuthorizationIDP = WebServiceUrlHelper.getInstance().getAuthorizationIdpServicePort();
             LOGGER.info("WS endpoint: " + ((BindingProvider) portAuthorizationIDP).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
-            loginInfos = portAuthorizationIDP.getLoginInfos(request);
+            loginInfos = portAuthorizationIDP.getLoginInfos(loginRequest);
         }
         catch (Exception e){
-            LOGGER.error("Error [0062]: " + e.getLocalizedMessage());
+            LOGGER.error("Error [0062]", e);
         }
 
         //User is logged in
@@ -172,7 +172,6 @@ public class LoginHelper{
             // Checking timeout
             long now = new java.util.Date().getTime();
             long timestamp = loginReturn.getLastTimestamp().getTime();
-            //3.2.21 increased session timeout from 30 to 120
             long session_timeout = 120 * 60000; // 120 minutes, TODO read from DB
             
             if (now - session_timeout < timestamp){
@@ -198,54 +197,53 @@ public class LoginHelper{
             hb_session = HibernateUtil.getSessionFactory().openSession();
         
         try{
-            String hql = "select distinct s from Session s";
-            hql += " join fetch s.termUser tu";
+            String HQL_session_select = "select distinct s from Session s";
+            HQL_session_select += " join fetch s.termUser tu";
 
             HQLParameterHelper parameterHelper = new HQLParameterHelper();
             parameterHelper.addParameter("s.", "sessionId", Login.getSessionID());
 
-            // Adding parameters (always connected with AND)
-            hql += parameterHelper.getWhere("");
+            //Adding parameters (always connected with AND)
+            HQL_session_select += parameterHelper.getWhere("");
 
-            LOGGER.debug("HQL: " + hql);
+            LOGGER.debug("HQL: " + HQL_session_select);
 
-            // Creating query
-            org.hibernate.Query q = hb_session.createQuery(hql);
+            //Creating query
+            org.hibernate.Query Q_session_select = hb_session.createQuery(HQL_session_select);
 
             // Parameters can be set now via the helper
-            parameterHelper.applyParameter(q);
+            parameterHelper.applyParameter(Q_session_select);
 
-            List<Session> liste = q.list();
-
-            if (liste != null && liste.size() > 0){
+            List<Session> sessionList = Q_session_select.list();
+            
+            if (sessionList != null && sessionList.size() > 0){
                 LOGGER.debug("Session exists");
 
-                Session s_session = liste.get(0);
+                Session responseSession = sessionList.get(0);
 
                 // Creating response
                 loginReturn = new LoginInfoType();
-                loginReturn.setLastTimestamp(s_session.getLastTimestamp());
-                loginReturn.setLastIP(s_session.getIpAddress());
-                loginReturn.setTermUser(s_session.getTermUser());
-                loginReturn.getTermUser().setIsAdmin(s_session.getTermUser().isIsAdmin());
+                loginReturn.setLastTimestamp(responseSession.getLastTimestamp());
+                loginReturn.setLastIP(responseSession.getIpAddress());
+                loginReturn.setTermUser(responseSession.getTermUser());
+                loginReturn.getTermUser().setIsAdmin(responseSession.getTermUser().isIsAdmin());
                 loginReturn.setLogin(new LoginType());
-                loginReturn.getLogin().setUsername(s_session.getTermUser().getName());
-                loginReturn.getLogin().setSessionID(s_session.getSessionId());
+                loginReturn.getLogin().setUsername(responseSession.getTermUser().getName());
+                loginReturn.getLogin().setSessionID(responseSession.getSessionId());
 
                 userMap.put(Login.getSessionID(), loginReturn);
             }
         }
-        catch (Exception e){
-            LOGGER.error("Error at 'getLoginInfos', Hibernate: " + e.getLocalizedMessage());
+        catch (Exception ex){
+            LOGGER.error("Error [0118]", ex);
         }
         finally{
-            if (session!=null){
-                if(hb_session!=null && hb_session.isOpen()){
-                    LOGGER.debug("Closing hibernate session");
+            try{
+                if(hb_session!=null && hb_session.isOpen())
                     hb_session.close();
-                }
-                else
-                    LOGGER.debug("Hibernate session has already been closed unexpectedly");
+            }
+            catch(Exception ex){
+                LOGGER.error("Error [0119]", ex);
             }
         }
         LOGGER.info("----- getLoginInfos finished (007) -----");

@@ -21,32 +21,24 @@ package de.fhdo.terminologie.ws.authorization.types;
 
 import de.fhdo.terminologie.ws.types.LoginType;
 
-
 /**
  *
  * @author Mathias
  */
-public class LoginRequestType
-{
-  private LoginType login;
+public class LoginRequestType{
+    private LoginType login;
 
-  public LoginRequestType(){}
+    /**
+     * @return the login
+    */
+    public LoginType getLogin(){
+        return login;
+    }
 
-  /**
-   * @return the login
-   */
-  public LoginType getLogin()
-  {
-    return login;
-  }
-
-  /**
-   * @param login the login to set
-   */
-  public void setLogin(LoginType login)
-  {
-    this.login = login;
-  }
-
- 
+    /**
+     * @param login the login to set
+    */
+    public void setLogin(LoginType login){
+        this.login = login;
+    }
 }

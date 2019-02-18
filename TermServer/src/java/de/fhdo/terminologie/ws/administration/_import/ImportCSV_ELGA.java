@@ -198,8 +198,10 @@ public class ImportCSV_ELGA
                 if (createCodeSystem(hb_session) == false)
                 {
                     // Fehlermeldung
-                    hb_session.getTransaction().commit();
-                    hb_session.close();
+                    if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted())
+                        hb_session.getTransaction().commit();
+                    if(hb_session.isOpen())
+                        hb_session.close();
                     return "CodeSystem konnte nicht erstellt werden!";
                 }
 
@@ -423,7 +425,8 @@ public class ImportCSV_ELGA
                 }
                 else
                 {
-                    hb_session.getTransaction().commit();
+                    if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted())
+                        hb_session.getTransaction().commit();
                     String sortMessage = "";
                     if (sort(parameter.getCodeSystem().getCodeSystemVersions().iterator().next().getVersionId()))
                     {
@@ -688,7 +691,8 @@ public class ImportCSV_ELGA
                 }
             }
 
-            hb_session.getTransaction().commit();
+            if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted())
+                hb_session.getTransaction().commit();
             s = true;
         }
         catch (Exception e)

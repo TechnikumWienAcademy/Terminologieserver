@@ -93,8 +93,11 @@ public class ListValueSetContents{
         try{
             org.hibernate.Session hb_session;
 
-            if (session == null)
+            boolean hibernateSessionCreated = false;
+            if (session == null){
+                hibernateSessionCreated = true;
                 hb_session = HibernateUtil.getSessionFactory().openSession();
+            }
             else
                 hb_session = session;
             
@@ -446,7 +449,7 @@ public class ListValueSetContents{
                 response.getReturnInfos().setMessage("Fehler bei 'ListValueSetContents', Hibernate: " + e.getLocalizedMessage());
             }
             finally{
-                if(hb_session.isOpen())
+                if(hibernateSessionCreated && hb_session.isOpen())
                     hb_session.close();
             }
         }

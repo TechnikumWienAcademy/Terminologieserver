@@ -93,8 +93,7 @@ public abstract class AbstractImport
         StaticStatusList.getStatus(importId).setImportTotal(totalCount);
     }
     
-    protected void setCurrentTaskInStatusList(String currentTask, Long importId)
-    {
+    protected void setCurrentTaskInStatusList(String currentTask, Long importId){
         StaticStatusList.getStatus(importId).setCurrentTask(currentTask);
     }
     

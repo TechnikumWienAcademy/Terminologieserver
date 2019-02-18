@@ -33,6 +33,7 @@ import java.util.List;
  */
 public class Security
 {
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
   public static final String COLLAB_SOFTWARE_NAME = "collaboration_software";  
     
@@ -66,88 +67,90 @@ public class Security
         return null;
   }
   
-  public static List<Session> checkForExistingSessions(org.hibernate.Session hb_session, LoginType login, TermUser user){
-  
-        String hql = "from Session ";
+    public static List<Session> checkForExistingSessions(org.hibernate.Session hb_session, LoginType login, TermUser user){
+        String HQL_session_select = "from Session ";
 
         HQLParameterHelper parameterHelper = new HQLParameterHelper();
         parameterHelper.addParameter("", "termUserId",user.getId());
 
-        // Parameter hinzufügen (immer mit AND verbunden)
-        hql += parameterHelper.getWhere("");
+        //Adding parameters (connected through AND)
+        HQL_session_select += parameterHelper.getWhere("");
 
-        // Query erstellen
-        org.hibernate.Query q = hb_session.createQuery(hql);
+        //Creating query
+        org.hibernate.Query Q_session_select = hb_session.createQuery(HQL_session_select);
 
-        // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
-        parameterHelper.applyParameter(q);
+        //Setting parameters via helper
+        parameterHelper.applyParameter(Q_session_select);
 
-        // Datenbank-Aufruf durchführen
-        List<Session> list = (java.util.List<Session>) q.list();
+        //Executing query
+        List<Session> sessionList = (java.util.List<Session>) Q_session_select.list();
 
-        if (list != null && list.size() > 0)
-        {
-          return list;
-        }
-        return null;
-  }
+        if (sessionList != null && sessionList.size() > 0)
+          return sessionList;
+        else 
+            return null;
+    }
   
-  public static List<Session> checkForExistingKollabSessions(org.hibernate.Session hb_session, LoginType login, TermUser user){
-      
-        String hql = "from Session ";
+    public static List<Session> checkForExistingKollabSessions(org.hibernate.Session hb_session, LoginType login, TermUser user){
+        String HQL_session_select = "from Session ";
 
         HQLParameterHelper parameterHelper = new HQLParameterHelper();
         parameterHelper.addParameter("", "termUserId",user.getId());
-        String[] str = login.getUsername().split(":");
-        parameterHelper.addParameter("", "collabUsername", str[1]);
+        String[] usernameArray = login.getUsername().split(":");
+        parameterHelper.addParameter("", "collabUsername", usernameArray[1]);
 
-        // Parameter hinzufügen (immer mit AND verbunden)
-        hql += parameterHelper.getWhere("");
+        //Adding parameters (connected through AND)
+        HQL_session_select += parameterHelper.getWhere("");
 
-        // Query erstellen
-        org.hibernate.Query q = hb_session.createQuery(hql);
+        //Creating query
+        org.hibernate.Query Q_session_select = hb_session.createQuery(HQL_session_select);
 
-        // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
-        parameterHelper.applyParameter(q);
+        //Parameters can be set now via helper
+        parameterHelper.applyParameter(Q_session_select);
 
-        // Datenbank-Aufruf durchführen
-        List<Session> list = (java.util.List<Session>) q.list();
+        //Executing query
+        List<Session> sessionList = (java.util.List<Session>) Q_session_select.list();
 
-        if (list != null && list.size() > 0)
-        {
-          return list;
-        }
-        return null;
-  }
+        if (sessionList != null && sessionList.size() > 0)
+          return sessionList;
+        else
+            return null;
+    }
   
-  public static void checkForDeadSessions(org.hibernate.Session hb_session){
+    public static void checkForDeadSessions(org.hibernate.Session hb_session){
         //GetSessions for collab_software
-        String hqlS = "from Session";
-        HQLParameterHelper parameterHelperS = new HQLParameterHelper();
+        String HQL_session_search = "from Session";
+        HQLParameterHelper paramHelper = new HQLParameterHelper();
         
-        hqlS += parameterHelperS.getWhere("");
-        org.hibernate.Query qS = hb_session.createQuery(hqlS);
-        parameterHelperS.applyParameter(qS);
-        List<Session> listS = (java.util.List<Session>) qS.list();
+        HQL_session_search += paramHelper.getWhere("");
+        org.hibernate.Query Q_session_search = hb_session.createQuery(HQL_session_search);
+        paramHelper.applyParameter(Q_session_search);
+        List<Session> sessionList = (java.util.List<Session>) Q_session_search.list();
         
         String sessionTimeStr = SysParameter.instance().getStringValue("killDeadSessionAfter", null, null);
-        Long sessionTime = 0l;
+        Long maxSessionTime;
         try{
-            sessionTime = Long.valueOf(sessionTimeStr);
-        }catch(Exception ex){
-            sessionTime = 43200000l;
+            maxSessionTime = Long.valueOf(sessionTimeStr);
+        }
+        catch(Exception ex){
+            LOGGER.error("Error [0114]", ex);
+            maxSessionTime = 43200000L;
         }
         
-        //Check for each Sessions which are older than "killDeadSessionAfter"-Time
-        for(Session s:listS){
-        
-            Date dateOfOrigin = s.getLastTimestamp();
+        //Check all sessions which are older than "killDeadSessionAfter"-Time
+        for(Session session:sessionList){
+            Date lastTimestamp = session.getLastTimestamp();
             Date now = new Date();
-            Long difference = now.getTime() - dateOfOrigin.getTime();
+            Long difference = now.getTime() - lastTimestamp.getTime();
 
-            if(difference >= sessionTime){
-                s.setTermUser(null);
-                hb_session.delete(s);
+            if(difference >= maxSessionTime){
+                try{
+                    session.setTermUser(null);
+                    hb_session.delete(session);
+                }
+                catch(Exception ex){
+                    LOGGER.error("Error [0115]", ex);
+                }
             }
         }
     }

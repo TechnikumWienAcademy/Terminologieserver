@@ -35,140 +35,127 @@ import java.util.Set;
  * TODO english translation
  * @author Mathias Aschhoff
  */
-public class UpdateValueSetStatus
-{
+public class UpdateValueSetStatus{
 
-  final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  public UpdateValueSetStatusResponseType updateValueSetStatus(UpdateValueSetStatusRequestType parameter)
-  {
-    if (logger.isInfoEnabled())
-    {
-      logger.info("====== UpdateValueSetStatus started ======");
-    }
+    public UpdateValueSetStatusResponseType updateValueSetStatus(UpdateValueSetStatusRequestType parameter){
+        LOGGER.info("+++++ updateValueSetStatus started +++++");
 
-    UpdateValueSetStatusResponseType response = new UpdateValueSetStatusResponseType();
-    response.setReturnInfos(new ReturnType());
+        UpdateValueSetStatusResponseType response = new UpdateValueSetStatusResponseType();
+        response.setReturnInfos(new ReturnType());
 
-    //Checking parameters
-    if (validateParameter(parameter, response) == false)
-    {
-      return response; // Parameter check failed
-    }
+        //Checking parameters
+        if (validateParameter(parameter, response) == false){
+            LOGGER.info("----- updateValueSetStatus finished (001) -----");
+            return response; // Parameter check failed
+        }
 
-    // Check login
-    //3.2.17 added second check
-    if (parameter != null)
-    {
-      if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
-        return response;
-    }
+        //Checking login
+        if (parameter != null)
+            if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
+                LOGGER.info("----- updateValueSetStatus finished (002) -----");
+                return response;
+            }
+    
+        if(parameter != null)
+            try{
+                ValueSet VS = parameter.getValueSet();
+                ValueSetVersion VSversion = null;
 
-    try
-    {
-      ValueSet vs = parameter.getValueSet();
-      ValueSetVersion vsv = null;
+                if (VS.getValueSetVersions() != null && VS.getValueSetVersions().size() > 0)
+                    VSversion = (ValueSetVersion) VS.getValueSetVersions().toArray()[0];
 
-      if (vs.getValueSetVersions() != null && vs.getValueSetVersions().size() > 0)
-        vsv = (ValueSetVersion) vs.getValueSetVersions().toArray()[0];
-
-      // Opening hibernate session
-      org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
-      hb_session.getTransaction().begin();
+                org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
+                hb_session.getTransaction().begin();
       
-      try
-      {
-        boolean changedVSStatus = false;
-        // Reading VS and VSV from DB, changing status and saving them again
-        ValueSet vs_db = null;
+                try{
+                    boolean changedVSStatus = false;
+                    // Reading VS and VSV from DB, changing status and saving them again
+                    ValueSet VS_db = null;
         
-        if(vs.getId() != null){
-           vs_db = (ValueSet) hb_session.get(ValueSet.class, vs.getId());
+                    if(VS.getId() != null){
+                        VS_db = (ValueSet) hb_session.get(ValueSet.class, VS.getId());
 
-            if (vs.getStatus() != null)
-            {
-              vs_db.setStatus(vs.getStatus());
-              hb_session.update(vs_db);
-            }
-        }else{
+                        if (VS.getStatus() != null){
+                            VS_db.setStatus(VS.getStatus());
+                            hb_session.update(VS_db);
+                        }
+                    }
+                    else if(VSversion != null){
+                        String HQL_VSV_select = "select distinct vsv from ValueSetVersion vsv join fetch vsv.valueSet vs WHERE vsv.versionId=" + VSversion.getVersionId();
+                        org.hibernate.Query Q_VSV_select = hb_session.createQuery(HQL_VSV_select);
+                        List VSVlist = Q_VSV_select.list();
+                        if(!VSVlist.isEmpty())
+                            VS_db = ((ValueSetVersion)VSVlist.get(0)).getValueSet();
+                    }
         
-            String hql = "select distinct vsv from ValueSetVersion vsv join fetch vsv.valueSet vs WHERE vsv.versionId=" + vsv.getVersionId();
-            org.hibernate.Query q = hb_session.createQuery(hql);
-            List vsv_list = q.list();
-            if(!vsv_list.isEmpty()){
-                vs_db = ((ValueSetVersion)vsv_list.get(0)).getValueSet();
-            }
-        }
-        
-        if (vsv != null)
-        {
-          ValueSetVersion vsv_db = (ValueSetVersion) hb_session.get(ValueSetVersion.class, vsv.getVersionId());
+                    if (VSversion != null){
+                        ValueSetVersion VSV_db = (ValueSetVersion) hb_session.get(ValueSetVersion.class, VSversion.getVersionId());
           
-          if(vsv.getStatus() != null){
-            vsv_db.setStatus(vsv.getStatus());
-            hb_session.update(vsv_db);
-          }
+                        if(VSversion.getStatus() != null){
+                            VSV_db.setStatus(VSversion.getStatus());
+                            hb_session.update(VSV_db);
+                        }
 					
-          //Matthias: uncommented based on Request from ELGA
-          //ChangePreviousVersionStatus(vsv_db, hb_session, vsv.getStatus());
+                        //Uncommented based on Request from ELGA
+                        //ChangePreviousVersionStatus(vsv_db, hb_session, vsv.getStatus());
 
-          // prüfen, ob ValueSet-Version die letzte Version ist, dann auch VS-Status ändern (!)
-          String hql = "select distinct vsv from ValueSetVersion vsv where vsv.previousVersionId=" + vsv_db.getVersionId();
-          org.hibernate.Query q = hb_session.createQuery(hql);
-          List vsv_list = q.list();
-          if (vsv_list == null || vsv_list.size() == 0)
-          {
-            // ValueSetVersion ist letzte Version, jetzt also auch ValueSet-Status ändern
-            vs_db.setStatus(vsv.getStatus());
-            hb_session.update(vs_db);
-            changedVSStatus = true;
-          }
-          LastChangeHelper.updateLastChangeDate(false, vsv_db.getVersionId(),hb_session);
-        }
-        hb_session.getTransaction().commit();
+                        //Check if VSV ist last version, then change VS status
+                        String HQL_VSV_select = "select distinct vsv from ValueSetVersion vsv where vsv.previousVersionId=" + VSV_db.getVersionId();
+                        org.hibernate.Query Q_VSV_select = hb_session.createQuery(HQL_VSV_select);
+                        List VSVlist = Q_VSV_select.list();
+                        if ((VSVlist == null || VSVlist.isEmpty()) && VS_db != null){
+                            // VSV is last version, change value set status
+                            VS_db.setStatus(VSversion.getStatus());
+                            hb_session.update(VS_db);
+                            changedVSStatus = true;
+                        }
+                        LastChangeHelper.updateLastChangeDate(false, VSV_db.getVersionId(),hb_session);
+                    }
+                    if(!hb_session.getTransaction().wasCommitted())
+                        hb_session.getTransaction().commit();
 
-        response.getReturnInfos().setCount(1);
+                    response.getReturnInfos().setCount(1);
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
+                    response.getReturnInfos().setStatus(ReturnType.Status.OK);
+                    response.getReturnInfos().setMessage("Status erfolgreich aktualisiert.");
+                    
+                    if(changedVSStatus)
+                        response.getReturnInfos().setMessage(response.getReturnInfos().getMessage() + "\nStatus der ValueSet-Version wurde ebenfalls aktualisiert, da alle ValueSet-Versionen von der Ã„nderung betroffen waren.");
+                }
+                catch (Exception ex){
+                    LOGGER.error("Error [0127]", ex);
+                    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                    response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                    response.getReturnInfos().setMessage("Fehler bei 'UpdateValueSetStatus': " + ex.getLocalizedMessage());
+                    try{
+                        if(!hb_session.getTransaction().wasRolledBack())
+                            hb_session.getTransaction().rollback();
+                    }
+                    catch(Exception e){
+                        LOGGER.error("Error [0128]: Rollback failed.", e);
+                    }
+                }
+                finally{
+                    if(hb_session.isOpen())
+                        hb_session.close();
+                }
+            }
+            catch (Exception ex){
+                LOGGER.error("Error [0129]", ex);
+                response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+                response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+                response.getReturnInfos().setMessage("Fehler bei 'UpdateValueSetStatus': " + ex.getLocalizedMessage());
+            }
+
         response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
         response.getReturnInfos().setStatus(ReturnType.Status.OK);
-        
-        response.getReturnInfos().setMessage("Status erfolgreich aktualisiert.");
-        if(changedVSStatus)
-          response.getReturnInfos().setMessage(response.getReturnInfos().getMessage() + "\nStatus der ValueSet-Version wurde ebenfalls aktualisiert, da alle ValueSet-Versionen von der Ã„nderung betroffen waren.");
-      }
-      catch (Exception e)
-      {
-          if(!hb_session.getTransaction().wasRolledBack())
-             hb_session.getTransaction().rollback();
-        // Fehlermeldung an den Aufrufer weiterleiten
-        response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-        response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-        response.getReturnInfos().setMessage("Fehler bei 'UpdateValueSetStatus': " + e.getLocalizedMessage());
-
-        logger.error("Fehler bei 'UpdateValueSetStatus' a: " + e.getLocalizedMessage());
-      }
-      finally
-      {
-          if(hb_session.isOpen())
-            hb_session.close();
-      }
-    }
-    catch (Exception e)
-    {
-      // Fehlermeldung an den Aufrufer weiterleiten
-      response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
-      response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
-      response.getReturnInfos().setMessage("Fehler bei 'UpdateValueSetStatus': " + e.getLocalizedMessage());
-
-      logger.error("Fehler bei 'UpdateValueSetStatus': b" + e.getLocalizedMessage());
-    }
-
-    // Alles OK
-    response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
-    response.getReturnInfos().setStatus(ReturnType.Status.OK);
-    response.getReturnInfos().setMessage("Status erfolgreich geändert");
+        response.getReturnInfos().setMessage("Status erfolgreich geändert");
     
-    return response;
-  }
+        LOGGER.info("----- updateValueSetStatus finished (003) -----");
+        return response;
+    }
 
   private void ChangePreviousVersionStatus(ValueSetVersion vsv, org.hibernate.Session hb_session, int new_status)
   {

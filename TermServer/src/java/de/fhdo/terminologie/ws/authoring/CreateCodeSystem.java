@@ -77,6 +77,7 @@ public class CreateCodeSystem{
         CodeSystem cs_return = null;
         CodeSystemVersion csv_return = null;
         org.hibernate.Session hb_session = null;
+        boolean hibernateSessionCreated = false;
         try{
             // The returned code-system and code-system version contain only the
             // code-system-ID, code-system-currentVersionID and the code-system-version-versionID.
@@ -88,6 +89,7 @@ public class CreateCodeSystem{
             hb_session = null;
 
             if (session == null){
+                hibernateSessionCreated = true;
                 hb_session = HibernateUtil.getSessionFactory().openSession();
                 hb_session.getTransaction().begin();
             }
@@ -222,7 +224,7 @@ public class CreateCodeSystem{
                         LOGGER.error("Error [0094]: " + e.getLocalizedMessage());
                     }
                 }
-                if(hb_session.isOpen())
+                if(hibernateSessionCreated && hb_session.isOpen())
                     hb_session.close();
             }
         }

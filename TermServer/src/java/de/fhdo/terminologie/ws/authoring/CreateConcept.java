@@ -353,7 +353,7 @@ public class CreateConcept{
                             response.setCodeSystemEntity(null);
                             LOGGER.warn("Create concept failed [0028], codeSystemEntityVersionID: " + codeSystemEntityVersionId);
                         }
-                        if(hb_session.isOpen())
+                        if(createHibernateSession && hb_session.isOpen())
                             hb_session.close();
                     }
                 }
