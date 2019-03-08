@@ -71,7 +71,7 @@ public class ImportCodeSystemNew{
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
 
-            if (loggedIn && !loginInfoType.getTermUser().isIsAdmin())
+            if (loginInfoType != null && !loginInfoType.getTermUser().isIsAdmin())
                     loggedIn = false;
         }
 
@@ -138,14 +138,14 @@ public class ImportCodeSystemNew{
      * @return false if one of the parameters is missing or invalid
      */
     private boolean validateParameter(ImportCodeSystemRequestType Request, ImportCodeSystemResponseType Response){
-        boolean erfolg = true;
+        boolean passed = true;
 
         if (Request.getImportInfos() == null){
-            erfolg = false;
+            passed = false;
             Response.getReturnInfos().setMessage("ImportInfos darf nicht null sein!");
         }
         else if (Request.getImportInfos().getFormatId() == null || Request.getImportInfos().getFormatId() == 0){
-            erfolg = false;
+            passed = false;
             Response.getReturnInfos().setMessage("Import-Format darf nicht null sein!");
         }
         else{
@@ -159,22 +159,22 @@ public class ImportCodeSystemNew{
                 formatID != ImportCodeSystemRequestType.IMPORT_LOINC_RELATIONS_ID &&
                 formatID != ImportCodeSystemRequestType.IMPORT_LeiKat_ID &&
                 formatID != ImportCodeSystemRequestType.IMPORT_SVS_ID){
-                    erfolg = false;
+                    passed = false;
                     Response.getReturnInfos().setMessage("Es muss ein gültiges Import-Format angegeben sein.");
             }
         }
         
         if (Request.getLogin() == null || Request.getLogin().getSessionID() == null || Request.getLogin().getSessionID().length() == 0){
-            erfolg = false;
+            passed = false;
             Response.getReturnInfos().setMessage("Login darf nicht null sein und es muss eine Session-ID angegeben sein!");
         }
 
-        if (!erfolg){
+        if (!passed){
             Response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             Response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
         }
 
-        return erfolg;
+        return passed;
     }
 
     /**

@@ -10,11 +10,11 @@
 <project name="TermBrowser" default="default" basedir=".">
     <description>Builds, tests, and runs the project TermBrowser.</description>
     <import file="nbproject/build-impl.xml"/>
-    <target name="-post-compile" description="Sets the buildversion for the current build">
+    <!--<target name="-post-compile" description="Sets the buildversion for the current build">
         <propertyfile file="${src.dir}/version.properties">
             <entry key="application.buildnumber" value="1" type="int" operation="+"/>
         </propertyfile>
-    </target>
+    </target> -->
     <!--
 
     There exist several targets which are by default empty and which can be 

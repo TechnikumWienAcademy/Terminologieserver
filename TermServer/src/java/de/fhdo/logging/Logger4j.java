@@ -26,42 +26,28 @@ import java.io.File;
 import org.apache.log4j.*;
 
 /**
- * Logger-Klasse. Einfach initialisieren mit "getInstance().getLogger()".
- *
+ * Logger-class, initialized with getInstance().getLogger.
  * @author Robert Muetzner
  */
 public class Logger4j {
-
-    /**
-     * Logging-Konfigurationsdatei
-     */
     private static final String LOG4J_CONFIG_FILE = "termserver_log4j.config.xml";
-
-    /**
-     * Der Logger
-     */
     private Logger logger = null;
-
-    /**
-     * Singleton-Instanz
-     */
     private static Logger4j instance = null;
 
-    public static Logger4j getInstance()
-    {
+    /**
+     * Initializes the instance if it is null. Then returns the instance.
+     * @return the singleton instance of the logger.
+     */
+    public static Logger4j getInstance(){
         if (instance == null)
-        {
             instance = new Logger4j();
-        }
         return instance;
     }
 
     /**
-     * Konstruktor. Privat wg. Singleton
-     *
+     * Private constructor for the singleton format. Calls initLogger().
      */
-    private Logger4j()
-    {
+    private Logger4j(){
         initLogger();
     }
 

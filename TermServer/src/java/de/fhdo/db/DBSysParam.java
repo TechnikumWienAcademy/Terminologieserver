@@ -28,182 +28,159 @@ import java.util.List;
 import org.hibernate.Session;
 
 /**
- Diese Klasse ist eine Hilfsklasse zum Auslesen und Speichern von
- Parametern in der Datenbank
-
- @author Robert Mützner (robert.muetzner@fh-dortmund.de)
+ * Reads various system parameters from the database and returns them.
+ * @author Robert Mützner
  */
-public class DBSysParam
-{
-  // Singleton-Muster
+public class DBSysParam{
+    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static DBSysParam instance = null;
 
-  private static DBSysParam instance = null;
-
-  public static DBSysParam instance()
-  {
-    //if (instance == null)
-    //{
-      instance = new DBSysParam();
-    //}
-    return instance;
-  }
-  // Konstanten
-  public static final long VALIDITY_DOMAIN_ID = 60;
-  public static final long VALIDITY_DOMAIN_SYSTEM = 1313;
-  public static final long VALIDITY_DOMAIN_MODULE = 1314;
-  public static final long VALIDITY_DOMAIN_SERVICE = 1315;
-  public static final long VALIDITY_DOMAIN_USERGROUP = 1316;
-  public static final long VALIDITY_DOMAIN_USER = 1317;
-
-  public DBSysParam()
-  {
-  }
-
-  /**
-   Listet alle verfügbaren Validity-Domains auf.
-
-   Eine Validity-Domain gibt eine Domäne an, für die ein Parameter
-   gültig ist. Beispiele für Validity-Domains sind:
-   1. System
-   2. Modul
-   3. Service
-   4. Benutzergruppe
-   5. Benutzer
-
-   @return List<DomainValue> - Liste mit Validity-Domains
-   */
-  public List<DomainValue> getValidityDomains()
-  {
-    List<DomainValue> list = null;
-
-    Session hb_session = HibernateUtil.getSessionFactory().openSession();
-    //hb_session.getTransaction().begin();
-
-    try
-    {
-      org.hibernate.Query q = hb_session.createQuery("from Domain WHERE domainId=:domain_id");
-      q.setParameter("domain_id", VALIDITY_DOMAIN_ID);
-
-      java.util.List<Domain> domainList = (java.util.List<Domain>) q.list();
-
-      if (domainList.size() == 1)
-      {
-        list = new LinkedList<DomainValue>(domainList.get(0).getDomainValues());
-      }
+    /**
+     * Singleton format: If the static instance is null, it is instantiated.
+     * Then the instance is returned.
+     * @return the static instance of the class.
+     */
+    public static DBSysParam instance(){
+        if (instance == null)
+            instance = new DBSysParam();
+        return instance;
     }
-    catch (Exception ex)
-    {
-      ex.printStackTrace();
-    }
-
-    hb_session.close();
-
-    return list;
-  }
-
-  /**
-   Liest ein Parameter aus der Datenbank.
-   Der Name des Parameters muss angegeben werden.
-   Validity-Domain und ObjectID sind optional. Diese werden angegeben,
-   wenn man z.B. einen Parameter für einen bestimmten Benutzer lesen
-   möchte. In diesem Fall gibt man bei Validity-Domain die ID für User an
-   und bei ObjectID die UserID.
-
-   @param Name Name des Parameters
-   @param ValidityDomain Validity-Domain (optional)
-   @param ObjectID Objekt-ID, z.B. User-ID (otional)
-   @return Parameter
-   */
-  public SysParam getValue(String Name, Long ValidityDomain, Long ObjectID)
-  {
-    SysParam setting = null;
-
-    Session hb_session = HibernateUtil.getSessionFactory().openSession();
-    //hb_session.getTransaction().begin();
-
-    try
-    {
-      org.hibernate.Query q;
-
-      if (ValidityDomain != null && ObjectID == null)
-      {
-        q = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd");
-        q.setParameter("name", Name);
-        q.setParameter("vd", ValidityDomain);
-      }
-      else if (ValidityDomain != null && ObjectID != null)
-      {
-        q = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd AND objectId=:objectid");
-        q.setParameter("name", Name);
-        q.setParameter("vd", ValidityDomain);
-        q.setParameter("objectid", ObjectID);
-      }
-      else
-      {
-        q = hb_session.createQuery("from SysParam WHERE name=:name ORDER BY validityDomain");
-        q.setParameter("name", Name);
-      }
-      q.setMaxResults(1);
-
-      java.util.List<SysParam> paramList = (java.util.List<SysParam>) q.list();
-
-      if (paramList.size() > 0)
-      {
-        // Genau 1 Ergebnis gefunden
-        setting = paramList.get(0);
-      }
-
-      if (setting == null && ObjectID != null && ObjectID > 0)
-      {
-        // Kein Ergebnis gefunden, aber User-ID angegeben
-        // Evtl. wurde dieser Parameter jedoch nicht überschrieben
-        // also den Standard-Parameter benutzen
-
-        
-        hb_session.close();
-
-        // TODO eigentlich müsste man 1 Ebene höher prüfen
-        // aber die ID ist ja nicht bekannt
-        // Bsp: Wenn User-Parameter nicht gefunden, dann müsste
-        //      in Usergroup gesucht werden
-        //      die Usergroup-ID ist jedoch nicht bekannt
-        return getValue(Name, null, null);
-      }
-
-    }
-    catch (Exception ex)
-    {
-      ex.printStackTrace();
-    }
-
     
-    hb_session.close();
+    /**
+     * Constants
+     */
+    public static final long VALIDITY_DOMAIN_ID = 60;
+    public static final long VALIDITY_DOMAIN_SYSTEM = 1313;
+    public static final long VALIDITY_DOMAIN_MODULE = 1314;
+    public static final long VALIDITY_DOMAIN_SERVICE = 1315;
+    public static final long VALIDITY_DOMAIN_USERGROUP = 1316;
+    public static final long VALIDITY_DOMAIN_USER = 1317;
 
-    return setting;
-  }
+    /**
+     * Lists all available validity-domains and returns them.
+     * A validity-domain is a domain, in which a parameter is valid.
+     * Examples: system, module, service, usergroup, user.
+     * @return the list of validity domains.
+     */
+    public List<DomainValue> getValidityDomains(){
+        
+        List<DomainValue> domainValueList = null;
+        Session hb_session = HibernateUtil.getSessionFactory().openSession();
 
-  public String getStringValue(String Name, Long ValidityDomain, Long ObjectID)
-  {
-    SysParam param = getValue(Name, ValidityDomain, ObjectID);
-    if (param != null && param.getValue() != null)
-      return param.getValue();
+        try{
+            org.hibernate.Query Q_domain_select = hb_session.createQuery("from Domain WHERE domainId=:domain_id");
+            Q_domain_select.setParameter("domain_id", VALIDITY_DOMAIN_ID);
 
-    return "";
-  }
+            java.util.List<Domain> domainList = (java.util.List<Domain>) Q_domain_select.list();
 
-  public Boolean getBoolValue(String Name, Long ValidityDomain, Long ObjectID)
-  {
-    SysParam param = getValue(Name, ValidityDomain, ObjectID);
-    try
-    {
-      if (param != null && param.getValue() != null)
-        return Boolean.parseBoolean(param.getValue());
+            if (domainList.size() == 1)
+                domainValueList = new LinkedList<DomainValue>(domainList.get(0).getDomainValues());
+        }
+        catch (Exception ex){
+            LOGGER.error("Error [0137]", ex);
+        }
+        finally{
+            if(hb_session.isOpen())
+                hb_session.close();
+        }
+        
+        return domainValueList;
     }
-    catch (Exception e)
-    {
-      return null;
+
+    /**
+     * Reads a parameter from the database, the name of the parameter has to be
+     * given. Validity-domain and object-ID are optional. They can be set if you
+     * want to read a parameter for the given validity-domain and the object
+     * with the given object-ID. (For example user as validity-domain and the
+     * user's ID as object-ID.)
+     * @param Name the name of the parameter to be read.
+     * @param ValidityDomain the validity-domain for which to filter (optional).
+     * @param ObjectID the ID of the object for which to filter the domain (optional).
+     * @return the value which was read from the databse.
+     */
+    public SysParam getValue(String Name, Long ValidityDomain, Long ObjectID){
+        
+        SysParam returnValue = null;
+        Session hb_session = HibernateUtil.getSessionFactory().openSession();
+    
+        try{
+            org.hibernate.Query Q_sysParam_select;
+
+            if (ValidityDomain != null && ObjectID == null){
+                Q_sysParam_select = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd");
+                Q_sysParam_select.setParameter("name", Name);
+                Q_sysParam_select.setParameter("vd", ValidityDomain);
+            }
+            else if (ValidityDomain != null && ObjectID != null){
+                Q_sysParam_select = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd AND objectId=:objectid");
+                Q_sysParam_select.setParameter("name", Name);
+                Q_sysParam_select.setParameter("vd", ValidityDomain);
+                Q_sysParam_select.setParameter("objectid", ObjectID);
+            }
+            else{
+                Q_sysParam_select = hb_session.createQuery("from SysParam WHERE name=:name ORDER BY validityDomain");
+                Q_sysParam_select.setParameter("name", Name);
+            }
+            Q_sysParam_select.setMaxResults(1);
+
+            java.util.List<SysParam> paramList = (java.util.List<SysParam>) Q_sysParam_select.list();
+
+            if (paramList.size() > 0)
+                returnValue = paramList.get(0);
+
+            if (returnValue == null && ObjectID != null && ObjectID > 0){
+                //No result found, user-ID given: maybe that parameter has not been
+                //overwritten -> using standard parameter
+                if(hb_session.isOpen())
+                    hb_session.close();
+                
+                return getValue(Name, null, null);
+            }
+        }
+        catch (Exception ex){
+            LOGGER.error("Error [0138]", ex);
+        }
+        finally{
+            if(hb_session.isOpen())
+                hb_session.close();
+        }
+    
+        return returnValue;
     }
 
-    return null;
-  }
+    /**
+     * Calls getValue with the parameters given to this function.
+     * @param Name see getValue.
+     * @param ValidityDomain see getValue.
+     * @param ObjectID see getValue.
+     * @return the result of the call if it is not null, otherwise "".
+     */
+    public String getStringValue(String Name, Long ValidityDomain, Long ObjectID){
+        SysParam param = getValue(Name, ValidityDomain, ObjectID);
+        if (param != null && param.getValue() != null)
+            return param.getValue();
+
+        return "";
+    }
+
+    /**
+     * Calls getValue with the parameters given to this function and parses the
+     * returned value to a boolean.
+     * @param Name see getValue.
+     * @param ValidityDomain see getValue.
+     * @param ObjectID see getValue.
+     * @return the result of the call, parsed to boolean or null if that fails.
+     */
+    public Boolean getBoolValue(String Name, Long ValidityDomain, Long ObjectID){
+        SysParam param = getValue(Name, ValidityDomain, ObjectID);
+        try{
+            if (param != null && param.getValue() != null)
+                return Boolean.parseBoolean(param.getValue());
+        }
+        catch (Exception e){
+            LOGGER.error("Error [0139]", e);
+        }
+        
+        return null;
+    }
 }

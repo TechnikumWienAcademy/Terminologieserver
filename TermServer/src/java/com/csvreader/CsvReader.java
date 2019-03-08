@@ -34,464 +34,426 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 
 /**
- * A stream based parser for parsing delimited text data from a file or a stream.
+ * A stream based parser for delimited text data from a file or a stream.
  */
 public class CsvReader {
-	private Reader inputStream = null;
-	private String fileName = null;
-
-	// This holds all the values for switches that the user is allowed to set
-	private final UserSettings userSettings = new UserSettings();
-
-	private Charset charset = null;
-
-	private boolean useCustomRecordDelimiter = false;
-
-	// This will be our working buffer to hold data chunks
-	// read in from the data file
-
-	private DataBuffer dataBuffer = new DataBuffer();
-
-	private ColumnBuffer columnBuffer = new ColumnBuffer();
-
-	private RawRecordBuffer rawBuffer = new RawRecordBuffer();
-
-	private boolean[] isQualified = null;
-
-	private String rawRecord = "";
-
-	private HeadersHolder headersHolder = new HeadersHolder();
-
-	// these are all more or less global loop variables
-	// to keep from needing to pass them all into various
-	// methods during parsing
-
-	private boolean startedColumn = false;
-
-	private boolean startedWithQualifier = false;
-
-	private boolean hasMoreData = true;
-
-	private char lastLetter = '\0';
-
-	private boolean hasReadNextLine = false;
-
-	private int columnsCount = 0;
-
-	private long currentRecord = 0;
-
-	private String[] values = new String[StaticSettings.INITIAL_COLUMN_COUNT];
-
-	private boolean initialized = false;
-
-	private boolean closed = false;
-
-	/**
-	 * Double up the text qualifier to represent an occurance of the text
-	 * qualifier.
-	 */
-	public static final int ESCAPE_MODE_DOUBLED = 1;
-
-	/**
-	 * Use a backslash character before the text qualifier to represent an
-	 * occurance of the text qualifier.
-	 */
-	public static final int ESCAPE_MODE_BACKSLASH = 2;
-
-	/**
-	 * Creates a {@link com.csvreader.CsvReader CsvReader} object using a file
-	 * as the data source.
-	 * 
-	 * @param fileName
-	 *            The path to the file to use as the data source.
-	 * @param delimiter
-	 *            The character to use as the column delimiter.
-	 * @param charset
-	 *            The {@link java.nio.charset.Charset Charset} to use while
-	 *            parsing the data.
-	 */
-	public CsvReader(String fileName, char delimiter, Charset charset)
-			throws FileNotFoundException {
-		if (fileName == null) {
-			throw new IllegalArgumentException(
-					"Parameter fileName can not be null.");
-		}
-
-		if (charset == null) {
-			throw new IllegalArgumentException(
-					"Parameter charset can not be null.");
-		}
-
-		if (!new File(fileName).exists()) {
-			throw new FileNotFoundException("File " + fileName
-					+ " does not exist.");
-		}
-
-		this.fileName = fileName;
-		this.userSettings.Delimiter = delimiter;
-		this.charset = charset;
-
-		isQualified = new boolean[values.length];
-	}
-
-	/**
-	 * Creates a {@link com.csvreader.CsvReader CsvReader} object using a file
-	 * as the data source.&nbsp;Uses ISO-8859-1 as the
-	 * {@link java.nio.charset.Charset Charset}.
-	 * 
-	 * @param fileName
-	 *            The path to the file to use as the data source.
-	 * @param delimiter
-	 *            The character to use as the column delimiter.
-	 */
-	public CsvReader(String fileName, char delimiter)
-			throws FileNotFoundException {
-		this(fileName, delimiter, Charset.forName("ISO-8859-1"));
-	}
-
-	/**
-	 * Creates a {@link com.csvreader.CsvReader CsvReader} object using a file
-	 * as the data source.&nbsp;Uses a comma as the column delimiter and
-	 * ISO-8859-1 as the {@link java.nio.charset.Charset Charset}.
-	 * 
-	 * @param fileName
-	 *            The path to the file to use as the data source.
-	 */
-	public CsvReader(String fileName) throws FileNotFoundException {
-		this(fileName, Letters.COMMA);
-	}
-
-	/**
-	 * Constructs a {@link com.csvreader.CsvReader CsvReader} object using a
-	 * {@link java.io.Reader Reader} object as the data source.
-	 * 
-	 * @param inputStream
-	 *            The stream to use as the data source.
-	 * @param delimiter
-	 *            The character to use as the column delimiter.
-	 */
-	public CsvReader(Reader inputStream, char delimiter) {
-		if (inputStream == null) {
-			throw new IllegalArgumentException(
-					"Parameter inputStream can not be null.");
-		}
-
-		this.inputStream = inputStream;
-		this.userSettings.Delimiter = delimiter;
-		initialized = true;
-
-		isQualified = new boolean[values.length];
-	}
-
-	/**
-	 * Constructs a {@link com.csvreader.CsvReader CsvReader} object using a
-	 * {@link java.io.Reader Reader} object as the data source.&nbsp;Uses a
-	 * comma as the column delimiter.
-	 * 
-	 * @param inputStream
-	 *            The stream to use as the data source.
-	 */
-	public CsvReader(Reader inputStream) {
-		this(inputStream, Letters.COMMA);
-	}
-
-	/**
-	 * Constructs a {@link com.csvreader.CsvReader CsvReader} object using an
-	 * {@link java.io.InputStream InputStream} object as the data source.
-	 * 
-	 * @param inputStream
-	 *            The stream to use as the data source.
-	 * @param delimiter
-	 *            The character to use as the column delimiter.
-	 * @param charset
-	 *            The {@link java.nio.charset.Charset Charset} to use while
-	 *            parsing the data.
-	 */
-	public CsvReader(InputStream inputStream, char delimiter, Charset charset) {
-		this(new InputStreamReader(inputStream, charset), delimiter);
-	}
-
-	/**
-	 * Constructs a {@link com.csvreader.CsvReader CsvReader} object using an
-	 * {@link java.io.InputStream InputStream} object as the data
-	 * source.&nbsp;Uses a comma as the column delimiter.
-	 * 
-	 * @param inputStream
-	 *            The stream to use as the data source.
-	 * @param charset
-	 *            The {@link java.nio.charset.Charset Charset} to use while
-	 *            parsing the data.
-	 */
-	public CsvReader(InputStream inputStream, Charset charset) {
-		this(new InputStreamReader(inputStream, charset));
-	}
-
-	public boolean getCaptureRawRecord() {
-		return userSettings.CaptureRawRecord;
-	}
-
-	public void setCaptureRawRecord(boolean captureRawRecord) {
-		userSettings.CaptureRawRecord = captureRawRecord;
-	}
-
-	public String getRawRecord() {
-		return rawRecord;
-	}
-
-	/**
-	 * Gets whether leading and trailing whitespace characters are being trimmed
-	 * from non-textqualified column data. Default is true.
-	 * 
-	 * @return Whether leading and trailing whitespace characters are being
-	 *         trimmed from non-textqualified column data.
-	 */
-	public boolean getTrimWhitespace() {
-		return userSettings.TrimWhitespace;
-	}
-
-	/**
-	 * Sets whether leading and trailing whitespace characters should be trimmed
-	 * from non-textqualified column data or not. Default is true.
-	 * 
-	 * @param trimWhitespace
-	 *            Whether leading and trailing whitespace characters should be
-	 *            trimmed from non-textqualified column data or not.
-	 */
-	public void setTrimWhitespace(boolean trimWhitespace) {
-		userSettings.TrimWhitespace = trimWhitespace;
-	}
-
-	/**
-	 * Gets the character being used as the column delimiter. Default is comma,
-	 * ','.
-	 * 
-	 * @return The character being used as the column delimiter.
-	 */
-	public char getDelimiter() {
-		return userSettings.Delimiter;
-	}
-
-	/**
-	 * Sets the character to use as the column delimiter. Default is comma, ','.
-	 * 
-	 * @param delimiter
-	 *            The character to use as the column delimiter.
-	 */
-	public void setDelimiter(char delimiter) {
-		userSettings.Delimiter = delimiter;
-	}
-
-	public char getRecordDelimiter() {
-		return userSettings.RecordDelimiter;
-	}
-
-	/**
-	 * Sets the character to use as the record delimiter.
-	 * 
-	 * @param recordDelimiter
-	 *            The character to use as the record delimiter. Default is
-	 *            combination of standard end of line characters for Windows,
-	 *            Unix, or Mac.
-	 */
-	public void setRecordDelimiter(char recordDelimiter) {
-		useCustomRecordDelimiter = true;
-		userSettings.RecordDelimiter = recordDelimiter;
-	}
-
-	/**
-	 * Gets the character to use as a text qualifier in the data.
-	 * 
-	 * @return The character to use as a text qualifier in the data.
-	 */
-	public char getTextQualifier() {
-		return userSettings.TextQualifier;
-	}
-
-	/**
-	 * Sets the character to use as a text qualifier in the data.
-	 * 
-	 * @param textQualifier
-	 *            The character to use as a text qualifier in the data.
-	 */
-	public void setTextQualifier(char textQualifier) {
-		userSettings.TextQualifier = textQualifier;
-	}
-
-	/**
-	 * Whether text qualifiers will be used while parsing or not.
-	 * 
-	 * @return Whether text qualifiers will be used while parsing or not.
-	 */
-	public boolean getUseTextQualifier() {
-		return userSettings.UseTextQualifier;
-	}
-
-	/**
-	 * Sets whether text qualifiers will be used while parsing or not.
-	 * 
-	 * @param useTextQualifier
-	 *            Whether to use a text qualifier while parsing or not.
-	 */
-	public void setUseTextQualifier(boolean useTextQualifier) {
-		userSettings.UseTextQualifier = useTextQualifier;
-	}
-
-	/**
-	 * Gets the character being used as a comment signal.
-	 * 
-	 * @return The character being used as a comment signal.
-	 */
-	public char getComment() {
-		return userSettings.Comment;
-	}
-
-	/**
-	 * Sets the character to use as a comment signal.
-	 * 
-	 * @param comment
-	 *            The character to use as a comment signal.
-	 */
-	public void setComment(char comment) {
-		userSettings.Comment = comment;
-	}
-
-	/**
-	 * Gets whether comments are being looked for while parsing or not.
-	 * 
-	 * @return Whether comments are being looked for while parsing or not.
-	 */
-	public boolean getUseComments() {
-		return userSettings.UseComments;
-	}
-
-	/**
-	 * Sets whether comments are being looked for while parsing or not.
-	 * 
-	 * @param useComments
-	 *            Whether comments are being looked for while parsing or not.
-	 */
-	public void setUseComments(boolean useComments) {
-		userSettings.UseComments = useComments;
-	}
-
-	/**
-	 * Gets the current way to escape an occurance of the text qualifier inside
-	 * qualified data.
-	 * 
-	 * @return The current way to escape an occurance of the text qualifier
-	 *         inside qualified data.
-	 */
-	public int getEscapeMode() {
-		return userSettings.EscapeMode;
-	}
-
-	/**
-	 * Sets the current way to escape an occurance of the text qualifier inside
-	 * qualified data.
-	 * 
-	 * @param escapeMode
-	 *            The way to escape an occurance of the text qualifier inside
-	 *            qualified data.
-	 * @exception IllegalArgumentException
-	 *                When an illegal value is specified for escapeMode.
-	 */
-	public void setEscapeMode(int escapeMode) throws IllegalArgumentException {
-		if (escapeMode != ESCAPE_MODE_DOUBLED
-				&& escapeMode != ESCAPE_MODE_BACKSLASH) {
-			throw new IllegalArgumentException(
-					"Parameter escapeMode must be a valid value.");
-		}
-
-		userSettings.EscapeMode = escapeMode;
-	}
-
-	public boolean getSkipEmptyRecords() {
-		return userSettings.SkipEmptyRecords;
-	}
-
-	public void setSkipEmptyRecords(boolean skipEmptyRecords) {
-		userSettings.SkipEmptyRecords = skipEmptyRecords;
-	}
-
-	/**
-	 * Safety caution to prevent the parser from using large amounts of memory
-	 * in the case where parsing settings like file encodings don't end up
-	 * matching the actual format of a file. This switch can be turned off if
-	 * the file format is known and tested. With the switch off, the max column
-	 * lengths and max column count per record supported by the parser will
-	 * greatly increase. Default is true.
-	 * 
-	 * @return The current setting of the safety switch.
-	 */
-	public boolean getSafetySwitch() {
-		return userSettings.SafetySwitch;
-	}
-
-	/**
-	 * Safety caution to prevent the parser from using large amounts of memory
-	 * in the case where parsing settings like file encodings don't end up
-	 * matching the actual format of a file. This switch can be turned off if
-	 * the file format is known and tested. With the switch off, the max column
-	 * lengths and max column count per record supported by the parser will
-	 * greatly increase. Default is true.
-	 * 
-	 * @param safetySwitch
-	 */
-	public void setSafetySwitch(boolean safetySwitch) {
-		userSettings.SafetySwitch = safetySwitch;
-	}
-
-	/**
-	 * Gets the count of columns found in this record.
-	 * 
-	 * @return The count of columns found in this record.
-	 */
-	public int getColumnCount() {
-		return columnsCount;
-	}
-
-	/**
-	 * Gets the index of the current record.
-	 * 
-	 * @return The index of the current record.
-	 */
-	public long getCurrentRecord() {
-		return currentRecord - 1;
-	}
-
-	/**
-	 * Gets the count of headers read in by a previous call to
-	 * {@link com.csvreader.CsvReader#readHeaders readHeaders()}.
-	 * 
-	 * @return The count of headers read in by a previous call to
-	 *         {@link com.csvreader.CsvReader#readHeaders readHeaders()}.
-	 */
-	public int getHeaderCount() {
-		return headersHolder.Length;
-	}
-
-	/**
-	 * Returns the header values as a string array.
-	 * 
-	 * @return The header values as a String array.
-	 * @exception IOException
-	 *                Thrown if this object has already been closed.
-	 */
-	public String[] getHeaders() throws IOException {
-		checkClosed();
-
-		if (headersHolder.Headers == null) {
-			return null;
-		} else {
-			// use clone here to prevent the outside code from
-			// setting values on the array directly, which would
-			// throw off the index lookup based on header name
-			String[] clone = new String[headersHolder.Length];
-			System.arraycopy(headersHolder.Headers, 0, clone, 0,
-					headersHolder.Length);
-			return clone;
-		}
-	}
+    private Reader inputStream = null;
+    private String fileName = null;
+
+    /**
+     * Settings which can be set by the user.
+     */
+    private final UserSettings userSettings = new UserSettings();
+    private Charset charset = null;
+    private boolean useCustomRecordDelimiter = false;
+
+    /**
+     * Buffers to hold data while reading the stream.
+     */
+    private final DataBuffer dataBuffer = new DataBuffer();
+    private final ColumnBuffer columnBuffer = new ColumnBuffer();
+    private final RawRecordBuffer rawBuffer = new RawRecordBuffer();
+    private boolean[] isQualified = null;
+    private String rawRecord = "";
+    private final HeadersHolder headersHolder = new HeadersHolder();
+
+    /**
+     * Global loop variables, implemented here so they do not have to be passed
+     * around during parsing the stream.
+     */
+    private boolean startedColumn = false;
+    private boolean startedWithQualifier = false;
+    private boolean hasMoreData = true;
+    private char lastLetter = '\0';
+    private boolean hasReadNextLine = false;
+    private int columnsCount = 0;
+    private long currentRecord = 0;
+    private String[] values = new String[StaticSettings.INITIAL_COLUMN_COUNT];
+    private boolean initialized = false;
+    private boolean closed = false;
+
+    /**
+     * Double up the text qualifier to represent an occurance of the text qualifier.
+     */
+    public static final int ESCAPE_MODE_DOUBLED = 1;
+
+    /**
+     * Use a backslash character before the text qualifier to represent an occurance of the text qualifier.
+     */
+    public static final int ESCAPE_MODE_BACKSLASH = 2;
+
+    /**
+     * Creates a {@link com.csvreader.CsvReader CsvReader} object using a file
+     * as the data source, setting the delimiter and charset in the process.
+     * 
+     * @param fileName The path to the file to use as the data source.
+     * @param delimiter The character which seperates the columns.
+     * @param charset The {@link java.nio.charset.Charset Charset} to use while parsing the data.
+     * @throws java.io.FileNotFoundException Thrown if the file does not exist.
+     */
+    public CsvReader(String fileName, char delimiter, Charset charset) throws FileNotFoundException, IllegalArgumentException {
+        if (fileName == null)
+            throw new IllegalArgumentException("Parameter fileName can not be null.");
+        
+        if (charset == null) 
+            throw new IllegalArgumentException("Parameter charset can not be null.");
+		
+        if (!new File(fileName).exists())
+            throw new FileNotFoundException("File " + fileName + " does not exist.");
+        
+        this.fileName = fileName;
+        this.userSettings.Delimiter = delimiter;
+        this.charset = charset;
+        isQualified = new boolean[values.length];
+    }
+
+    /**
+     * Creates a {@link com.csvreader.CsvReader CsvReader} object using a file
+     * as the data source and sets the delimiter. 
+     * Uses ISO-8859-1 as the {@link java.nio.charset.Charset Charset}.
+     * 
+     * @param fileName The path to the file to use as the data source.
+     * @param delimiter The character to use to seperate the columns.
+     * @throws java.io.FileNotFoundException Thrown if the file does not exist.
+     */
+    public CsvReader(String fileName, char delimiter) throws FileNotFoundException, IllegalArgumentException {
+        this(fileName, delimiter, Charset.forName("ISO-8859-1"));
+    }
+
+    /**
+     * Creates a {@link com.csvreader.CsvReader CsvReader} object using a file
+     * as the data source.
+     * Uses a comma as the column delimiter and ISO-8859-1 as the {@link java.nio.charset.Charset Charset}.
+     * 
+     * @param fileName The path to the file to use as the data source.
+     * @throws java.io.FileNotFoundException Thrown if the file does not exist.
+    */
+    public CsvReader(String fileName) throws FileNotFoundException, IllegalArgumentException {
+        this(fileName, Letters.COMMA);
+    }
+
+    /**
+     * Constructs a {@link com.csvreader.CsvReader CsvReader} object using a
+     * {@link java.io.Reader Reader} object as the data source.
+     * 
+     * @param inputStream The stream to use as the data source.
+     * @param delimiter The character to use as the column delimiter.
+     * @throws IllegalArgumentException Thrown if the inputStream is null.
+    */
+    public CsvReader(Reader inputStream, char delimiter) throws IllegalArgumentException {
+        if (inputStream == null)
+            throw new IllegalArgumentException("Parameter inputStream can not be null.");
+
+        this.inputStream = inputStream;
+        this.userSettings.Delimiter = delimiter;
+        initialized = true;
+        isQualified = new boolean[values.length];
+    }
+
+    /**
+     * Constructs a {@link com.csvreader.CsvReader CsvReader} object using a
+     * {@link java.io.Reader Reader} object as the data source.&nbsp;Uses a
+     * comma as the column delimiter.
+     * 
+     * @param inputStream The stream to use as the data source.
+     */
+    public CsvReader(Reader inputStream) {
+        this(inputStream, Letters.COMMA);
+    }
+
+    /**
+     * Constructs a {@link com.csvreader.CsvReader CsvReader} object using an
+     * {@link java.io.InputStream InputStream} object as the data source.
+     * 
+     * @param inputStream
+     *            The stream to use as the data source.
+     * @param delimiter
+     *            The character to use as the column delimiter.
+     * @param charset
+     *            The {@link java.nio.charset.Charset Charset} to use while
+     *            parsing the data.
+     */
+    public CsvReader(InputStream inputStream, char delimiter, Charset charset) {
+        this(new InputStreamReader(inputStream, charset), delimiter);
+    }
+
+    /**
+     * Constructs a {@link com.csvreader.CsvReader CsvReader} object using an
+     * {@link java.io.InputStream InputStream} object as the data
+     * source.&nbsp;Uses a comma as the column delimiter.
+     * 
+     * @param inputStream
+     *            The stream to use as the data source.
+     * @param charset
+     *            The {@link java.nio.charset.Charset Charset} to use while
+     *            parsing the data.
+     */
+    public CsvReader(InputStream inputStream, Charset charset) {
+        this(new InputStreamReader(inputStream, charset));
+    }
+
+    public boolean getCaptureRawRecord() {
+        return userSettings.CaptureRawRecord;
+    }
+
+    public void setCaptureRawRecord(boolean captureRawRecord) {
+        userSettings.CaptureRawRecord = captureRawRecord;
+    }
+
+    public String getRawRecord() {
+        return rawRecord;
+    }
+
+    /**
+     * Gets whether leading and trailing whitespace characters are being trimmed
+     * from non-textqualified column data. Default is true.
+     * 
+     * @return Whether leading and trailing whitespace characters are being
+     *         trimmed from non-textqualified column data.
+     */
+    public boolean getTrimWhitespace() {
+        return userSettings.TrimWhitespace;
+    }
+
+    /**
+     * Sets whether leading and trailing whitespace characters should be trimmed
+     * from non-textqualified column data or not. Default is true.
+     * 
+     * @param trimWhitespace
+     *            Whether leading and trailing whitespace characters should be
+     *            trimmed from non-textqualified column data or not.
+    */
+    public void setTrimWhitespace(boolean trimWhitespace) {
+        userSettings.TrimWhitespace = trimWhitespace;
+    }
+
+    /**
+     * Gets the character being used as the column delimiter. Default is comma,
+     * ','.
+     * 
+     * @return The character being used as the column delimiter.
+     */
+    public char getDelimiter() {
+        return userSettings.Delimiter;
+    }
+
+    /**
+     * Sets the character to use as the column delimiter. Default is comma, ','.
+     * 
+     * @param delimiter
+     *            The character to use as the column delimiter.
+     */
+    public void setDelimiter(char delimiter) {
+        userSettings.Delimiter = delimiter;
+    }
+
+    public char getRecordDelimiter() {
+        return userSettings.RecordDelimiter;
+    }
+
+    /**
+     * Sets the character to use as the record delimiter.
+     * 
+     * @param recordDelimiter
+     *            The character to use as the record delimiter. Default is
+     *            combination of standard end of line characters for Windows,
+     *            Unix, or Mac.
+     */
+    public void setRecordDelimiter(char recordDelimiter) {
+        useCustomRecordDelimiter = true;
+        userSettings.RecordDelimiter = recordDelimiter;
+    }
+
+    /**
+     * Gets the character to use as a text qualifier in the data.
+     * 
+     * @return The character to use as a text qualifier in the data.
+     */
+    public char getTextQualifier() {
+        return userSettings.TextQualifier;
+    }
+
+    /**
+     * Sets the character to use as a text qualifier in the data.
+     * 
+     * @param textQualifier
+     *            The character to use as a text qualifier in the data.
+     */
+    public void setTextQualifier(char textQualifier) {
+            userSettings.TextQualifier = textQualifier;
+    }
+
+    /**
+     * Whether text qualifiers will be used while parsing or not.
+     * 
+     * @return Whether text qualifiers will be used while parsing or not.
+     */
+    public boolean getUseTextQualifier() {
+            return userSettings.UseTextQualifier;
+    }
+
+    /**
+     * Sets whether text qualifiers will be used while parsing or not.
+     * 
+     * @param useTextQualifier
+     *            Whether to use a text qualifier while parsing or not.
+     */
+    public void setUseTextQualifier(boolean useTextQualifier) {
+            userSettings.UseTextQualifier = useTextQualifier;
+    }
+
+    /**
+     * Gets the character being used as a comment signal.
+     * 
+     * @return The character being used as a comment signal.
+     */
+    public char getComment() {
+            return userSettings.Comment;
+    }
+
+    /**
+     * Sets the character to use as a comment signal.
+     * 
+     * @param comment
+     *            The character to use as a comment signal.
+     */
+    public void setComment(char comment) {
+            userSettings.Comment = comment;
+    }
+
+    /**
+     * Gets whether comments are being looked for while parsing or not.
+     * 
+     * @return Whether comments are being looked for while parsing or not.
+     */
+    public boolean getUseComments() {
+            return userSettings.UseComments;
+    }
+
+    /**
+     * Sets whether comments are being looked for while parsing or not.
+     * 
+     * @param useComments
+     *            Whether comments are being looked for while parsing or not.
+     */
+    public void setUseComments(boolean useComments) {
+            userSettings.UseComments = useComments;
+    }
+
+    /**
+     * Gets the current way to escape an occurance of the text qualifier inside
+     * qualified data.
+     * 
+     * @return The current way to escape an occurance of the text qualifier
+     *         inside qualified data.
+     */
+    public int getEscapeMode() {
+            return userSettings.EscapeMode;
+    }
+
+    /**
+     * Sets the current way to escape an occurance of the text qualifier inside
+     * qualified data.
+     * 
+     * @param escapeMode
+     *            The way to escape an occurance of the text qualifier inside
+     *            qualified data.
+     * @exception IllegalArgumentException
+     *                When an illegal value is specified for escapeMode.
+     */
+    public void setEscapeMode(int escapeMode) throws IllegalArgumentException {
+        if (escapeMode != ESCAPE_MODE_DOUBLED && escapeMode != ESCAPE_MODE_BACKSLASH) 
+            throw new IllegalArgumentException("Parameter escapeMode must be a valid value.");
+            
+        userSettings.EscapeMode = escapeMode;
+    }
+
+    public boolean getSkipEmptyRecords() {
+        return userSettings.SkipEmptyRecords;
+    }
+
+    public void setSkipEmptyRecords(boolean skipEmptyRecords) {
+        userSettings.SkipEmptyRecords = skipEmptyRecords;
+    }
+
+    /**
+     * Safety caution to prevent the parser from using large amounts of memory
+     * in the case where parsing settings like file encodings don't end up
+     * matching the actual format of a file. This switch can be turned off if
+     * the file format is known and tested. With the switch off, the max column
+     * lengths and max column count per record supported by the parser will
+     * greatly increase. Default is true.
+     * 
+     * @return The current setting of the safety switch.
+     */
+    public boolean getSafetySwitch() {
+        return userSettings.SafetySwitch;
+    }
+
+    /**
+     * Safety caution to prevent the parser from using large amounts of memory
+     * in the case where parsing settings like file encodings don't end up
+     * matching the actual format of a file. This switch can be turned off if
+     * the file format is known and tested. With the switch off, the max column
+     * lengths and max column count per record supported by the parser will
+     * greatly increase. Default is true.
+     * 
+     * @param safetySwitch
+     */
+    public void setSafetySwitch(boolean safetySwitch) {
+        userSettings.SafetySwitch = safetySwitch;
+    }
+
+    /**
+     * Gets the count of columns found in this record.
+     * 
+     * @return The count of columns found in this record.
+     */
+    public int getColumnCount() {
+        return columnsCount;
+    }
+
+    /**
+     * Gets the index of the current record.
+     * 
+     * @return The index of the current record.
+     */
+    public long getCurrentRecord() {
+        return currentRecord - 1;
+    }
+
+    /**
+     * Gets the count of headers read in by a previous call to
+     * {@link com.csvreader.CsvReader#readHeaders readHeaders()}.
+     * 
+     * @return The count of headers read in by a previous call to
+     *         {@link com.csvreader.CsvReader#readHeaders readHeaders()}.
+     */
+    public int getHeaderCount() {
+       return headersHolder.Length;
+    }
+
+    /**
+     * Returns the header values as a string array.
+     * 
+     * @return The header values as a String array.
+     * @exception IOException
+     *                Thrown if this object has already been closed.
+     */
+    public String[] getHeaders() throws IOException {
+        checkClosed();
+
+        if (headersHolder.Headers == null)
+            return null;
+        else {
+            // use clone here to prevent the outside code from
+            // setting values on the array directly, which would
+            // throw off the index lookup based on header name
+            String[] clone = new String[headersHolder.Length];
+            System.arraycopy(headersHolder.Headers, 0, clone, 0, headersHolder.Length);
+            return clone;
+        }
+    }
 
 	public void setHeaders(String[] headers) {
 		headersHolder.Headers = headers;
