@@ -1,4 +1,8 @@
-﻿Changelog 3.2.29
+﻿Changelog 3.2.30
+	-Änderungen
+		.) Neuanlieferung nach einem Build-Fehler der TermBrowser-WAR-Datei.
+
+Changelog 3.2.29
 	-Bugfixes
 		.) EHTSOID-200: Der Claml-Import funktioniert wieder.
 
