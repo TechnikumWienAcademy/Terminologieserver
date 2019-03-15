@@ -86,8 +86,6 @@ public class CreateCodeSystem{
             csv_return = new CodeSystemVersion();
 
             // Opening hibernate session
-            hb_session = null;
-
             if (session == null){
                 hibernateSessionCreated = true;
                 hb_session = HibernateUtil.getSessionFactory().openSession();
@@ -205,8 +203,9 @@ public class CreateCodeSystem{
             // Closing transaction
             if(hb_session != null){
                 if(cs_return != null && csv_return != null && cs_return.getId() > 0 && csv_return.getVersionId() > 0){
-                    if(!hb_session.getTransaction().wasCommitted())
-                        hb_session.getTransaction().commit();
+                    //if(!hb_session.getTransaction().wasCommitted())
+                        //hb_session.getTransaction().commit(); //DABACA vielleicht auf flush ändern
+                    hb_session.flush();
                 }
                 else{
                     if(cs_return != null && csv_return != null)

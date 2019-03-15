@@ -191,10 +191,13 @@ public class LoginHelper{
             LOGGER.debug("Session-ID is missing from userMap");
 
         org.hibernate.Session hb_session;
+        boolean hibernateOpened = false;
         if (session != null)
             hb_session = session;
-        else
+        else{
             hb_session = HibernateUtil.getSessionFactory().openSession();
+            hibernateOpened = true;
+        }
         
         try{
             String HQL_session_select = "select distinct s from Session s";
@@ -239,7 +242,7 @@ public class LoginHelper{
         }
         finally{
             try{
-                if(hb_session!=null && hb_session.isOpen())
+                if(hibernateOpened && hb_session.isOpen())
                     hb_session.close();
             }
             catch(Exception ex){

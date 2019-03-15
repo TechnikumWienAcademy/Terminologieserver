@@ -143,8 +143,9 @@ public class CreateConceptAssociation {
                             }
                         }
 
-                        if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted())
-                            hb_session.getTransaction().commit();
+                        //if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted()) //dabaca
+                            //hb_session.getTransaction().commit();
+                        hb_session.flush();
                     } 
                     else{
                         LOGGER.warn("Changes not successful");

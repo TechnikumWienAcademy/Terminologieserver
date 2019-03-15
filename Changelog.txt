@@ -1,4 +1,8 @@
-﻿Changelog 3.2.28
+﻿Changelog 3.2.29
+	-Bugfixes
+		.) EHTSOID-200: Der Claml-Import funktioniert wieder.
+
+Changelog 3.2.28
 	-Bugfixes
 		.) EHTSOID-191: Ein Fehler in der Freigabe wurde entfernt.
 

@@ -39,6 +39,7 @@ public class LastChangeHelper{
             hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
             hbOpened = true;
+            LOGGER.info("PASSED HB-SESSION WAS NULL");
         }
         boolean success = false;
         try{
@@ -55,9 +56,9 @@ public class LastChangeHelper{
                 hb_session.update(VSversion);
             }
 
-            if (hbOpened && !hb_session.getTransaction().wasCommitted())
-                hb_session.getTransaction().commit();
-
+            //if (hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted()) //dabaca
+            hb_session.flush();
+                //hb_session.getTransaction().commit();
             success = true;
         }
         catch (Exception ex){

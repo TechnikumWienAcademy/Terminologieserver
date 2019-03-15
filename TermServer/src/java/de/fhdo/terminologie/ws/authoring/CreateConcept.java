@@ -97,7 +97,7 @@ public class CreateConcept{
         }
 
         //3.2.17 added last parameter
-        CreateConceptOrAssociationType(response, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session);
+        CreateConceptOrAssociationType(response, paramLogin, paramCodeSystem, paramCodeSystemEntity, paramProperty, session); 
     
         LOGGER.info("----- CreateConcept finished (002) -----");
         return response;
@@ -335,12 +335,13 @@ public class CreateConcept{
                 }
                 finally{
                     //Completing transaction
-                    if (createHibernateSession){
                         if (codeSystemEntityVersionId > 0){
                             if(codeSystemVersionId > 0)
                                 LastChangeHelper.updateLastChangeDate(true, codeSystemVersionId, hb_session);
-                            if(!hb_session.getTransaction().wasCommitted())
-                                hb_session.getTransaction().commit();
+                            //if(hb_session.getTransaction().isActive() && !hb_session.getTransaction().wasCommitted()) //dabaca
+                                //hb_session.getTransaction().commit();
+                                
+                                hb_session.flush();
                         }
                         else{
                             //Changes not successful
@@ -355,7 +356,6 @@ public class CreateConcept{
                         }
                         if(createHibernateSession && hb_session.isOpen())
                             hb_session.close();
-                    }
                 }
             
             //Creating response

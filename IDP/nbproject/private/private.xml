@@ -5,6 +5,8 @@
         <group name="Version 3.2">
             <file>file:/C:/A_Dev/terminologieserver/IDP/src/java/de/fhdo/helper/LoginInfoHelper.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/IDP/src/java/de/fhdo/Definitions.java</file>
+        </group>
     </open-files>
 </project-private>

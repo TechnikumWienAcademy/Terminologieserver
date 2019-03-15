@@ -215,7 +215,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     LOGGER.info("Rollback failed");
             }
 
-            if(hb_session != null && hb_session.isConnected() && hb_session.isOpen())
+            if(hb_session != null && hb_session.isOpen())
                 hb_session.close();  
 
             //TODO check this
@@ -232,8 +232,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         LOGGER.info("+++++ loadClamlXML started +++++");
         
         LOGGER.debug("Create JAXBContext");
-
-        LOGGER.info("DABACA 1");
         clamlBindingXSD.Class clazz = null;
         clamlBindingXSD.Rubric rubric = null;
         clamlBindingXSD.RubricKinds rubricKinds = new clamlBindingXSD.RubricKinds();
@@ -256,8 +254,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
         int countEvery = 0;
         
-        LOGGER.info("DABACA 2");
-        
         while (eventReader.hasNext()){
             
             this.status = StaticStatusList.getStatus(this.getImportId());
@@ -265,14 +261,11 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 break;
             
             XMLEvent event = eventReader.nextEvent();
-            LOGGER.info("DABACA 3: " + event.toString());
             if (event.isStartElement()){
-                LOGGER.info("DABACA 4");
                 StartElement startElement = event.asStartElement();
                 String startElementName = startElement.getName().toString();
 
                 if (startElementName.equals("Title")){
-                    LOGGER.info("DABACA 5");
                     Date date = new Date();
                     String title = "";
                     String versionName = "";
@@ -280,7 +273,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     // We read the attributes from this tag and add the date attribute to our object
                     Iterator<Attribute> attributes = startElement.getAttributes();
                     while (attributes.hasNext()){
-                        LOGGER.info("DABACA 6");
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("name"))
                             title = attribute.getValue();
@@ -299,21 +291,17 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
 
                     //If <Title>-element does not have content --> description will be set to ""
                     if (event.isEndElement()){
-                        LOGGER.info("DABACA 7");
                         this.createCodeSystem(title, uid, versionName, date, authority, "");
                         continue;
                     }
 
                     String description = event.asCharacters().getData();
-                    LOGGER.info("DABACA 8");
                     this.createCodeSystem(title, uid, versionName, date, authority, description);
                 }
                 else if (startElementName.equals("Identifier")){
-                    LOGGER.info("DABACA 9");
                     //We read the attributes from this tag and add the date attribute to our object
                     Iterator<Attribute> attributes = startElement.getAttributes();
                     while (attributes.hasNext()){
-                        LOGGER.info("DABACA 10");
                         Attribute attribute = attributes.next();
                         if (attribute.getName().toString().equals("authority"))
                             authority = attribute.getValue();
@@ -323,7 +311,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("RubricKind")){
-                    LOGGER.info("DABACA 11");
                     //We read the attributes from this tag and add the date attribute to our object
                     clamlBindingXSD.RubricKind rubricKind = new clamlBindingXSD.RubricKind();
                     Iterator<Attribute> attributes = startElement.getAttributes();
@@ -336,7 +323,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("Class")){
-                    LOGGER.info("DABACA 12");
                     clazz = new clamlBindingXSD.Class();
 
                     // We read the attributes from this tag and add the date attribute to our object
@@ -350,7 +336,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("Rubric")){
-                    LOGGER.info("DABACA 13");
                     if (clazz != null){
                         rubric = new clamlBindingXSD.Rubric();
                         // We read the attributes from this tag and add the date attribute to our object
@@ -364,7 +349,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("Label")){
-                    LOGGER.info("DABACA 14");
                     if (rubric != null){
                         event = eventReader.nextEvent();
                         clamlBindingXSD.Label label = new clamlBindingXSD.Label();
@@ -375,7 +359,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("Fragment")){
-                    LOGGER.info("DABACA 15");
                     if (rubric != null){
                         if (event.isEndElement() == false){
                             event = eventReader.nextEvent();
@@ -392,7 +375,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("SuperClass")){
-                    LOGGER.info("DABACA 16");
                     if (clazz != null){
                         clamlBindingXSD.SuperClass superClass = new clamlBindingXSD.SuperClass();
                         Iterator<Attribute> attributes = startElement.getAttributes();
@@ -406,7 +388,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("SubClass")){
-                    LOGGER.info("DABACA 17");
                     if (clazz != null){
                         clamlBindingXSD.SubClass subClass = new clamlBindingXSD.SubClass();
                         Iterator<Attribute> attributes = startElement.getAttributes();
@@ -420,7 +401,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (startElementName.equals("Meta")){
-                    LOGGER.info("DABACA 18");
                     if (clazz != null){
                         Meta meta = new Meta();
                         Iterator<Attribute> attributes = startElement.getAttributes();
@@ -434,7 +414,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                         clazz.getMeta().add(meta);
                     }
                     else{
-                        LOGGER.info("DABACA 19");
                         //Claml/Metadata
                         Iterator<Attribute> attributes = startElement.getAttributes();
                         String name = "";
@@ -452,10 +431,8 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 }
             } // End start element
             if (event.isEndElement()){
-                LOGGER.info("DABACA 20");
                 EndElement endElement = event.asEndElement();
                 if (endElement.getName().toString().equals("Class")){
-                    LOGGER.info("DABACA 21");
                     //Write clazz to map to be processed later
                     if(clazz!=null){
                         this._clamlClassMap.put(clazz.getCode(), clazz);
@@ -463,7 +440,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                     }
                 }
                 else if (endElement.getName().toString().equals("RubricKinds")){
-                    LOGGER.info("DABACA 22");
                     //CreateAssociationType (Unterklasse,Oberklasse)
                     this._assoctypeTaxonomy = this.CreateAssociationType("ist Oberklasse von", "ist Unterklasse von");
                     LOGGER.debug(this._ccatrespt.getReturnInfos().getMessage());
@@ -491,7 +467,6 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         Collection<clamlBindingXSD.Class> clazzCollection = this._clamlClassMap.values();
         int counter = 0;
         for (clamlBindingXSD.Class bufferClazz : clazzCollection){
-            LOGGER.info("DABACA 23");
             counter++;
             importClazz(bufferClazz);
 
@@ -576,11 +551,12 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         String HQL_metadataParameter_search = "select distinct mp from MetadataParameter mp "
             + " where codeSystemId=" + createCSresponse.getCodeSystem().getId();
         
+        /*
         //DABACA
         if(!hb_session.isOpen()){
             this.hb_session = HibernateUtil.getSessionFactory().openSession();
             this.hb_session.getTransaction().begin();
-        }
+        }*/
             
         List<MetadataParameter> metadataParameterList = hb_session.createQuery(HQL_metadataParameter_search).list();
 

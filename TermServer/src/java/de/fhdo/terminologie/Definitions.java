@@ -32,7 +32,7 @@ public class Definitions
   public final static String APP_KEY = "TERMSERVER";
 
     public static String getSwVersion() {
-        return "3.2.28";
+        return "3.2.29";
     }
 
   public static enum STATUS_CODES
