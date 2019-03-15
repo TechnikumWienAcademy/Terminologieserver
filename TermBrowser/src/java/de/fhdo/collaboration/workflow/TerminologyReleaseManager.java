@@ -679,7 +679,7 @@ public class TerminologyReleaseManager
         request_search.setCodeSystem(new CodeSystem());
         request_search.getCodeSystem().setId(codesystemId);
         //3.2.17
-        request_search.setLoginAlreadyChecked(true);
+        //request_search.setLoginAlreadyChecked(true);
         
         de.fhdo.terminologie.ws.search.ListCodeSystemsResponse.Return resp = port_search.listCodeSystems(request_search);
         
@@ -750,7 +750,7 @@ public class TerminologyReleaseManager
         req_export_cs.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
         req_export_cs.getLogin().setSessionID(this.sessionId);
         //3.2.17 added
-        req_export_cs.setLoginAlreadyChecked(true);
+        //req_export_cs.setLoginAlreadyChecked(true);
 
         req_export_cs.setCodeSystem(new CodeSystem());
         req_export_cs.getCodeSystem().setId(codesystemId);
@@ -847,7 +847,7 @@ public class TerminologyReleaseManager
         request_searchPubThread.setCodeSystem(new de.fhdo.terminologie.ws.searchPub.CodeSystem());
         request_searchPubThread.getCodeSystem().setName(codesystemName);
         //3.2.17
-        request_searchPubThread.setLoginAlreadyChecked(true);
+        //request_searchPubThread.setLoginAlreadyChecked(true);
         
         //de.fhdo.terminologie.ws.searchPub.ListCodeSystemsResponse.Return respSearchPub = port_searchPub.listCodeSystems(request_searchPub);
         //de.fhdo.terminologie.ws.searchPub.ListCodeSystemsResponse.Return respSearchPub;
@@ -906,7 +906,7 @@ public class TerminologyReleaseManager
         request.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
         //3.2.17
-        request.setLoginAlreadyChecked(true);
+        //request.setLoginAlreadyChecked(true);
         
         // Codesystem
         request.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
@@ -938,7 +938,7 @@ public class TerminologyReleaseManager
         requestThread.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         requestThread.getLogin().setSessionID(this.pubSessionId);
         //3.2.17
-        requestThread.setLoginAlreadyChecked(true);
+        //requestThread.setLoginAlreadyChecked(true);
         requestThread.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
         requestThread.getCodeSystem().setId(this.targetCS.getId());
 
@@ -1012,7 +1012,7 @@ public class TerminologyReleaseManager
         cs_pub.getCodeSystemVersions().add(csv_pub);
         request.setCodeSystem(cs_pub);
         //3.2.17 added
-        request.setLoginAlreadyChecked(true);
+        //request.setLoginAlreadyChecked(true);
         
         //de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
 
@@ -1080,7 +1080,7 @@ public class TerminologyReleaseManager
                 req_remove.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
                 req_remove.getLogin().setSessionID(this.pubSessionId);
                 //3.2.17 added
-                req_remove.setLoginAlreadyChecked(true);
+                //req_remove.setLoginAlreadyChecked(true);
 
                 req_remove.setDeleteInfo(new de.fhdo.terminologie.ws.authoringPub.DeleteInfo());
                 de.fhdo.terminologie.ws.authoringPub.CodeSystem cs_remove = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
@@ -1225,7 +1225,7 @@ public class TerminologyReleaseManager
         req_vs.setValueSet(vs_search);
 
         //3.2.17 added
-        req_vs.setLoginAlreadyChecked(true);
+        //req_vs.setLoginAlreadyChecked(true);
         
         de.fhdo.terminologie.ws.search.Search port = WebServiceUrlHelper.getInstance().getSearchServicePort();
 
@@ -1354,7 +1354,7 @@ public class TerminologyReleaseManager
         LOGGER.debug("TermBrowser - calling export-service");
 
         //3.2.17
-        req_export_vs.setLoginAlreadyChecked(true);
+        //req_export_vs.setLoginAlreadyChecked(true);
         
         // WS-Aufruf
         ExportValueSetContentResponse.Return response = WebServiceHelper.exportValueSetContent(req_export_vs);
@@ -1385,7 +1385,7 @@ public class TerminologyReleaseManager
         Search search_port = WebServiceUrlHelper.getInstance().getSearchServicePort();
 
         //3.2.17 added
-        requestVsContent.setLoginAlreadyChecked(true);
+        //requestVsContent.setLoginAlreadyChecked(true);
         
         ListValueSetContentsResponse.Return responseVsContent = search_port.listValueSetContents(requestVsContent);
 
@@ -1408,7 +1408,7 @@ public class TerminologyReleaseManager
                 parameter.setCode(cse.getCodeSystemEntityVersions().get(0).getCodeSystemConcepts().get(0).getCode());
                 parameter.setTerm("");
                 //3.2.17
-                parameter.setLoginAlreadyChecked(true);
+                //parameter.setLoginAlreadyChecked(true);
                 
                 //PUB ÄNDERUNGEN
                 //ListGloballySearchedConceptsResponse.Return response = portSearchPub.listGloballySearchedConcepts(parameter);
@@ -1470,7 +1470,7 @@ public class TerminologyReleaseManager
         request_searchPub.setValueSet(new de.fhdo.terminologie.ws.searchPub.ValueSet());
         request_searchPub.getValueSet().setName(valuesetName);
         //3.2.17 added
-        request_searchPub.setLoginAlreadyChecked(true);
+        //request_searchPub.setLoginAlreadyChecked(true);
         
         //de.fhdo.terminologie.ws.searchPub.ListValueSetsResponse.Return respSearchPub = port_searchPub.listValueSets(request_searchPub);
         GetListValueSetsPubResponeResponse.Return respSearchPub = null;
@@ -1538,7 +1538,7 @@ public class TerminologyReleaseManager
         request.getValueSet().getValueSetVersions().add(vsv_pub);
 
         //3.2.17 added
-        request.setLoginAlreadyChecked(true);
+        //request.setLoginAlreadyChecked(true);
         
         //de.fhdo.terminologie.ws.administrationPub.ImportValueSetResponse.Return ret_import = port.importValueSet(request);
         //3.2.21 start
