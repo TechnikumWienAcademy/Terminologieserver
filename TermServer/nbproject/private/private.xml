@@ -26,6 +26,11 @@
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/LoginHelper.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/types/LoginType.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/TermServerServletContextListener.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/SecurityHelper.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermServer/src/java/de/fhdo/terminologie/helper/LastChangeHelper.java</file>
+        </group>
     </open-files>
 </project-private>

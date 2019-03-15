@@ -217,7 +217,7 @@ public class ProposalWorkflow
                     // Codesystem angeben
                     request.setCodeSystem(cs);
                     //3.2.17
-                    //request.setLoginAlreadyChecked(true);
+                    request.setLoginAlreadyChecked(true);
 
                     // Webservice aufrufen
                     CreateCodeSystemResponse.Return ret = createCodeSystem(request);
@@ -396,7 +396,7 @@ public class ProposalWorkflow
                     }
 
                     //3.2.17
-                    //request.setLoginAlreadyChecked(true);
+                    request.setLoginAlreadyChecked(true);
                     
                     // Webservice aufrufen
                     CreateConceptResponse.Return ret = WebServiceHelper.createConcept(request);
@@ -581,7 +581,7 @@ public class ProposalWorkflow
                             login.setSessionID(CollaborationSession.getInstance().getSessionID());
                             parameter2.setLogin(login);
                             //3.2.17 added
-                            //parameter2.setLoginAlreadyChecked(true);
+                            parameter2.setLoginAlreadyChecked(true);
 
                             // valueset
                             ValueSet vs = new ValueSet();
@@ -1212,7 +1212,7 @@ public class ProposalWorkflow
 
                 //3.2.17 
                 request.getLogin().setSessionID(collabSessionID);
-                //request.setLoginAlreadyChecked(true);
+                request.setLoginAlreadyChecked(true);
                 //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
                 
                 // Codesystem angeben
@@ -1291,7 +1291,7 @@ public class ProposalWorkflow
                 vsv.setStatus(newStatus);
                 request.getValueSet().getValueSetVersions().add(vsv);
                 //3.2.17 added
-                //request.setLoginAlreadyChecked(true);
+                request.setLoginAlreadyChecked(true);
 
                 // Webservice aufrufen
                 UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
@@ -1402,7 +1402,7 @@ public class ProposalWorkflow
                     req_export_cs.setLogin(new de.fhdo.terminologie.ws.administration.LoginType());
                     req_export_cs.getLogin().setSessionID(SessionHelper.getSessionId());                    
                     //3.2.17 added
-                    //req_export_cs.setLoginAlreadyChecked(true);                    
+                    req_export_cs.setLoginAlreadyChecked(true);                    
                     
                     req_export_cs.setCodeSystem(new CodeSystem());
                     req_export_cs.getCodeSystem().setId(resp.getCodeSystem().get(0).getId());
@@ -1639,7 +1639,7 @@ public class ProposalWorkflow
                 }
             }
             //3.2.17 added
-            //request_search.setLoginAlreadyChecked(true);
+            request_search.setLoginAlreadyChecked(true);
             
             ListValueSetsResponse.Return resp = port_search.listValueSets(request_search);
 
@@ -1687,7 +1687,7 @@ public class ProposalWorkflow
                     requestVsContent.setValueSet(valueSet);
                     requestVsContent.setReadMetadataLevel(false);
                     //3.2.17 added
-                    //requestVsContent.setLoginAlreadyChecked(true);
+                    requestVsContent.setLoginAlreadyChecked(true);
 
                     ListValueSetContentsResponse.Return responseVsContent = WebServiceHelper.listValueSetContents(requestVsContent);
 
@@ -1750,7 +1750,7 @@ public class ProposalWorkflow
                     logger.debug("Export-Service-Aufruf...");
 
                     //3.2.17 added
-                    //req_export_vs.setLoginAlreadyChecked(true);
+                    req_export_vs.setLoginAlreadyChecked(true);
                     
                     // WS-Aufruf
                     ExportValueSetContentResponse.Return response = WebServiceHelper.exportValueSetContent(req_export_vs);
@@ -1849,7 +1849,7 @@ public class ProposalWorkflow
                                 request.getImportInfos().setOrder(Boolean.TRUE);
                                 
                                 //3.2.17 added
-                                //request.setLoginAlreadyChecked(true);
+                                request.setLoginAlreadyChecked(true);
 
                                 de.fhdo.terminologie.ws.administrationPub.ImportValueSetResponse.Return ret_import = port.importValueSet(request);
                                 if (ret_import.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))

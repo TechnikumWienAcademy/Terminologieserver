@@ -7,20 +7,20 @@
     <service name="ConceptAssociations">
       <implementation-class>de.fhdo.terminologie.ws.conceptAssociation.ConceptAssociations</implementation-class>
     </service>
-    <service name="Search">
-      <implementation-class>de.fhdo.terminologie.ws.search.Search</implementation-class>
-    </service>
-    <service name="Authorization">
-      <implementation-class>de.fhdo.terminologie.ws.authorization.Authorization</implementation-class>
-    </service>
-    <service name="ObjectIdentifier">
-      <implementation-class>de.fhdo.terminologie.ws.objectIdentifier.ObjectIdentifier</implementation-class>
-    </service>
     <service name="Administration">
       <implementation-class>de.fhdo.terminologie.ws.administration.Administration</implementation-class>
     </service>
     <service name="SSo">
       <implementation-class>de.fhdo.terminologie.ws.sso.SSo</implementation-class>
+    </service>
+    <service name="Search">
+      <implementation-class>de.fhdo.terminologie.ws.search.Search</implementation-class>
+    </service>
+    <service name="ObjectIdentifier">
+      <implementation-class>de.fhdo.terminologie.ws.objectIdentifier.ObjectIdentifier</implementation-class>
+    </service>
+    <service name="Authorization">
+      <implementation-class>de.fhdo.terminologie.ws.authorization.Authorization</implementation-class>
     </service>
   </services>
   <clients>
