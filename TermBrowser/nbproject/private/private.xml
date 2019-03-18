@@ -10,6 +10,9 @@
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/ProposalWorkflow.java</file>
         </group>
         <group/>
-        <group/>
+        <group>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/src/java/de/fhdo/helper/TermBrowserServletContextListener.java</file>
+            <file>file:/C:/A_DEV/terminologieserver/TermBrowser/web/WEB-INF/web.xml</file>
+        </group>
     </open-files>
 </project-private>
