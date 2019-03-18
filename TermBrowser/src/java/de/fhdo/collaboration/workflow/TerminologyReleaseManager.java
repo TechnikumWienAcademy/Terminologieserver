@@ -29,6 +29,7 @@ import de.fhdo.terminologie.ws.authoringPub.GetCreateCodeSystemPubResponseRespon
 import de.fhdo.terminologie.ws.authoringPub.GetCreateValueSetPubResponseResponse;
 import de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptResponseType;
 import de.fhdo.terminologie.ws.authorizationPub.Authorization;
+import de.fhdo.terminologie.ws.authorizationPub.CheckLoginResponse;
 import de.fhdo.terminologie.ws.search.ListValueSetsRequestType;
 import de.fhdo.terminologie.ws.search.ListValueSetsResponse;
 import de.fhdo.terminologie.ws.search.Search;
@@ -61,10 +62,10 @@ import types.termserver.fhdo.de.ValueSetVersion;
 
 /**
  *
- * @author puraner
+ * @author Stefan Puraner
  */
-public class TerminologyReleaseManager
-{
+public class TerminologyReleaseManager{
+    
     private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
     private String sessionId;
     private String pubSessionId;
@@ -72,43 +73,33 @@ public class TerminologyReleaseManager
     private de.fhdo.terminologie.ws.searchPub.ValueSet targetVS;
     private long importId;
     //3.2.17 added
-    private boolean sessionIDsSet;
+    private final boolean sessionIDsSet;
 
-    public TerminologyReleaseManager()
-    {
+    public TerminologyReleaseManager(){
         this.sessionId = SessionHelper.getSessionId();
         this.pubSessionId = CollaborationSession.getInstance().getPubSessionID();
         this.targetCS = null;
         this.targetVS = null;
-        try
-        {
+        try{
             importId = SecureRandom.getInstance("SHA1PRNG").nextLong();
         }
-        catch (NoSuchAlgorithmException ex)
-        {
-            LOGGER.error(ex);
+        catch (NoSuchAlgorithmException ex){
+            LOGGER.error("Error [0140]", ex);
         }
         //3.2.17 added
         sessionIDsSet = this.areSessionIdsSet();
     }
 
-    /**
-     * checks if publication plattform is alive
-     *
-     * @return
-     */
-    private boolean isPubPlattformAliveAndUserLoggedIn()
-    {
+    private boolean isPubPlattformAliveAndUserLoggedIn(){
         LOGGER.info("+++++ isPubPlattformAliveAndUserLoggedIn started +++++");
         //3.2.17 auskommentiert
-        /*LoginRequestType request = new LoginRequestType();
-        request.setLogin(new LoginType());
-        request.getLogin().setSessionID(this.pubSessionId);*/
+        de.fhdo.terminologie.ws.authorizationPub.LoginRequestType request = new de.fhdo.terminologie.ws.authorizationPub.LoginRequestType();
+        request.setLogin(new de.fhdo.terminologie.ws.authorizationPub.LoginType());
+        request.getLogin().setSessionID(this.pubSessionId);
         
         Authorization port_authorizationPub = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
 
-        if (port_authorizationPub == null)
-        {
+        if (port_authorizationPub == null){
             LOGGER.debug("PubServicePort is null");
             LOGGER.info("----- isPubPlattformAliveAndUserLoggedIn finished (001) -----");
             return false;
@@ -118,8 +109,7 @@ public class TerminologyReleaseManager
         return true;
 
         //3.2.17 auskommentiert
-        /*
-        try
+        /*try
         {
             CheckLoginResponse.Return response = port_authorizationPub.checkLogin(request);
             //ListCodeSystemsResponse.Return response = port_searchPub.listCodeSystems(parameter);
@@ -129,13 +119,13 @@ public class TerminologyReleaseManager
             }
             else
             {
-                logger.debug("User ist nicht eingeloggt");
+                LOGGER.debug("User ist nicht eingeloggt");
                 return false;
             }
         }
         catch (Exception ex)
         {
-            logger.error(ex);
+            LOGGER.error(ex);
             return false;
         }*/
     }
