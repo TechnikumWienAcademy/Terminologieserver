@@ -38,7 +38,7 @@ import org.hibernate.Session;
 public class ProposalStatus
 {
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+  private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
   private static ProposalStatus instance;
 
   public static ProposalStatus getInstance()
@@ -64,58 +64,43 @@ public class ProposalStatus
     statusMap = null;
   }
 
-  private void initData()
-  {
-    if (statusMap == null)
-    {
-      // Daten laden
-      Session hb_session = HibernateUtil.getSessionFactory().openSession();
-      //hb_session.getTransaction().begin();
-      try
-      {
-        statusMap = new HashMap<Long, Status>();
-        statusrelMap = new HashMap<Long, Statusrel>();
+    private void initData(){
+        if (statusMap == null){
+            // Daten laden
+            Session hb_session = HibernateUtil.getSessionFactory().openSession();
+            hb_session.getTransaction().begin();
+            try{
+                statusMap = new HashMap<Long, Status>();
+                statusrelMap = new HashMap<Long, Statusrel>();
 
-        String hql = "select distinct s from Status s"
-                + " left join fetch s.statusrelsForStatusIdFrom rel"
-                + " left join fetch rel.action";
-                //+ " left join fetch rel.statusByStatusIdTo";
+                String hql = "select distinct s from Status s"
+                    + " left join fetch s.statusrelsForStatusIdFrom rel"
+                    + " left join fetch rel.action";
+                    //+ " left join fetch rel.statusByStatusIdTo";
 
-        List<Status> statusList = hb_session.createQuery(hql).list();
+                List<Status> statusList = hb_session.createQuery(hql).list();
 
-        for (Status status : statusList)
-        {
-          statusMap.put(status.getId(), status);
-          
-          /*for(Statusrel rel : status.getStatusrelsForStatusIdFrom())
-          {
-            logger.debug("Status: " + status.getId() + " von " + rel.getStatusByStatusIdFrom().getId() + " zu " + rel.getStatusByStatusIdTo().getId());
-          }*/
-        }
+                for (Status status : statusList)
+                    statusMap.put(status.getId(), status);
         
-        hql = "select distinct rel from Statusrel rel"
-                + " left join fetch rel.roles roles"
-                + " left join fetch rel.action";
+                hql = "select distinct rel from Statusrel rel"
+                    + " left join fetch rel.roles roles"
+                    + " left join fetch rel.action";
 
-        List<Statusrel> statusrelList = hb_session.createQuery(hql).list();
+                List<Statusrel> statusrelList = hb_session.createQuery(hql).list();
 
-        for (Statusrel rel : statusrelList)
-        {
-          statusrelMap.put(rel.getId(), rel);
+                for (Statusrel rel : statusrelList)
+                    statusrelMap.put(rel.getId(), rel);
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0143]", e);
+            }
+            finally{
+                if(hb_session.isOpen())
+                    hb_session.close();
+            }
         }
-      //hb_session.getTransaction().commit();
-      }
-      catch (Exception e)
-      {
-        //hb_session.getTransaction().rollback();
-          LoggingOutput.outputException(e, this);
-      }
-      finally
-      {
-        hb_session.close();
-      }
     }
-  }
 
   /**
    * Liest den Status-Text von einem Zahlenwert
@@ -178,8 +163,7 @@ public class ProposalStatus
     return new HashSet<Statusrel>();
   }
   
-  public Statusrel getStatusRel(long statusFrom, long statusTo)
-  {
+  public Statusrel getStatusRel(long statusFrom, long statusTo){
     initData();
     
     for(Statusrel rel : statusrelMap.values())
@@ -209,8 +193,8 @@ public class ProposalStatus
     initData();
     
     boolean erlaubt = false;
-    if(logger.isDebugEnabled())
-      logger.debug("isUserAllowed() mit userId: " + collabUserId);
+    if(LOGGER.isDebugEnabled())
+      LOGGER.debug("isUserAllowed() mit userId: " + collabUserId);
     
     Session hb_session = HibernateUtil.getSessionFactory().openSession();
     //hb_session.getTransaction().begin();
@@ -220,8 +204,8 @@ public class ProposalStatus
               + " join r.collaborationusers cu"
               + " where cu.id=" + collabUserId;
       
-      if(logger.isDebugEnabled())
-        logger.debug("HQL: " + hql);
+      if(LOGGER.isDebugEnabled())
+        LOGGER.debug("HQL: " + hql);
       
       List<Role> roleList = hb_session.createQuery(hql).list();
       

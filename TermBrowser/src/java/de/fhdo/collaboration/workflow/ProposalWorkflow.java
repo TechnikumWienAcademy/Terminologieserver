@@ -138,7 +138,7 @@ public class ProposalWorkflow
     //TODO set STATUS_DELETED to DB ID
     private static int STATUS_DELETED = 99;
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
     // Singleton-Muster
     private static ProposalWorkflow instance;
 
@@ -206,7 +206,7 @@ public class ProposalWorkflow
             {
                 if (!isExisting)
                 {
-                    logger.debug("Codesystem einfügen mit...");
+                    LOGGER.debug("Codesystem einfügen mit...");
 
                     CodeSystem cs = (CodeSystem) obj;
 
@@ -248,13 +248,13 @@ public class ProposalWorkflow
                     }
                     else
                     {
-                        logger.debug("Kein Erfolg beim Einfügen eines CodeSystems: " + ret.getReturnInfos().getMessage());
+                        LOGGER.debug("Kein Erfolg beim Einfügen eines CodeSystems: " + ret.getReturnInfos().getMessage());
                         Messagebox.show(ret.getReturnInfos().getMessage());
                     }
                 }
                 else
                 {
-                    logger.debug("Codesystem existiert. Proposal vorbereiten...");
+                    LOGGER.debug("Codesystem existiert. Proposal vorbereiten...");
 
                     tsDataInserted = true;   // Erfolg
                     CodeSystemVersion csv = (CodeSystemVersion) obj;
@@ -283,7 +283,7 @@ public class ProposalWorkflow
 
                 if (!isExisting)
                 {
-                    logger.debug("ValueSet einfügen mit...");
+                    LOGGER.debug("ValueSet einfügen mit...");
                     ValueSet vs = (ValueSet) obj;
 
                     CreateValueSetRequestType request = new CreateValueSetRequestType();
@@ -321,14 +321,14 @@ public class ProposalWorkflow
                     }
                     else
                     {
-                        logger.debug("Kein Erfolg beim Einfügen eines ValueSets: " + ret.getReturnInfos().getMessage());
+                        LOGGER.debug("Kein Erfolg beim Einfügen eines ValueSets: " + ret.getReturnInfos().getMessage());
                         Messagebox.show(ret.getReturnInfos().getMessage());
                     }
                 }
                 else
                 {
 
-                    logger.debug("ValueSet existiert. Proposal vorbereiten...");
+                    LOGGER.debug("ValueSet existiert. Proposal vorbereiten...");
                     ValueSetVersion vsv = (ValueSetVersion) obj;
 
                     tsDataInserted = true;   // Erfolg
@@ -356,7 +356,7 @@ public class ProposalWorkflow
             {
                 if (!isExisting)
                 {
-                    logger.debug("Konzept einfügen mit...");
+                    LOGGER.debug("Konzept einfügen mit...");
 
                     CodeSystemConcept csc = (CodeSystemConcept) obj;
 
@@ -370,7 +370,7 @@ public class ProposalWorkflow
                     request.setCodeSystem(new CodeSystem());
                     request.getCodeSystem().setId(csId);
                     request.getCodeSystem().getCodeSystemVersions().add(csv);
-                    logger.debug("...Codesystem-Version-ID: " + proposal.getVocabularyId());
+                    LOGGER.debug("...Codesystem-Version-ID: " + proposal.getVocabularyId());
 
                     // Konzept angeben
                     CodeSystemEntityVersion csev = new CodeSystemEntityVersion();
@@ -382,8 +382,8 @@ public class ProposalWorkflow
                     request.setCodeSystemEntity(new CodeSystemEntity());
                     request.getCodeSystemEntity().getCodeSystemEntityVersions().add(csev);
 
-                    logger.debug("...Konzept-Code: " + csc.getCode());
-                    logger.debug("...Konzept-Term: " + csc.getTerm());
+                    LOGGER.debug("...Konzept-Code: " + csc.getCode());
+                    LOGGER.debug("...Konzept-Term: " + csc.getTerm());
 
                     // Axis
                     if (csc.getCodeSystemEntityVersion() != null
@@ -391,7 +391,7 @@ public class ProposalWorkflow
                             && csc.getCodeSystemEntityVersion().getCodeSystemEntity().getCodeSystemVersionEntityMemberships() != null
                             && csc.getCodeSystemEntityVersion().getCodeSystemEntity().getCodeSystemVersionEntityMemberships().size() > 0)
                     {
-                        logger.debug("verknüpfe Codesystem mit Begriff");
+                        LOGGER.debug("verknüpfe Codesystem mit Begriff");
                         request.getCodeSystemEntity().getCodeSystemVersionEntityMemberships().add(csc.getCodeSystemEntityVersion().getCodeSystemEntity().getCodeSystemVersionEntityMemberships().get(0));
                     }
 
@@ -433,12 +433,12 @@ public class ProposalWorkflow
                                 if (cseva.getCodeSystemEntityVersionByCodeSystemEntityVersionId2() == null)
                                 {
                                     // gerade eingefügte Konzept-ID übernehmen
-                                    logger.debug("gerade eingefügte Konzept-ID übernehmen: " + insertedConceptId);
+                                    LOGGER.debug("gerade eingefügte Konzept-ID übernehmen: " + insertedConceptId);
                                     cseva.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
                                     cseva.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(insertedConceptId);
                                 }
 
-                                logger.debug("Beziehung einfügen");
+                                LOGGER.debug("Beziehung einfügen");
 
                                 CreateConceptAssociationRequestType request2 = new CreateConceptAssociationRequestType();
                                 request2.setLogin(new de.fhdo.terminologie.ws.conceptassociation.LoginType());
@@ -463,7 +463,7 @@ public class ProposalWorkflow
                                 }
                                 else
                                 {
-                                    logger.debug("Kein Erfolg beim Einfügen eine Beziehung: " + ret2.getReturnInfos().getMessage());
+                                    LOGGER.debug("Kein Erfolg beim Einfügen eine Beziehung: " + ret2.getReturnInfos().getMessage());
                                     Messagebox.show(ret2.getReturnInfos().getMessage());
                                 }
                             }
@@ -471,14 +471,14 @@ public class ProposalWorkflow
                     }
                     else
                     {
-                        logger.debug("Kein Erfolg beim Einfügen eines Konzeptes: " + ret.getReturnInfos().getMessage());
+                        LOGGER.debug("Kein Erfolg beim Einfügen eines Konzeptes: " + ret.getReturnInfos().getMessage());
                         Messagebox.show(ret.getReturnInfos().getMessage());
                     }
                 }
                 else
                 {
 
-                    logger.debug("Konzept existiert. Proposal vorbereiten...");
+                    LOGGER.debug("Konzept existiert. Proposal vorbereiten...");
                     CodeSystemEntityVersion csev = (CodeSystemEntityVersion) obj;
 
                     tsDataInserted = true;   // Erfolg
@@ -519,7 +519,7 @@ public class ProposalWorkflow
                         parameter.getCodeSystem().setId(vocInfo.getCsId());
                         parameter.getCodeSystem().getCodeSystemVersions().add(csv);
 
-                        logger.debug("Codesystem-ID: " + vocInfo.getCsId() + ", csv-id: " + vocInfo.getVersionId());
+                        LOGGER.debug("Codesystem-ID: " + vocInfo.getCsId() + ", csv-id: " + vocInfo.getVersionId());
 
                         // login
                         if (SessionHelper.isCollaborationActive())
@@ -650,11 +650,11 @@ public class ProposalWorkflow
                                         po.setChangeType(PO_CHANGE_TYPE.NEW.id()); // 1 = hinzugefügt
                                         proposalObjectList.add(po);
 
-                                        logger.debug("CVSM Update erfolgreich!" + response.getReturnInfos().getMessage());
+                                        LOGGER.debug("CVSM Update erfolgreich!" + response.getReturnInfos().getMessage());
                                     }
                                     else
                                     {
-                                        logger.debug("CVSM Update fehlgeschlagen!" + response.getReturnInfos().getMessage());
+                                        LOGGER.debug("CVSM Update fehlgeschlagen!" + response.getReturnInfos().getMessage());
                                         Messagebox.show("CVSM Update fehlgeschlagen!", "Vorschlag erstellen", Messagebox.OK, Messagebox.INFORMATION);
                                     }
 
@@ -662,7 +662,7 @@ public class ProposalWorkflow
                                 else
                                 {
 
-                                    logger.debug("CVSM konnte nicht zu einem Update geholt werden!" + response.getReturnInfos().getMessage());
+                                    LOGGER.debug("CVSM konnte nicht zu einem Update geholt werden!" + response.getReturnInfos().getMessage());
                                     Messagebox.show("CVSM konnte nicht zu einem Update geholt werden!", "Vorschlag erstellen", Messagebox.OK, Messagebox.INFORMATION);
                                 }
                             }
@@ -670,20 +670,20 @@ public class ProposalWorkflow
                         else
                         {
 
-                            logger.debug("Code wurde nicht gefunden!" + response.getReturnInfos().getMessage());
+                            LOGGER.debug("Code wurde nicht gefunden!" + response.getReturnInfos().getMessage());
                             Messagebox.show("Code wurde nicht gefunden!", "Vorschlag erstellen", Messagebox.OK, Messagebox.INFORMATION);
                         }
                     }
                     else
                     {
 
-                        logger.debug("Kein Erfolg bei der Concept-zu-ValueSet Zuweisung!");
+                        LOGGER.debug("Kein Erfolg bei der Concept-zu-ValueSet Zuweisung!");
                         Messagebox.show("Kein Erfolg bei der Concept-zu-ValueSet Zuweisung!", "Vorschlag erstellen", Messagebox.OK, Messagebox.INFORMATION);
                     }
                 }
                 else
                 {
-                    logger.debug("ConceptValueSetMembership existiert. Proposal vorbereiten...");
+                    LOGGER.debug("ConceptValueSetMembership existiert. Proposal vorbereiten...");
                     CodeSystemEntityVersion csev = (CodeSystemEntityVersion) obj;
                     ValueSetVersion vsv = (ValueSetVersion) obj2;
 
@@ -707,7 +707,7 @@ public class ProposalWorkflow
             LoggingOutput.outputException(ex, this);
         }
 
-        logger.debug("tsDataInserted: " + tsDataInserted);
+        LOGGER.debug("tsDataInserted: " + tsDataInserted);
 
         if (tsDataInserted)
         {
@@ -878,285 +878,211 @@ public class ProposalWorkflow
     }
 
     //3.2.17 added collabuserID parameter and collaborationSession 
-    //3.2.20 CHECKED
-    // TODO translate comments into english
-    public ReturnType changeProposalStatus(Proposal proposal, long statusTo, String reason, Date discDateFrom, Date discDateTo, boolean isBatch, long collabUserID, String collabSessionID)
-    {
+    public ReturnType changeProposalStatus(Proposal proposal, long statusTo, String reason, Date discDateFrom, Date discDateTo, boolean isBatch, long collabUserID, String collabSessionID){
         ReturnType returnInfos = new ReturnType();
 
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("changeProposalStatus from " + proposal.getStatus() + " to " + statusTo);
-        }
-
+        LOGGER.debug("changeProposalStatus from " + proposal.getStatus() + " to " + statusTo);
         long statusFrom = proposal.getStatus();
 
         // 1. prüfen, ob Statusänderung möglich ist
         Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusTo);
-        if (rel != null)
-        {
-            logger.debug("Status change possible");
-            
-            //3.2.17 AUSKOMMMENTIERT die überprüfung der rechte erfolgt nun schon im proposalstatuschange onokclicked()
-            /*
-            // 2. Rechte prüfen, ob angemeldeter Benutzer die Statusänderung durchführen darf
-            if (ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID()))
-            {
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Rechte vorhanden!");
-                }*/
+        if (rel != null){
+            LOGGER.debug("Status change possible");
 
-                // 3. Statusänderung durchführen
-                Session hb_session = HibernateUtil.getSessionFactory().openSession();
-                hb_session.getTransaction().begin();
+            // 2. Statusänderung durchführen
+            Session hb_session = HibernateUtil.getSessionFactory().openSession();
+            hb_session.getTransaction().begin();
 
-                try
-                {
-                    // Proposal ändern (Status + StatusDate)
-                    logger.debug("Proposal-ID of proposal to be changed: " + proposal.getId());
-                    Proposal proposal_db = (Proposal) hb_session.get(Proposal.class, proposal.getId());
+            try{
+                // Proposal ändern (Status + StatusDate)
+                LOGGER.debug("Proposal-ID of proposal to be changed: " + proposal.getId());
+                Proposal proposal_db = (Proposal) hb_session.get(Proposal.class, proposal.getId());
 
-                    //Matthias 16.04.2015
-                    //löschen eines Eintrags 
-                    if (statusTo == STATUS_DELETED)
-                    {
+                //Matthias 16.04.2015
+                //löschen eines Eintrags 
+                if (statusTo == STATUS_DELETED){
+                    //Löschen den Privilege Datensätzen mit Verknüpfungen zum Proposal PrimKey
+                    String hql = "from Privilege where proposalId =:id";
+                    Query qPrivilege = hb_session.createQuery(hql);
+                    qPrivilege.setParameter("id", proposal.getId());
+                    List<Privilege> myPrivs = qPrivilege.list();
 
-                        //Löschen den Privilege Datensätzen mit Verknüpfungen zum Proposal PrimKey
-                        String hql = "from Privilege where proposalId =:id";
-                        Query qPrivilege = hb_session.createQuery(hql);
-                        qPrivilege.setParameter("id", proposal.getId());
-                        List<Privilege> myPrivs = qPrivilege.list();
+                    for (Privilege priv : myPrivs)
+                        hb_session.delete(priv);
+                        
+                    //Löschen den ProposalObject Datensätzen mit Verknüpfungen zum Proposal PrimKey
+                    String hqlProposalObject = "from Proposalobject where proposalId =:id";
+                    Query qProposalObject = hb_session.createQuery(hqlProposalObject);
+                    qProposalObject.setParameter("id", proposal.getId());
+                    List<Proposalobject> myProposalObjects = qProposalObject.list();
 
-                        for (Privilege priv : myPrivs)
-                        {
-                            hb_session.delete(priv);
-                        }
+                    for (Proposalobject myProposalObject : myProposalObjects)
+                        hb_session.delete(myProposalObject);
+                    
 
-                        //Löschen den ProposalObject Datensätzen mit Verknüpfungen zum Proposal PrimKey
-                        String hqlProposalObject = "from Proposalobject where proposalId =:id";
-                        Query qProposalObject = hb_session.createQuery(hqlProposalObject);
-                        qProposalObject.setParameter("id", proposal.getId());
-                        List<Proposalobject> myProposalObjects = qProposalObject.list();
+                    //Löschen den ProposalStatuschange Datensätzen mit Verknüpfungen zum Proposal PrimKey
+                    String hqlProposalStatusChange = "from Proposalstatuschange where proposalId =:id";
+                    Query qProposalStatusChange = hb_session.createQuery(hqlProposalStatusChange);
+                    qProposalStatusChange.setParameter("id", proposal.getId());
+                    List<Proposalstatuschange> myProposalStatusChangedList = qProposalStatusChange.list();
 
-                        for (Proposalobject myProposalObject : myProposalObjects)
-                        {
-                            hb_session.delete(myProposalObject);
-                        }
+                    for (Proposalstatuschange myProposalStatusChanged : myProposalStatusChangedList)
+                        hb_session.delete(myProposalStatusChanged);
+                        
 
-                        //Löschen den ProposalStatuschange Datensätzen mit Verknüpfungen zum Proposal PrimKey
-                        String hqlProposalStatusChange = "from Proposalstatuschange where proposalId =:id";
-                        Query qProposalStatusChange = hb_session.createQuery(hqlProposalStatusChange);
-                        qProposalStatusChange.setParameter("id", proposal.getId());
-                        List<Proposalstatuschange> myProposalStatusChangedList = qProposalStatusChange.list();
+                    //Löschen der Discussion Datensätzen mit Verknüpfungen zum Proposal PrimKey
+                    String hqlDiscussion = "from Proposalstatuschange where proposalId =:id";
+                    Query qDiscussion = hb_session.createQuery(hqlDiscussion);
+                    qDiscussion.setParameter("id", proposal.getId());
+                    List<Discussion> myDiscussionList = qDiscussion.list();
 
-                        for (Proposalstatuschange myProposalStatusChanged : myProposalStatusChangedList)
-                        {
-                            hb_session.delete(myProposalStatusChanged);
-                        }
+                    for (Discussion myDiscussion : myDiscussionList)
+                        hb_session.delete(myDiscussion);
+                        
+                    //Löschen der Link Datensätzen mit Verknüpfungen zum Proposal PrimKey
+                    String hqlLink = "from Proposalstatuschange where proposalId =:id";
+                    Query qLink = hb_session.createQuery(hqlLink);
+                    qLink.setParameter("id", proposal.getId());
+                    List<Link> myLinkList = qLink.list();
 
-                        //Löschen der Discussion Datensätzen mit Verknüpfungen zum Proposal PrimKey
-                        String hqlDiscussion = "from Proposalstatuschange where proposalId =:id";
-                        Query qDiscussion = hb_session.createQuery(hqlDiscussion);
-                        qDiscussion.setParameter("id", proposal.getId());
-                        List<Discussion> myDiscussionList = qDiscussion.list();
+                    for (Link myLink : myLinkList)
+                        hb_session.delete(myLink);
 
-                        for (Discussion myDiscussion : myDiscussionList)
-                        {
-                            hb_session.delete(myDiscussion);
-                        }
+                    //Löschen der Rating Datensätzen mit Verknüpfungen zum Proposal PrimKey
+                    String hqlRating = "from Proposalstatuschange where proposalId =:id";
+                    Query qRating = hb_session.createQuery(hqlRating);
+                    qRating.setParameter("id", proposal.getId());
+                    List<Rating> myRatingList = qRating.list();
 
-                        //Löschen der Link Datensätzen mit Verknüpfungen zum Proposal PrimKey
-                        String hqlLink = "from Proposalstatuschange where proposalId =:id";
-                        Query qLink = hb_session.createQuery(hqlLink);
-                        qLink.setParameter("id", proposal.getId());
-                        List<Link> myLinkList = qLink.list();
+                    for (Rating myRating : myRatingList)
+                        hb_session.delete(myRating);
+                        
+                    proposal_db.setCollaborationuser(null);
+                    proposal_db.setContentType(null);
+                    proposal_db.setCreated(null);
+                    proposal_db.setDescription(null);
+                    proposal_db.setDiscussions(null);
+                    proposal_db.setId(null);
+                    proposal_db.setLastChangeDate(null);
+                    proposal_db.setLinks(null);
+                    proposal_db.setNote(null);
+                    proposal_db.setPrivileges(null);
+                    proposal_db.setProposalobjects(null);
+                    proposal_db.setProposalstatuschanges(null);
+                    proposal_db.setRatings(null);
+                    proposal_db.setStatus(null);
+                    proposal_db.setStatusDate(null);
+                    proposal_db.setValidFrom(null);
+                    proposal_db.setValidTo(null);
+                    proposal_db.setVocabularyId(null);
+                    proposal_db.setVocabularyIdTwo(null);
+                    proposal_db.setVocabularyName(null);
+                    proposal_db.setVocabularyNameTwo(null);
 
-                        for (Link myLink : myLinkList)
-                        {
-                            hb_session.delete(myLink);
-                        }
+                    hb_session.delete(proposal_db);
 
-                        //Löschen der Rating Datensätzen mit Verknüpfungen zum Proposal PrimKey
-                        String hqlRating = "from Proposalstatuschange where proposalId =:id";
-                        Query qRating = hb_session.createQuery(hqlRating);
-                        qRating.setParameter("id", proposal.getId());
-                        List<Rating> myRatingList = qRating.list();
+                    hb_session.getTransaction().commit();
 
-                        for (Rating myRating : myRatingList)
-                        {
-                            hb_session.delete(myRating);
-                        }
+                    //Deleting the references in tables code_system and code_system_version
+                    removeEntity(true, false, proposal);
 
-                        proposal_db.setCollaborationuser(null);
-                        proposal_db.setContentType(null);
-                        proposal_db.setCreated(null);
-                        proposal_db.setDescription(null);
-                        proposal_db.setDiscussions(null);
-                        proposal_db.setId(null);
-                        proposal_db.setLastChangeDate(null);
-                        proposal_db.setLinks(null);
-                        proposal_db.setNote(null);
-                        proposal_db.setPrivileges(null);
-                        proposal_db.setProposalobjects(null);
-                        proposal_db.setProposalstatuschanges(null);
-                        proposal_db.setRatings(null);
-                        proposal_db.setStatus(null);
-                        proposal_db.setStatusDate(null);
-                        proposal_db.setValidFrom(null);
-                        proposal_db.setValidTo(null);
-                        proposal_db.setVocabularyId(null);
-                        proposal_db.setVocabularyIdTwo(null);
-                        proposal_db.setVocabularyName(null);
-                        proposal_db.setVocabularyNameTwo(null);
+                    Messagebox.show("Eintrag wurde erfolgreich entfernt.", "Eintrag entfernen", Messagebox.OK, Messagebox.INFORMATION);
 
-                        hb_session.delete(proposal_db);
+                    proposal.setStatus(STATUS_DELETED);
+                }
+                else{
+                    proposal_db.setStatus((int) statusTo);
+                    proposal_db.setStatusDate(new Date());
+                    proposal_db.setValidFrom(discDateFrom);
+                    proposal_db.setValidTo(discDateTo);
 
-                        hb_session.getTransaction().commit();
+                    hb_session.update(proposal_db);
 
-                        //Deleting the references in tables code_system and code_system_version
-                        removeEntity(true, false, proposal);
+                    //Statusänderung hinzufügen
+                    Proposalstatuschange psc = new Proposalstatuschange();
+                    psc.setProposal(proposal_db);
+                    psc.getProposal().setId(proposal.getId());
+                    psc.setChangeTimestamp(new Date());
+                    psc.setCollaborationuser(new Collaborationuser());
 
-                        Messagebox.show("Eintrag wurde erfolgreich entfernt.", "Eintrag entfernen", Messagebox.OK, Messagebox.INFORMATION);
+                    //3.2.17 replaced commented lined with this one
+                    psc.getCollaborationuser().setId(collabUserID);
+                    //psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
+                    psc.setProposalStatusFrom((int) statusFrom);
+                    psc.setProposalStatusTo((int) statusTo);
+                    psc.setReason(reason);
+                    
+                    hb_session.save(psc);
 
-                        proposal.setStatus(STATUS_DELETED);
+                    hb_session.getTransaction().commit();
 
-                    }
-                    else
-                    {
-                        proposal_db.setStatus((int) statusTo);
-                        proposal_db.setStatusDate(new Date());
-
-                        proposal_db.setValidFrom(discDateFrom);
-                        proposal_db.setValidTo(discDateTo);
-
-                        if (discDateFrom != null)
-                        {
-                            logger.debug("Date from: " + discDateFrom);
-                        }
-                        else
-                        {
-                            logger.debug("Date from: null");
-                        }
-
-                        hb_session.update(proposal_db);
-
-                        // Statusänderung hinzufügen
-                        Proposalstatuschange psc = new Proposalstatuschange();
-                        psc.setProposal(proposal_db);
-                        //psc.getProposal().setId(proposal.getId());
-                        psc.setChangeTimestamp(new Date());
-                        psc.setCollaborationuser(new Collaborationuser());
-
-                        //3.2.17 replaced commented lined with this one
-                        psc.getCollaborationuser().setId(collabUserID);
-                        //psc.getCollaborationuser().setId(SessionHelper.getCollaborationUserID());
-                        psc.setProposalStatusFrom((int) statusFrom);
-                        psc.setProposalStatusTo((int) statusTo);
-                        psc.setReason(reason);
-                        hb_session.save(psc);
-
-                        hb_session.getTransaction().commit();
-
-                        // 4. Status in Terminologieserver ändern
-                        ReturnType transfer_success = new ReturnType();
-                        transfer_success.setSuccess(false);
-                        //Sortieren der proposalobjects um CS/VS nach vorne zu reihen -> wichtig bei Transfer auf public
-                        List<Proposalobject> terminologies = new ArrayList<Proposalobject>();
-                        List<Proposalobject> codesystems = new ArrayList<Proposalobject>();
-                        List<Proposalobject> valuesets = new ArrayList<Proposalobject>();
-                        List<Proposalobject> codesystemVersions = new ArrayList<Proposalobject>();
-                        List<Proposalobject> valuesetVersions = new ArrayList<Proposalobject>();
-                        List<Proposalobject> codesystemConcepts = new ArrayList<Proposalobject>();
-                        List<Proposalobject> valuesetConcepts = new ArrayList<Proposalobject>();
-                        List<Proposalobject> other = new ArrayList<Proposalobject>();
-                        for (Proposalobject po : proposal_db.getProposalobjects())
-                        {
+                    // 4. Status in Terminologieserver ändern
+                    ReturnType transfer_success = new ReturnType();
+                    transfer_success.setSuccess(false);
+                    //Sortieren der proposalobjects um CS/VS nach vorne zu reihen -> wichtig bei Transfer auf public
+                    List<Proposalobject> terminologies = new ArrayList<>();
+                    List<Proposalobject> codesystems = new ArrayList<>();
+                    List<Proposalobject> valuesets = new ArrayList<>();
+                    List<Proposalobject> codesystemVersions = new ArrayList<>();
+                    List<Proposalobject> valuesetVersions = new ArrayList<>();
+                    List<Proposalobject> codesystemConcepts = new ArrayList<>();
+                    List<Proposalobject> valuesetConcepts = new ArrayList<>();
+                    List<Proposalobject> other = new ArrayList<>();
+                    
+                    for (Proposalobject po : proposal_db.getProposalobjects()){
                             if (po.getClassname().equals("CodeSystem"))
-                            {
                                 codesystems.add(po);
-                            }
                             else if (po.getClassname().equals("ValueSet"))
-                            {
                                 valuesets.add(po);
-                            }
                             else if (po.getClassname().equals("CodeSystemVersion"))
-                            {
                                 codesystemVersions.add(po);
-                            }
                             else if (po.getClassname().equals("ValueSetVersion"))
-                            {
                                 valuesetVersions.add(po);
-                            }
                             else if (po.getClassname().equals("CodeSystemConcept"))
-                            {
                                 codesystemConcepts.add(po);
-                            }
                             else if (po.getClassname().equals("ConceptValueSetMembership"))
-                            {
                                 valuesetConcepts.add(po);
-                            }
                             else
-                            {
                                 other.add(po);
-                            }
-                        }
+                    }
 
-                        terminologies.addAll(terminologies.size(), codesystems);
-                        terminologies.addAll(terminologies.size(), valuesets);
-                        terminologies.addAll(terminologies.size(), codesystemVersions);
-                        terminologies.addAll(terminologies.size(), valuesetVersions);
-                        terminologies.addAll(terminologies.size(), codesystemConcepts);
-                        terminologies.addAll(terminologies.size(), valuesetConcepts);
-                        terminologies.addAll(terminologies.size(), other);
+                    terminologies.addAll(terminologies.size(), codesystems);
+                    terminologies.addAll(terminologies.size(), valuesets);
+                    terminologies.addAll(terminologies.size(), codesystemVersions);
+                    terminologies.addAll(terminologies.size(), valuesetVersions);
+                    terminologies.addAll(terminologies.size(), codesystemConcepts);
+                    terminologies.addAll(terminologies.size(), valuesetConcepts);
+                    terminologies.addAll(terminologies.size(), other);
 
-                        boolean statusChangeSuccess = false;
+                    boolean statusChangeSuccess = false;
 
-                        for (Proposalobject po : terminologies)
-                        {
-                            //3.2.17 added collabSessionID parameter
-                            statusChangeSuccess = changeTerminologyServerStatus(rel.getStatusByStatusIdTo(), po, returnInfos, collabSessionID);
-                            if (!statusChangeSuccess)
-                            {
-                                logger.info("The status of a proposal object could not be changed");
-                                break;
-                            }
+                    for (Proposalobject po : terminologies){
+                        //3.2.17 added collabSessionID parameter
+                        statusChangeSuccess = changeTerminologyServerStatus(rel.getStatusByStatusIdTo(), po, returnInfos, collabSessionID);
+                        if (!statusChangeSuccess){
+                            LOGGER.info("The status of a proposal object could not be changed");
+                            break;
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    LoggingOutput.outputException(ex, this);
-                    if(!hb_session.getTransaction().wasRolledBack())
-                        hb_session.getTransaction().rollback();
+            }
+            catch (Exception ex){
+                LOGGER.error("Error [0145]", ex);
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
 
-                    returnInfos.setSuccess(false);
-                    returnInfos.setMessage("Fehler beim Ändern des Status: " + ex.getLocalizedMessage());
-                    return returnInfos;
-                }
-                finally
-                {
-                    // Session schließen
-                    if(hb_session.isOpen())
-                        hb_session.close();
-                }
-
-                returnInfos.setSuccess(true);
-                returnInfos.setMessage("Status erfolgreich geändert zu: " + rel.getStatusByStatusIdTo().getStatus() + "\n\nAndere Benutzer wurden über die Statusänderung per Email informiert.");
-            //}
-            //3.2.17 commented out
-            /*else
-            {
-                // Statusänderung nicht möglich, da keine Rechte
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("keine Rechte vorhanden!");
-                }
-
-                returnInfos.setMessage("Sie besitzen nicht die nötigen Rechte für diese Statusänderung!");
+                returnInfos.setSuccess(false);
+                returnInfos.setMessage("Fehler beim Ändern des Status: " + ex.getLocalizedMessage());
                 return returnInfos;
-            }*/
+            }
+            finally{
+                // Session schließen
+                if(hb_session.isOpen())
+                    hb_session.close();
+            }
 
+            returnInfos.setSuccess(true);
+            returnInfos.setMessage("Status erfolgreich geändert zu: " + rel.getStatusByStatusIdTo().getStatus() + "\n\nAndere Benutzer wurden über die Statusänderung per Email informiert.");
         }
         else
         {
@@ -1176,43 +1102,33 @@ public class ProposalWorkflow
      * @param returnInfos
      */
     //3.2.17 added collaborationsession parameter
-    private static boolean changeTerminologyServerStatus(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po, ReturnType returnInfos, String collabSessionID)
-    {
-        logger.debug("changeTerminologyServerStatus(), classId: " + po.getClassId() + ", classname: " + po.getClassname());
+    private static boolean changeTerminologyServerStatus(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po, ReturnType returnInfos, String collabSessionID){
+        LOGGER.debug("changeTerminologyServerStatus(), classId: " + po.getClassId() + ", classname: " + po.getClassname());
         PO_CLASSNAME classname = PO_CLASSNAME.get(po.getClassname());
         PO_CHANGE_TYPE changeType = PO_CHANGE_TYPE.get(po.getChangeType());
 
         int newStatus = 0;
         if (statusTo.getIsPublic())
-        {
             newStatus = 1; // Black
-        }
         else if (statusTo.getIsDeleted())
-        {
             newStatus = 2; // Strikethrough
-        }
         else
-        {
             newStatus = 0; // Grey
-        }
 
-        logger.debug("Neuer Status: " + newStatus);
+        LOGGER.debug("New status: " + newStatus);
         if (changeType != PO_CHANGE_TYPE.CHANGED)
         {
-            if (classname == PO_CLASSNAME.CODESYSTEM)
-            {
+            if (classname == PO_CLASSNAME.CODESYSTEM){
                 // nothing happens, only code system versions have a status, code systems do not
                 return true;
             }
-            else if (classname == PO_CLASSNAME.CODESYSTEM_VERSION)
-            {
+            else if (classname == PO_CLASSNAME.CODESYSTEM_VERSION){
                 // Change status of the code system version
                 UpdateCodeSystemVersionStatusRequestType request = new UpdateCodeSystemVersionStatusRequestType();
                 request.setLogin(new LoginType());
 
                 //3.2.17 
                 request.getLogin().setSessionID(collabSessionID);
-                //request.setLoginAlreadyChecked(true);
                 //request.getLogin().setSessionID(CollaborationSession.getInstance().getSessionID());
                 
                 // Codesystem angeben
@@ -1225,18 +1141,13 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateCodeSystemVersionStatusResponse.Return ret = updateCodeSystemVersionStatus(request);
 
-                logger.debug("Result updateCodeSystemVersionStatus: " + ret.getReturnInfos().getMessage());
+                LOGGER.debug("Result updateCodeSystemVersionStatus: " + ret.getReturnInfos().getMessage());
                 if (ret.getReturnInfos().getStatus() == Status.OK)
-                {
                     return true;
-                }
                 else
-                {
                     return false;
-                }
             }
-            else if (classname == PO_CLASSNAME.CODESYSTEM_CONCEPT)
-            {
+            else if (classname == PO_CLASSNAME.CODESYSTEM_CONCEPT){
                 // Status des Konzepts ändern
                 UpdateConceptStatusRequestType request = new UpdateConceptStatusRequestType();
                 request.setCodeSystemVersionId(po.getProposal().getVocabularyId());
@@ -1256,26 +1167,19 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateConceptStatusResponse.Return ret = updateConceptStatus(request);
 
-                logger.debug("Result updateConceptStatus: " + ret.getReturnInfos().getMessage());
+                LOGGER.debug("Result updateConceptStatus: " + ret.getReturnInfos().getMessage());
                 if ((ret.getReturnInfos().getStatus() == Status.OK))
-                {
                     return true;
-                }
                 else
-                {
                     return false;
-                }
             }
-            else if (classname == PO_CLASSNAME.RELATION)
-            {
+            else if (classname == PO_CLASSNAME.RELATION){
                 // TODO
             }
-            else if (classname == PO_CLASSNAME.VALUESET)
-            {
+            else if (classname == PO_CLASSNAME.VALUESET){
                 return true;
             }
-            else if (classname == PO_CLASSNAME.VALUESET_VERSION)
-            {
+            else if (classname == PO_CLASSNAME.VALUESET_VERSION){
                 // Status der Codesystem-Version ändern
                 UpdateValueSetStatusRequestType request = new UpdateValueSetStatusRequestType();
                 request.setLogin(new LoginType());
@@ -1296,15 +1200,11 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateValueSetStatusResponse.Return ret = updateValueSetStatus(request);
 
-                logger.debug("Result updateValueSetVersionStatus: " + ret.getReturnInfos().getMessage());
+                LOGGER.debug("Result updateValueSetVersionStatus: " + ret.getReturnInfos().getMessage());
                 if (ret.getReturnInfos().getStatus() == Status.OK)
-                {
                     return true;
-                }
                 else
-                {
                     return false;
-                }
             }
             else if (classname == PO_CLASSNAME.CONCEPT_VALUESET_MEMBERSHIP)
             {
@@ -1332,18 +1232,13 @@ public class ProposalWorkflow
                 // Webservice aufrufen
                 UpdateConceptValueSetMembershipStatusResponse.Return ret = updateConceptValueSetMembershipStatus(request);
 
-                logger.debug("Ergebnis updateValueSetVersionStatus: " + ret.getReturnInfos().getMessage());
+                LOGGER.debug("Ergebnis updateValueSetVersionStatus: " + ret.getReturnInfos().getMessage());
                 if (ret.getReturnInfos().getStatus() == Status.OK)
-                {
                     return true;
-                }
                 else
-                {
                     return false;
-                }
             }
-            else if (classname == PO_CLASSNAME.ASSOCIATION)
-            {
+            else if (classname == PO_CLASSNAME.ASSOCIATION){
                 //nothing to do; association needs no status update
                 return true;
             }
@@ -1360,7 +1255,7 @@ public class ProposalWorkflow
      */
     private static ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po, ReturnType returnInfos, Object o)
     {
-        logger.debug("transferTerminologyToPublicServer(), classId: " + po.getClassId() + ", classname: " + po.getClassname());
+        LOGGER.debug("transferTerminologyToPublicServer(), classId: " + po.getClassId() + ", classname: " + po.getClassname());
 
         ReturnType ret = new ReturnType();
         ret.setSuccess(false);
@@ -1418,8 +1313,8 @@ public class ProposalWorkflow
                         format = 194L; // TODO 193 = ClaML, 194 = CSV, 195 SVS
                     }
 
-                    logger.info(po.getName());
-                    logger.info("Format: " + format);
+                    LOGGER.info(po.getName());
+                    LOGGER.info("Format: " + format);
                     eType.setFormatId(format);
                     eType.setUpdateCheck(false);
                     req_export_cs.setExportInfos(eType);
@@ -1431,7 +1326,7 @@ public class ProposalWorkflow
                     eParameterType.setTranslations(true);
                     req_export_cs.setExportParameter(eParameterType);
 
-                    logger.debug("Export-Service-Aufruf...");
+                    LOGGER.debug("Export-Service-Aufruf...");
 
                     // WS-Aufruf
                     Return response = null;
@@ -1548,8 +1443,8 @@ public class ProposalWorkflow
 
                                 de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import = port.importCodeSystem(request);
 
-                                logger.info("Import CodeSystem Return Status: " + ret_import.getReturnInfos().getStatus());
-                                logger.info(ret_import.getReturnInfos().getMessage());
+                                LOGGER.info("Import CodeSystem Return Status: " + ret_import.getReturnInfos().getStatus());
+                                LOGGER.info(ret_import.getReturnInfos().getMessage());
                                 if (ret_import.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))
                                 {
                                     //import erfolgreich --> HilfsVersion für neues CodeSystem wieder löschen  
@@ -1747,7 +1642,7 @@ public class ProposalWorkflow
                     eParameterType.setTranslations(false);
                     req_export_vs.setExportParameter(eParameterType);
 
-                    logger.debug("Export-Service-Aufruf...");
+                    LOGGER.debug("Export-Service-Aufruf...");
 
                     //3.2.17 added
                     //req_export_vs.setLoginAlreadyChecked(true);
@@ -2177,8 +2072,7 @@ public class ProposalWorkflow
         return st;
     }
 
-    private void removeEntity(Boolean isCodeSystem, Boolean versionOnly, Proposal proposal)
-    {
+    private void removeEntity(Boolean isCodeSystem, Boolean versionOnly, Proposal proposal){
         Long id = proposal.getVocabularyIdTwo();
         Long versionId = proposal.getVocabularyId();
 
@@ -2190,85 +2084,58 @@ public class ProposalWorkflow
         login.setSessionID(de.fhdo.helper.SessionHelper.getSessionId());
         parameter.setLogin(login);
 
-        if (isCodeSystem)
-        {//CS
+        if (isCodeSystem){
             CodeSystem cs = new CodeSystem();
             CodeSystemVersion csv = new CodeSystemVersion();
             cs.setId(id);
             if (versionId == null)
-            {
                 csv.setVersionId(null);
-            }
             else
-            {
                 csv.setVersionId(versionId);
-            }
+            
             cs.getCodeSystemVersions().add(csv);
             parameter.getDeleteInfo().setCodeSystem(cs);
 
             if (versionOnly)
-            {
                 parameter.getDeleteInfo().setType(Type.CODE_SYSTEM_VERSION);
-            }
             else
-            {
                 parameter.getDeleteInfo().setType(Type.CODE_SYSTEM);
-            }
 
             if (proposal.getContentType().equals("concept"))
-            {
                 parameter.getDeleteInfo().setType(Type.CODE_SYSTEM_ENTITY_VERSION);
-            }
-
         }
-        else
-        {//VS
+        else{
             ValueSet vs = new ValueSet();
             ValueSetVersion vsv = new ValueSetVersion();
             vs.setId(id);
             if (versionId == null)
-            {
                 vsv.setVersionId(null);
-            }
             else
-            {
                 vsv.setVersionId(versionId);
-            }
+            
             vs.getValueSetVersions().add(vsv);
             parameter.getDeleteInfo().setValueSet(vs);
             if (versionOnly)
-            {
                 parameter.getDeleteInfo().setType(Type.VALUE_SET_VERSION);
-            }
             else
-            {
                 parameter.getDeleteInfo().setType(Type.VALUE_SET);
-            }
         }
 
         // Ausführen
-        //de.fhdo.terminologie.ws.authoring.Authoring_Service service = new de.fhdo.terminologie.ws.authoring.Authoring_Service();
         de.fhdo.terminologie.ws.authoring.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringServicePort();
         RemoveTerminologyOrConceptResponseType response = port.removeTerminologyOrConcept(parameter);
 
         // Meldung
-        try
-        {
-            if (response.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.authoring.Status.OK)
-            {
+        try{
+            if (response.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.authoring.Status.OK){
                 if (response.getReturnInfos().getOverallErrorCategory() == de.fhdo.terminologie.ws.authoring.OverallErrorCategory.INFO)
-                {
                     Messagebox.show(response.getReturnInfos().getMessage(), Labels.getLabel("common.success"), Messagebox.OK, Messagebox.INFORMATION);
-                }
             }
             else
-            {
                 Messagebox.show(response.getReturnInfos().getMessage(), Labels.getLabel("common.error"), Messagebox.OK, Messagebox.ERROR);
-            }
         }
-        catch (Exception ex)
-        {
-            Logger.getLogger(PopupConcept.class.getName()).log(Level.SEVERE, null, ex);
+        catch (Exception ex){
+            LOGGER.error("Error [0144]", ex);
         }
     }
 

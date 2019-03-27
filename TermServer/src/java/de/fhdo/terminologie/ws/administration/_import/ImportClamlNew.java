@@ -144,7 +144,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         StaticStatusList.addStatus(this.getImportId(), this.status);
                
         try{
-            LOGGER.debug("Opening file and creating ByteArrayInputStream");
+            LOGGER.debug("Opening file and creating ByteArrayInputStream"); //anker2
             InputStream inputStream = new ByteArrayInputStream(this.fileContent);
 
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -170,7 +170,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             }
         }
         catch (HibernateException ex){
-            LOGGER.error("Error [0110]: " + ex.getLocalizedMessage(), ex);
+            LOGGER.error("Error [0110]", ex);
 
             try{
                 if(!hb_session.getTransaction().wasRolledBack()){
@@ -179,7 +179,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 }
             }
             catch (Exception exRollback){
-                LOGGER.error("Error [0111]: " + exRollback.getLocalizedMessage(), exRollback);
+                LOGGER.error("Error [0111]", exRollback);
                 if(!hb_session.getTransaction().wasRolledBack())
                     LOGGER.info("Rollback failed");
             }
@@ -187,19 +187,19 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (SAXException ex){
-            LOGGER.error("Error [0112]: " + ex.getLocalizedMessage(), ex);
+            LOGGER.error("Error [0112]", ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (IOException ex){
-            LOGGER.error("Error [0113]: " + ex.getLocalizedMessage(), ex);
+            LOGGER.error("Error [0113]", ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (ParserConfigurationException ex){
-            LOGGER.error("Error [0114]: " + ex.getLocalizedMessage(), ex);
+            LOGGER.error("Error [0114]", ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         catch (Exception ex){
-            LOGGER.error("Error [0115]: " + ex.getLocalizedMessage(), ex);
+            LOGGER.error("Error [0115]", ex);
             throw new ImportException(ex.getLocalizedMessage());
         }
         finally{
@@ -535,7 +535,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         
         //Creating code system
         CreateCodeSystem createCodeSystem = new CreateCodeSystem();
-        CreateCodeSystemResponseType createCSresponse = createCodeSystem.CreateCodeSystem(createCSrequest, hb_session);
+        CreateCodeSystemResponseType createCSresponse = createCodeSystem.CreateCodeSystem(createCSrequest, hb_session); //NULL ANKER
         
         LOGGER.debug(createCSresponse.getReturnInfos().getMessage());
 
@@ -544,8 +544,8 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         
         this.codesystem = createCSresponse.getCodeSystem();
 
-        LOGGER.debug("New CS-ID: " + createCSresponse.getCodeSystem().getId());
-        LOGGER.debug("New CSV-ID: " + ((CodeSystemVersion) createCSresponse.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
+        //LOGGER.debug("New CS-ID: " + createCSresponse.getCodeSystem().getId());
+        //LOGGER.debug("New CSV-ID: " + ((CodeSystemVersion) createCSresponse.getCodeSystem().getCodeSystemVersions().toArray()[0]).getVersionId());
 
         //Read existing metadata and add to map to avoid double entries
         String HQL_metadataParameter_search = "select distinct mp from MetadataParameter mp "

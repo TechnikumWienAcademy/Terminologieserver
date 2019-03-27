@@ -340,7 +340,6 @@
 <xs:sequence>
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -384,6 +383,32 @@
 <xs:sequence/>
 </xs:complexType>
 
+<xs:complexType name="getRemoveTerminologyOrConceptPubResponse">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="getRemoveTerminologyOrConceptPubResponseResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:removeTerminologyOrConceptResponseType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="removeTerminologyOrConceptResponseType">
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="returnType">
+<xs:sequence>
+<xs:element name="count" type="xs:int"/>
+<xs:element name="httpStatus" type="tns:httpStatus" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0"/>
+<xs:element name="status" type="tns:status" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="getCreateValueSetPubResponse">
 <xs:sequence/>
 </xs:complexType>
@@ -398,32 +423,6 @@
 </xs:sequence>
 </xs:complexType>
 </xs:element>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="returnType">
-<xs:sequence>
-<xs:element name="count" type="xs:int"/>
-<xs:element name="httpStatus" type="tns:httpStatus" minOccurs="0"/>
-<xs:element name="message" type="xs:string" minOccurs="0"/>
-<xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0"/>
-<xs:element name="status" type="tns:status" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="getRemoveTerminologyOrConceptPubResponse">
-<xs:sequence/>
-</xs:complexType>
-
-<xs:complexType name="getRemoveTerminologyOrConceptPubResponseResponse">
-<xs:sequence>
-<xs:element name="return" type="tns:removeTerminologyOrConceptResponseType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="removeTerminologyOrConceptResponseType">
-<xs:sequence>
-<xs:element name="returnInfos" type="tns:returnType" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -594,7 +593,6 @@
 <xs:sequence>
 <xs:element name="deleteInfo" type="tns:deleteInfo" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -622,7 +620,6 @@
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="codeSystemEntity" type="ns1:codeSystemEntity" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 <xs:element name="property" type="ns1:property" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 </xs:sequence>
 </xs:complexType>
@@ -651,7 +648,6 @@
 <xs:element name="codeSystemEntity" type="ns1:codeSystemEntity" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 <xs:element name="conceptValueSetMembership" type="ns1:conceptValueSetMembership" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
@@ -793,7 +789,6 @@
 <xs:complexType name="updateValueSetStatusRequestType">
 <xs:sequence>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 <xs:element name="valueSet" type="ns1:valueSet" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
@@ -847,7 +842,6 @@
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="codeSystemEntity" type="ns1:codeSystemEntity" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 <xs:element name="property" type="ns1:property" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 </xs:sequence>
 </xs:complexType>
@@ -975,7 +969,6 @@
 <xs:sequence>
 <xs:element name="codeSystem" type="ns1:codeSystem" minOccurs="0"/>
 <xs:element name="login" type="tns:loginType" minOccurs="0"/>
-<xs:element name="loginAlreadyChecked" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 

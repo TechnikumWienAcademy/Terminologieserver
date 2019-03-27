@@ -30,8 +30,6 @@ import de.fhdo.terminologie.ws.types.ReturnType;
 import java.util.Set;
 
 /**
- * 3.2.20 CHECKED
- * TODO Javadoc
  * @author Mathias Aschhoff
  */
 public class UpdateCodeSystemVersionStatus{
@@ -68,12 +66,14 @@ public class UpdateCodeSystemVersionStatus{
                 try{
                     // Changing status and saving in DB
                     CodeSystemVersion CSV_db = (CodeSystemVersion) hb_session.get(CodeSystemVersion.class, CSversion.getVersionId());
-                    CSV_db.setStatus(CSversion.getStatus());
-                    hb_session.update(CSV_db);
-                
-                    LastChangeHelper.updateLastChangeDate(true, CSversion.getVersionId(),hb_session);
-                    if(!hb_session.getTransaction().wasCommitted())
-                        hb_session.getTransaction().commit();
+                    if(CSV_db != null){
+                        CSV_db.setStatus(CSversion.getStatus());
+                        hb_session.update(CSV_db);
+                    
+                        LastChangeHelper.updateLastChangeDate(true, CSversion.getVersionId(), hb_session);
+                        if(!hb_session.getTransaction().wasCommitted())
+                            hb_session.getTransaction().commit();
+                    }
                 }
                 catch (Exception ex){
                     LOGGER.error("Error [0121]", ex);

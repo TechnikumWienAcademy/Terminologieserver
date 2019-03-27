@@ -1,4 +1,8 @@
-﻿Changelog 3.2.30
+﻿Changelog 3.2.31
+	-Änderungen
+		.) Build- und Freigabefehler sollten behoben sein.
+
+Changelog 3.2.30
 	-Änderungen
 		.) Neuanlieferung nach einem Build-Fehler der TermBrowser-WAR-Datei.
 

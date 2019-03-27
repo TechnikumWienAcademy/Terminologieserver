@@ -39,7 +39,6 @@ public class LastChangeHelper{
             hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
             hbOpened = true;
-            LOGGER.info("PASSED HB-SESSION WAS NULL");
         }
         boolean success = false;
         try{

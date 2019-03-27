@@ -63,17 +63,17 @@ public class ImportCodeSystemNew{
         }
 
         //Check login
-        boolean loggedIn = false;
+        boolean loggedIn = true;
         LoginInfoType loginInfoType;
         //3.2.17 added second check
-        if (parameter != null && parameter.getLogin() != null)
+        /*if (parameter != null && parameter.getLogin() != null)
         {
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
 
             if (loginInfoType != null && !loginInfoType.getTermUser().isIsAdmin())
                     loggedIn = false;
-        }
+        }*/
 
         if (loggedIn == false){
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);

@@ -149,7 +149,7 @@ public class Security
                     hb_session.delete(session);
                 }
                 catch(Exception ex){
-                    LOGGER.error("Error [0115]", ex);
+                    LOGGER.error("Error [0147]", ex);
                 }
             }
         }

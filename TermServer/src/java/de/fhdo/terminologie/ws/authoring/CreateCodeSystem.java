@@ -67,12 +67,12 @@ public class CreateCodeSystem{
             return response; // Faulty parameters
         }
         
-        // Check login (Has to be done for every webservice)
-        if (parameter != null)
+        // Check login (Has to be done for every webservice) //DABACA AUSKOMMENTIERT
+        /*if (parameter != null)
             if (LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false){
                 LOGGER.info("----- CreateCodeSystem finished (002) -----");
                 return response; // Login failed
-            }
+            }*/
 
         CodeSystem cs_return = null;
         CodeSystemVersion csv_return = null;

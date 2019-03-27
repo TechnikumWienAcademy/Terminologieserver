@@ -24,6 +24,7 @@ import de.fhdo.terminologie.ws.administration.ExportValueSetContentResponse;
 import de.fhdo.terminologie.ws.administrationPub.Administration;
 import de.fhdo.terminologie.ws.administrationPub.GetImportValueSetPubResponseResponse;
 import de.fhdo.terminologie.ws.administrationPub.GetPubImportResponseResponse;
+import de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType;
 import de.fhdo.terminologie.ws.authoringPub.Authoring;
 import de.fhdo.terminologie.ws.authoringPub.GetCreateCodeSystemPubResponseResponse;
 import de.fhdo.terminologie.ws.authoringPub.GetCreateValueSetPubResponseResponse;
@@ -142,8 +143,7 @@ public class TerminologyReleaseManager{
         return false;
     }
 
-    private ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po)
-    {
+    private ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject po){
         LOGGER.info("+++++ transferTerminologyToPublicServer started +++++");
         //initially set return value
         ReturnType ret = new ReturnType();
@@ -206,8 +206,6 @@ public class TerminologyReleaseManager{
                     if(result.get(0).getName().equals(csToExport.getName())){
                         exists = true;
                         this.targetCS = result.get(0);
-                        if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
                     }
                     //check if name of found CS and CS to be exported are identical
                     /*for (de.fhdo.terminologie.ws.searchPub.CodeSystem cs : result)
@@ -237,8 +235,6 @@ public class TerminologyReleaseManager{
                         {
                             exists = true;
                             this.targetCS = cs;
-                            if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
                             //3.2.21
                             break;
                         }
@@ -290,7 +286,6 @@ public class TerminologyReleaseManager{
 
                 if (this.targetCS.getCodeSystemVersions() != null)
                 {
-                    LOGGER.info("DABACA not null, size = " + this.targetCS.getCodeSystemVersions().size());
                     this.removeTempCodeSystemVersion();
                 }
 
@@ -490,8 +485,6 @@ public class TerminologyReleaseManager{
                     if (exists)
                     {
                         this.targetCS = result.get(0);
-                        if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
                         exists = true;
                     }
                 }
@@ -511,15 +504,12 @@ public class TerminologyReleaseManager{
                         {
                             exists = true;
                             this.targetCS = cs;
-                            if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
                         }
                     }
                 }
 
                 if ((this.targetCS == null) && (!exists))
                 {
-                    LOGGER.info("DABACA wird TEMPORÄRES SYSTEM ERSTELLT?");
                     this.createTempCodeSystemVersionOnPub(csToExport);
                     //now target CS has to be set
                     if (this.targetCS != null)
@@ -629,16 +619,13 @@ public class TerminologyReleaseManager{
                 }
             }
         }
-        catch (ServerSOAPFaultException ex)
-        {
-            LOGGER.error(ex);
+        catch (ServerSOAPFaultException ex){
+            LOGGER.error("Error [0142]", ex);
             ret.setSuccess(false);
             ret.setMessage("Die Antwort des Servers ist fehlerhaft.");
         }
-        catch (Exception ex)
-        {
-            //TODO set message
-            LOGGER.error(ex);
+        catch (Exception ex){
+            LOGGER.error("Error [0141]", ex);
             ret.setSuccess(false);
             ret.setMessage("An Error occured.");
         }
@@ -884,56 +871,48 @@ public class TerminologyReleaseManager{
         }
     }
 
-    //3.2.20
-    de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType requestThread;
     
-    private de.fhdo.terminologie.ws.administrationPub.ReturnType importCodeSystem(CodeSystemVersion csv, ExportType exportedCs) throws ServerSOAPFaultException
-    {
+    private de.fhdo.terminologie.ws.administrationPub.ReturnType importCodeSystem(CodeSystemVersion CSversion, ExportType exportedCS) throws ServerSOAPFaultException{
         LOGGER.info("+++++ importCodeSystem started +++++");
         //de.fhdo.terminologie.ws.administrationPub.Administration port = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
+        
         // Login
         de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType request = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         request.getLogin().setSessionID(this.pubSessionId);
-        //3.2.17
-        //request.setLoginAlreadyChecked(true);
         
         // Codesystem
         request.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
         request.getCodeSystem().setId(this.targetCS.getId());
 
         request.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
-        if (this.targetCS.getName().contains("LOINC"))
-        {
+        if (this.targetCS!=null && this.targetCS.getName()!=null && this.targetCS.getName().contains("LOINC")){
             request.getImportInfos().setOrder(true);
             request.getImportInfos().setRole(CODES.ROLE_ADMIN);
         }
-        else
-        {
+        else{
             request.getImportInfos().setRole(CODES.ROLE_TRANSFER);
         }
 
-        de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion csv_pub = new de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion();
-        csv_pub.setName(csv.getName());
-        request.getCodeSystem().getCodeSystemVersions().add(csv_pub);
-        request.getImportInfos().setFormatId(exportedCs.getFormatId());
+        de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion CSversionPub = new de.fhdo.terminologie.ws.administrationPub.CodeSystemVersion();
+        CSversionPub.setName(CSversion.getName());
+        request.getCodeSystem().getCodeSystemVersions().add(CSversionPub);
+        request.getImportInfos().setFormatId(exportedCS.getFormatId());
         request.getCodeSystem().setName(this.targetCS.getName());
-        request.getImportInfos().setFilecontent(exportedCs.getFilecontent());
+        request.getImportInfos().setFilecontent(exportedCS.getFilecontent());
         request.setImportId(this.importId);
 
         //3.2.20 next line
         //de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return ret_import = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemResponse.Return();
         //3.2.20 added try catch and thread
-        requestThread = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
+        ImportCodeSystemRequestType requestThread = new de.fhdo.terminologie.ws.administrationPub.ImportCodeSystemRequestType();
         requestThread.setLogin(new de.fhdo.terminologie.ws.administrationPub.LoginType());
         requestThread.getLogin().setSessionID(this.pubSessionId);
-        //3.2.17
-        //requestThread.setLoginAlreadyChecked(true);
         requestThread.setCodeSystem(new de.fhdo.terminologie.ws.administrationPub.CodeSystem());
         requestThread.getCodeSystem().setId(this.targetCS.getId());
 
         requestThread.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
-        if (this.targetCS.getName().contains("LOINC"))
+        if (this.targetCS!=null && this.targetCS.getName()!=null && this.targetCS.getName().contains("LOINC"))
         {
             requestThread.getImportInfos().setOrder(true);
             requestThread.getImportInfos().setRole(CODES.ROLE_ADMIN);
@@ -942,10 +921,10 @@ public class TerminologyReleaseManager{
         {
             requestThread.getImportInfos().setRole(CODES.ROLE_TRANSFER);
         }
-        requestThread.getCodeSystem().getCodeSystemVersions().add(csv_pub);
-        requestThread.getImportInfos().setFormatId(exportedCs.getFormatId());
+        requestThread.getCodeSystem().getCodeSystemVersions().add(CSversionPub);
+        requestThread.getImportInfos().setFormatId(exportedCS.getFormatId());
         requestThread.getCodeSystem().setName(this.targetCS.getName());
-        requestThread.getImportInfos().setFilecontent(exportedCs.getFilecontent());
+        requestThread.getImportInfos().setFilecontent(exportedCS.getFilecontent());
         requestThread.setImportId(this.importId);
         
         final Administration importPort = WebServiceUrlHelper.getInstance().getAdministrationPubServicePort(new MTOMFeature(true));
@@ -975,32 +954,31 @@ public class TerminologyReleaseManager{
             
         }
         catch(Exception e){
-            LOGGER.info("Exception caught while importing CodeSystem on pub and communicating back to collab");
+            LOGGER.info("Error [0146]", e);
         }
         LOGGER.info("----- importCodeSystem finished (001) -----");
         return ret_importThread.getReturnInfos();
     }
 
-    private void createTempCodeSystemVersionOnPub(CodeSystem cs)
-    {
+    private void createTempCodeSystemVersionOnPub(CodeSystem CS){
         LOGGER.info("+++++ createTempCodeSystemVersionOnPub started +++++");
-        final de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType request = new de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType();
-        request.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
-        request.getLogin().setSessionID(this.pubSessionId);
+        final de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType createRequest = new de.fhdo.terminologie.ws.authoringPub.CreateCodeSystemRequestType();
+        createRequest.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
+        createRequest.getLogin().setSessionID(this.pubSessionId);
 
-        de.fhdo.terminologie.ws.authoringPub.CodeSystem cs_pub = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
-        cs_pub.setName(cs.getName());
-        cs_pub.setDescription(cs.getDescription());
-        cs_pub.setDescriptionEng(cs.getDescriptionEng());
-        cs_pub.setIncompleteCS(cs.isIncompleteCS());
-        cs_pub.setResponsibleOrganization(cs.getResponsibleOrganization());
-        cs_pub.setWebsite(cs.getWebsite());
-        cs_pub.setAutoRelease(cs.isAutoRelease());
-        cs_pub.setCodeSystemType(cs.getCodeSystemType());
+        de.fhdo.terminologie.ws.authoringPub.CodeSystem CS_pub = new de.fhdo.terminologie.ws.authoringPub.CodeSystem();
+        CS_pub.setName(CS.getName());
+        CS_pub.setDescription(CS.getDescription());
+        CS_pub.setDescriptionEng(CS.getDescriptionEng());
+        CS_pub.setIncompleteCS(CS.isIncompleteCS());
+        CS_pub.setResponsibleOrganization(CS.getResponsibleOrganization());
+        CS_pub.setWebsite(CS.getWebsite());
+        CS_pub.setAutoRelease(CS.isAutoRelease());
+        CS_pub.setCodeSystemType(CS.getCodeSystemType());
         de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion csv_pub = new de.fhdo.terminologie.ws.authoringPub.CodeSystemVersion();
         csv_pub.setName("Temp_import");
-        cs_pub.getCodeSystemVersions().add(csv_pub);
-        request.setCodeSystem(cs_pub);
+        CS_pub.getCodeSystemVersions().add(csv_pub);
+        createRequest.setCodeSystem(CS_pub);
         //3.2.17 added
         //request.setLoginAlreadyChecked(true);
         
@@ -1015,30 +993,23 @@ public class TerminologyReleaseManager{
         final de.fhdo.terminologie.ws.authoringPub.Authoring port = WebServiceUrlHelper.getInstance().getAuthoringPubServicePort();
         GetCreateCodeSystemPubResponseResponse.Return ret_pub = null;
         try{
-            //DABACA DEBUG MELDUNGEN ENTFERNEN
-            LOGGER.debug("Initializing thread");
             Thread thread = new Thread(){
-              @Override
-              public void run(){
-                  port.createCodeSystemPub(request);
-              }
+                @Override
+                public void run(){
+                    port.createCodeSystemPub(createRequest);
+                }
             };
-            LOGGER.debug("Starting thread");
             thread.start();
 
             boolean createRunning = true;
             int counter = 1;
-            LOGGER.debug("Starting createRunning");
             while(createRunning){
                 Thread.sleep(2*1000);
-                LOGGER.debug("Checking running import");
                 createRunning = port.getCreateCodeSystemPubRunning();
                 LOGGER.info("Pub-createCodeSystem running for " + counter*2 + " seconds");
                 counter++;
             }
-            LOGGER.debug("Getting response");
             ret_pub = port.getCreateCodeSystemPubResponse();
-            LOGGER.debug("Got response");
         }
         catch(Exception e){
             LOGGER.info("Exception caught while creating code-system on pub and communicating back to collab");
@@ -1049,9 +1020,8 @@ public class TerminologyReleaseManager{
         if (ret_pub.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
         {
             targetCS = new de.fhdo.terminologie.ws.searchPub.CodeSystem();
-            targetCS.setId(ret_pub.getCodeSystem().getId());
-            if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
+            if(ret_pub.getCodeSystem()!=null)
+                targetCS.setId(ret_pub.getCodeSystem().getId());
         }
         LOGGER.info("----- createTempCodeSystemVersionOnPub finished (001) -----");
     }
@@ -1059,13 +1029,11 @@ public class TerminologyReleaseManager{
     private void removeTempCodeSystemVersion()
     {
         LOGGER.info("+++++ removeTempCodeSystemVersion started +++++");
-        LOGGER.info("dabaca size of codesystemversion = " + this.targetCS.getCodeSystemVersions().size());
         for (de.fhdo.terminologie.ws.searchPub.CodeSystemVersion v : this.targetCS.getCodeSystemVersions())
         {
             //3.2.26 changed from equals to contains
             if (v.getName().contains("Temp_import"))
             {
-                LOGGER.info("dabaca temp removal started");
                 final de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType req_remove = new de.fhdo.terminologie.ws.authoringPub.RemoveTerminologyOrConceptRequestType();
                 req_remove.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
                 req_remove.getLogin().setSessionID(this.pubSessionId);
@@ -1125,7 +1093,6 @@ public class TerminologyReleaseManager{
             }
             else
             {
-                LOGGER.info("dabaca csv not removed, not temporary: " + v.getName());
             }
         }
         LOGGER.info("----- removeTempCodeSystemVersion finished (001) -----");
@@ -1623,8 +1590,7 @@ public class TerminologyReleaseManager{
         LOGGER.info("----- createTempValueSetVersionOnPub finished (001) -----");
     }
     
-    public ReturnType initTransfer(Set<Proposalobject> proposalObjects, Statusrel rel)
-    {
+    public ReturnType initTransfer(Set<Proposalobject> proposalObjects, Statusrel rel){
         LOGGER.info("+++++ initTransfer started +++++");
         ReturnType transfer_success = new ReturnType();
         transfer_success.setSuccess(false);
@@ -1686,11 +1652,9 @@ public class TerminologyReleaseManager{
             terminologies.addAll(terminologies.size(), valuesetConcepts);
             terminologies.addAll(terminologies.size(), other);
 
-            LOGGER.info("DABACA terminologies size: " + terminologies.size());
             for (Proposalobject po : terminologies)
             {
-                LOGGER.info("DABACA terminology to be transferred = " + po.getName());
-                transfer_success = this.transferTerminologyToPublicServer(rel.getStatusByStatusIdTo(), po);
+                transfer_success = this.transferTerminologyToPublicServer(rel.getStatusByStatusIdTo(), po); //ANKER
                 if (!transfer_success.isSuccess())
                 {
                     //3.2.20 changed from debug to info
@@ -1713,8 +1677,6 @@ public class TerminologyReleaseManager{
     public void setTargetCS(de.fhdo.terminologie.ws.searchPub.CodeSystem targetCS)
     {
         this.targetCS = targetCS;
-        if(this.targetCS.getCodeSystemVersions()!=null)
-                            LOGGER.info("DABACA: codesystems size" + this.targetCS.getCodeSystemVersions().size());
     }
 
     public void setTargetVS(de.fhdo.terminologie.ws.searchPub.ValueSet targetVS)
