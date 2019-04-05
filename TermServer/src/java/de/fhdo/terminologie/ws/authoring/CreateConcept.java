@@ -119,13 +119,16 @@ public class CreateConcept{
             loggedIn = loginInfoType != null;
         }
 
+        //DABACA BLOCK AUSKOMMENTIERT
+        loggedIn = true;
+        /*
         if (loggedIn == false){
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setMessage("Sie müssen am Terminologieserver angemeldet sein, um diesen Service nutzen zu können.");
-            LOGGER.info("----- CreateConceptOrAssociationType finished (001) -----");
+           < LOGGER.info("----- CreateConceptOrAssociationType finished (001) -----");
             return;
-        }
+        }*/
 
         try{
             

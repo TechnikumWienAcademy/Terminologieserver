@@ -727,7 +727,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
     
     private void createPreferredTerm(String labelString, String code, clamlBindingXSD.Class clazz) throws Exception{
         LOGGER.info("+++++ createPreferredTerm started +++++");
-        LOGGER.debug("createPrefferedTerm mit Code: " + code + ", Text: " + labelString);
+        LOGGER.debug("createPrefferedTerm with code: " + code + " and text: " + labelString);
 
         CreateConceptRequestType createConceptRequest = new CreateConceptRequestType();
 
@@ -784,10 +784,11 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         
         //Creating concept
         CreateConcept createConcept = new CreateConcept();
-        this._ccsResponse = createConcept.CreateConcept(createConceptRequest, hb_session);
+        this._ccsResponse = createConcept.CreateConcept(createConceptRequest, hb_session); //ANKER
         LOGGER.debug(this._ccsResponse.getReturnInfos().getMessage());
         
         if (this._ccsResponse.getReturnInfos().getStatus() == ReturnType.Status.OK){
+            
             if (clazz.getSuperClass() != null && clazz.getSuperClass().size() > 0)
                 this.createSuperclassAssociation(code, clazz);
 
@@ -805,8 +806,9 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 LOGGER.info("Import progress: " + this.aktCount + "/" + this.getTotalCountInStatusList(this.getImportId()));
             }
         }
-        else
+        else{
             throw new Exception();
+        }
     }
 
     private void createNotPrefferdTerm(String labelString, String code, clamlBindingXSD.Class clazz, String rubKind) throws Exception{

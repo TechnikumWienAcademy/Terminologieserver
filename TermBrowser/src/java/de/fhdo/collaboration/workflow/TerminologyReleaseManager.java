@@ -841,12 +841,22 @@ public class TerminologyReleaseManager{
             thread.start();
             
             boolean searchRunning = true;
-            int counter = 1;
+            byte seconds = 0;
+            byte minutes = 0;
+            byte hours = 0;
             while(searchRunning){
                 Thread.sleep(2*1000);
-                searchRunning = port_searchPub.checkListCodeSystemsPubRunning();
-                LOGGER.info("Pub-listCodeSystems running for " + counter*2 + " seconds");
-                counter++;
+                searchRunning = thread.isAlive();
+                seconds += 2;
+                if(seconds >= 60){
+                    minutes++;
+                    seconds = 0;
+                    if(minutes >= 60){
+                        hours++;
+                        minutes = 0;
+                    }
+                }
+                LOGGER.info("Pub-listCodeSystems running for " + hours + "h " + minutes + "m " + seconds + "s");
             }
             respSearchPub = port_searchPub.getListCodeSystemsPubReturn();
         }
@@ -943,12 +953,22 @@ public class TerminologyReleaseManager{
             thread.start();
             
             boolean importRunning = true;
-            int counter = 1;
+            byte seconds = 0;
+            byte minutes = 0;
+            byte hours = 0;
             while(importRunning){
-                Thread.sleep(5*1000);
-                importRunning = importPort.checkImportRunning();
-                LOGGER.info("Pub-importCodeSystem running for " + counter*5 + " seconds");
-                counter++;
+                Thread.sleep(2*1000);
+                importRunning = thread.isAlive();
+                seconds += 2;
+                if(seconds >= 60){
+                    minutes++;
+                    seconds = 0;
+                    if(minutes >= 60){
+                        hours++;
+                        minutes = 0;
+                    }
+                }
+                LOGGER.info("Pub-importCodeSystem running for " + hours + "h " + minutes + "m " + seconds + "s");
             }
             ret_importThread = importPort.getPubImportResponse();
             
@@ -1002,12 +1022,22 @@ public class TerminologyReleaseManager{
             thread.start();
 
             boolean createRunning = true;
-            int counter = 1;
+            byte seconds = 0;
+            byte minutes = 0;
+            byte hours = 0;
             while(createRunning){
                 Thread.sleep(2*1000);
-                createRunning = port.getCreateCodeSystemPubRunning();
-                LOGGER.info("Pub-createCodeSystem running for " + counter*2 + " seconds");
-                counter++;
+                createRunning = thread.isAlive();
+                seconds += 2;
+                if(seconds >= 60){
+                    minutes++;
+                    seconds = 0;
+                    if(minutes >= 60){
+                        hours++;
+                        minutes = 0;
+                    }
+                }
+                LOGGER.info("Pub-createCodeSystem running for " + hours + "h " + minutes + "m " + seconds + "s");
             }
             ret_pub = port.getCreateCodeSystemPubResponse();
         }
@@ -1066,12 +1096,22 @@ public class TerminologyReleaseManager{
                     thread.start();
 
                     boolean removalRunning = true;
-                    int counter = 1;
+                    byte seconds = 0;
+                    byte minutes = 0;
+                    byte hours = 0;
                     while(removalRunning){
                         Thread.sleep(2*1000);
-                        removalRunning = removeTMPport.getRemoveTerminologyOrConceptPubRunning();
-                        LOGGER.info("Pub-removeTerminologyOrConcept running for " + counter*2 + " seconds");
-                        counter++;
+                        removalRunning = thread.isAlive();
+                        seconds += 2;
+                        if(seconds >= 60){
+                            minutes++;
+                            seconds = 0;
+                            if(minutes >= 60){
+                                hours++;
+                                minutes = 0;
+                            }
+                        }
+                        LOGGER.info("Pub-removeTerminologyOrConcept running for " + hours + "h " + minutes + "m " + seconds + "s ");
                     }
                     resp_remove = removeTMPport.getRemoveTerminologyOrConceptPubResponse();
 
@@ -1136,12 +1176,22 @@ public class TerminologyReleaseManager{
                     thread.start();
 
                     boolean removalRunning = true;
-                    int counter = 1;
+                    byte seconds = 0;
+                    byte minutes = 0;
+                    byte hours = 0;
                     while(removalRunning){
                         Thread.sleep(2*1000);
-                        removalRunning = removePort.getRemoveTerminologyOrConceptPubRunning();
-                        LOGGER.info("Pub-removeTerminologyOrConcept running for " + counter*2 + " seconds");
-                        counter++;
+                        removalRunning = thread.isAlive();
+                        seconds += 2;
+                        if(seconds >= 60){
+                            minutes++;
+                            seconds = 0;
+                            if(minutes >= 60){
+                                hours++;
+                                minutes = 0;
+                            }
+                        }
+                        LOGGER.info("Pub-removeTerminologyOrConcept running for " + hours + "h " + minutes + "m " + seconds + "s");
                     }
                     resp_remove = removePort.getRemoveTerminologyOrConceptPubResponse();
 
@@ -1381,12 +1431,22 @@ public class TerminologyReleaseManager{
                     thread.start();
 
                     boolean listRunning = true;
-                    int counter = 1;
+                    byte seconds = 0;
+                    byte minutes = 0;
+                    byte hours = 0;
                     while(listRunning){
                         Thread.sleep(2*1000);
-                        listRunning = portSearchPub.isListGloballySearchedConceptsRunning();
-                        LOGGER.info("Pub-listGloballySearchedConcepts running for " + counter*2 + " seconds");
-                        counter++;
+                        listRunning = thread.isAlive();
+                        seconds += 2;
+                        if(seconds >= 60){
+                            minutes++;
+                            seconds = 0;
+                            if(minutes >= 60){
+                                hours++;
+                                minutes = 0;
+                            }
+                        }
+                        LOGGER.info("Pub-listGloballySearchedConcepts running for " + hours + "h " + minutes + "m " + seconds + "s");
                     }
                     response = portSearchPub.getListGloballySearchedConceptsResponse();
 
@@ -1442,12 +1502,22 @@ public class TerminologyReleaseManager{
             thread.start();
 
             boolean listRunning = true;
-            int counter = 1;
+            byte seconds = 0;
+            byte minutes = 0;
+            byte hours = 0;
             while(listRunning){
                 Thread.sleep(2*1000);
-                listRunning = port_searchPub.isListValueSetsPubRunning();
-                LOGGER.info("Pub-listValueSets running for " + counter*2 + " seconds");
-                counter++;
+                listRunning = thread.isAlive();
+                seconds += 2;
+                if(seconds >= 60){
+                    minutes++;
+                    seconds = 0;
+                    if(minutes >= 60){
+                        hours++;
+                        minutes = 0;
+                    }
+                }
+                LOGGER.info("Pub-listValueSets running for " + hours + "h " + minutes + "m " + seconds + "s");
             }
             respSearchPub = port_searchPub.getListValueSetsPubRespone();
 
@@ -1510,12 +1580,22 @@ public class TerminologyReleaseManager{
             thread.start();
 
             boolean importRunning = true;
-            int counter = 1;
+            byte seconds = 0;
+            byte minutes = 0;
+            byte hours = 0;
             while(importRunning){
                 Thread.sleep(2*1000);
-                importRunning = port.isImportValueSetPubRunning();
-                LOGGER.info("Pub-importValueSet running for " + counter*2 + " seconds");
-                counter++;
+                importRunning = thread.isAlive();
+                seconds += 2;
+                if(seconds >= 60){
+                    minutes++;
+                    seconds = 0;
+                    if(minutes >= 60){
+                        hours++;
+                        minutes = 0;
+                    }
+                }
+                LOGGER.info("Pub-importValueSet running for " + hours + "h " + minutes + "m " + seconds + "s");
             }
             response = port.getImportValueSetPubResponse();
 
@@ -1566,12 +1646,22 @@ public class TerminologyReleaseManager{
             thread.start();
 
             boolean importRunning = true;
-            int counter = 1;
+            byte seconds = 0;
+            byte minutes = 0;
+            byte hours = 0;
             while(importRunning){
                 Thread.sleep(2*1000);
-                importRunning = port.isCreateValueSetPubRunning();
-                LOGGER.info("Pub-createValueSet running for " + counter*2 + " seconds");
-                counter++;
+                importRunning = thread.isAlive();
+                seconds += 2;
+                if(seconds>=60){
+                    minutes += 1;
+                    seconds = 0;
+                    if(minutes>=60){
+                        hours += 1;
+                        minutes = 0;
+                    }
+                }
+                LOGGER.info("Pub-createValueSet running for " + hours + "h " + minutes + "m " + seconds + "s");
             }
             ret_pub = port.getCreateValueSetPubResponse();
 
