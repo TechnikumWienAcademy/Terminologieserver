@@ -1,4 +1,18 @@
-﻿Changelog 3.2.32
+﻿Changelog 3.2.35
+	-Bugfixes
+		.) EHTSOID-213: "Session was already closed"-Fehlermeldung behoben.
+	-Änderungen
+		.) EHTSOID-191: Freigabe bearbeitet.
+
+Changelog 3.2.34
+	-Änderungen
+		.) EHTSOID-191: Zusätzliche Logmeldung beim Erstellen temporärer CodeSysteme auf der Pub-Umgebung eingefügt.
+
+Changelog 3.2.33
+	-Bugfixes
+		.) EHTSOID-191: Null-Pointerfehler in der Freigabe behoben.
+
+Changelog 3.2.32
 	-Bugfixes
 		.) EHTSOID-191: Die Freigabe sollte nun einheitich funktionieren.
 

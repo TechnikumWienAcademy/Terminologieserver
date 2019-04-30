@@ -68,9 +68,7 @@ public class CollaborationSession
         return getSessionID(SessionHelper.getCollaborationUserName());
     }
 
-    public String getPubSessionID()
-    {
-
+    public String getPubSessionID(){
         return getPubSessionID(SessionHelper.getCollaborationUserName());
     }
 
@@ -79,49 +77,39 @@ public class CollaborationSession
         return SessionHelper.getValue("collab_session_id").toString();
     }
 
-    public String getPubSessionID(String username)
-    {
-        if (sessionIDPub == null || sessionIDPub.length() == 0)
-        {
-            logger.debug("Erhalte neue Session-ID");
+    public String getPubSessionID(String username){
+        if (sessionIDPub == null || sessionIDPub.length() == 0){
+            logger.debug("Creating new session-ID");
 
             String collabUsername = PropertiesHelper.getInstance().getCollaborationUser();
             String collabPassword = PropertiesHelper.getInstance().getCollaborationPassword();
-            if (collabUsername.equals(""))
-            {
-                logger.error("Collaboration Username is undefined");
+            if (collabUsername.isEmpty()){
+                logger.error("Error [0148]: Collaboration Username is undefined");
                 return null;
             }
-            if (collabPassword.equals(""))
-            {
-                logger.error("Collaboration Password is undefined");
+            if (collabPassword.isEmpty()){
+                logger.error("Error [0149]: Collaboration Password is undefined");
                 return null;
             }
 
-            de.fhdo.terminologie.ws.authorizationPub.LoginRequestType parameter = new de.fhdo.terminologie.ws.authorizationPub.LoginRequestType();
-            parameter.setLogin(new de.fhdo.terminologie.ws.authorizationPub.LoginType());
-            parameter.getLogin().setUsername(collabUsername + ":" + username); //Needed for cleaner Session Management
-            parameter.getLogin().setPassword(collabPassword);
+            de.fhdo.terminologie.ws.authorizationPub.LoginRequestType loginRequest = new de.fhdo.terminologie.ws.authorizationPub.LoginRequestType();
+            loginRequest.setLogin(new de.fhdo.terminologie.ws.authorizationPub.LoginType());
+            loginRequest.getLogin().setUsername(collabUsername + ":" + username); //Needed for cleaner Session Management
+            loginRequest.getLogin().setPassword(collabPassword);
 
-            de.fhdo.terminologie.ws.authorizationPub.LoginResponse.Return ret = login_pub(parameter);
-            if (ret != null && ret.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.authorizationPub.Status.OK)
-            {
-                sessionIDPub = ret.getLogin().getSessionID();
+            de.fhdo.terminologie.ws.authorizationPub.LoginResponse.Return loginResponse = login_pub(loginRequest);
+            if (loginResponse != null && loginResponse.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.authorizationPub.Status.OK){
+                sessionIDPub = loginResponse.getLogin().getSessionID();
                 logger.debug("Session-ID: " + sessionIDPub);
             }
             else
             {
-                // TODO Fehlermeldung
-                logger.warn("Fehler beim Lesen der Session-ID: ");
-                if (ret != null)
-                {
-                    logger.warn("" + ret.getReturnInfos().getMessage());
-                }
+                logger.error("Error [0133]: Unable to read Session-ID");
+                if (loginResponse != null)
+                    logger.error(loginResponse.getReturnInfos().getMessage());
             }
         }
-
-        logger.debug("Gebe Session-ID pub zurück: " + sessionIDPub);
-
+        logger.debug("Returning Session-ID: " + sessionIDPub);
         return sessionIDPub;
     }
 

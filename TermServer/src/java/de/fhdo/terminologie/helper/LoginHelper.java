@@ -120,16 +120,16 @@ public class LoginHelper{
             return null;
         }
         
-        LoginRequestType loginRequest = new LoginRequestType();
-        loginRequest.setLogin(new de.fhdo.terminologie.ws.idp.authorizationIDP.LoginType());
-        loginRequest.getLogin().setSessionID(Login.getSessionID());
+        LoginRequestType requestLogin = new LoginRequestType();
+        requestLogin.setLogin(new de.fhdo.terminologie.ws.idp.authorizationIDP.LoginType());
+        requestLogin.getLogin().setSessionID(Login.getSessionID());
         LOGGER.debug("Requested session-id: " + Login.getSessionID());
         
         GetLoginInfosResponse.Return loginInfos = null;
         try{
             AuthorizationIDP portAuthorizationIDP = WebServiceUrlHelper.getInstance().getAuthorizationIdpServicePort();
             LOGGER.info("WS endpoint: " + ((BindingProvider) portAuthorizationIDP).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
-            loginInfos = portAuthorizationIDP.getLoginInfos(loginRequest);
+            loginInfos = portAuthorizationIDP.getLoginInfos(requestLogin);
         }
         catch (Exception e){
             LOGGER.error("Error [0062]", e);

@@ -170,7 +170,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
             }
         }
         catch (HibernateException ex){
-            LOGGER.error("Error [0110]", ex);
+            LOGGER.error("Error [0101]", ex);
 
             try{
                 if(!hb_session.getTransaction().wasRolledBack()){
@@ -179,7 +179,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 }
             }
             catch (Exception exRollback){
-                LOGGER.error("Error [0111]", exRollback);
+                LOGGER.error("Error [0095]", exRollback);
                 if(!hb_session.getTransaction().wasRolledBack())
                     LOGGER.info("Rollback failed");
             }
@@ -210,7 +210,7 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
                 }
             }
             catch (Exception exRollback){
-                LOGGER.error("Error [0116]: " + exRollback.getLocalizedMessage(), exRollback);
+                LOGGER.error("Error [0116]", exRollback);
                 if(!hb_session.getTransaction().wasRolledBack())
                     LOGGER.info("Rollback failed");
             }

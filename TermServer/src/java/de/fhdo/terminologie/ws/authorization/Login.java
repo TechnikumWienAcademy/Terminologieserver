@@ -119,7 +119,7 @@ public class Login{
                         hb_session.getTransaction().rollback();
                 }
                 catch(Exception exRollback){
-                    LOGGER.error("Error [0116]: Rollback failed", exRollback);
+                    LOGGER.error("Error [0111]: Rollback failed", exRollback);
                 }
             }
             finally{
@@ -130,7 +130,7 @@ public class Login{
             }
         }
         catch (Exception ex){
-            LOGGER.error("Error [0118]", ex);
+            LOGGER.error("Error [0102]", ex);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler bei 'Login': " + ex.getLocalizedMessage());
@@ -235,15 +235,14 @@ public class Login{
 
     public LoginResponseType checkLogin(LoginRequestType parameter){
         LOGGER.info("+++++ checkLogin started +++++");
-
-        //Creating response
         LoginResponseType response = new LoginResponseType();
         response.setReturnInfos(new ReturnType());
 
         boolean loggedIn = false;
         LoginInfoType loginInfoType;
+        
         if (parameter != null && parameter.getLogin() != null){
-            loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
+            loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin()); //ANKER
             loggedIn = loginInfoType != null;
         }
 

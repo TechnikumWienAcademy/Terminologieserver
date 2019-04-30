@@ -39,208 +39,171 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Window;
 
 /**
- *
  * @author Philipp Urbauer
  */
-public class Enquiry extends Window implements AfterCompose, IGenericListActions, IUpdateModal
-{
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-  GenericList genericList;
+public class Enquiry extends Window implements AfterCompose, IGenericListActions, IUpdateModal{
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private GenericList genericList;
+
+    @Override
+    public void afterCompose(){
+      initList();
+    }
   
-  public Enquiry()
-  {
-    
-  }
+    private GenericListRowType createRowFromEnquiry(de.fhdo.collaboration.db.classes.Enquiry enquiry){
+        GenericListRowType row = new GenericListRowType();
 
-  public void afterCompose()
-  {
-    initList();
-  }
-  
-  private GenericListRowType createRowFromEnquiry(de.fhdo.collaboration.db.classes.Enquiry enquiry)
-  {
-    GenericListRowType row = new GenericListRowType();
+        GenericListCellType[] cells = new GenericListCellType[5];
+        cells[0] = new GenericListCellType(enquiry.getCollaborationuser().getFirstName(), false, "");
+        cells[1] = new GenericListCellType(enquiry.getCollaborationuser().getName(), false, "");
+        cells[2] = new GenericListCellType(enquiry.getCollaborationuser().getOrganisation().getOrganisation(), false, "");
+        cells[3] = new GenericListCellType(enquiry.getRequestType(), false, "");
+        String status;
+        if(!enquiry.getClosedFlag())
+            status = "Offen";
+        else
+            status = "Geschlossen";
+        cells[4] = new GenericListCellType(status, false, "");
 
-    
-    GenericListCellType[] cells = new GenericListCellType[5];
-    cells[0] = new GenericListCellType(enquiry.getCollaborationuser().getFirstName(), false, "");
-    cells[1] = new GenericListCellType(enquiry.getCollaborationuser().getName(), false, "");
-    cells[2] = new GenericListCellType(enquiry.getCollaborationuser().getOrganisation().getOrganisation(), false, "");
-    cells[3] = new GenericListCellType(enquiry.getRequestType(), false, "");
-    String status = "";
-    if(!enquiry.getClosedFlag()){
-        status = "Offen";
-    }else{
-        status = "Geschlossen";
-    }
-    cells[4] = new GenericListCellType(status, false, "");
+        row.setData(enquiry);
+        row.setCells(cells);
 
-    row.setData(enquiry);
-    row.setCells(cells);
-
-    return row;
-  }
-
-  private void initList()
-  {
-    // Header
-    List<GenericListHeaderType> header = new LinkedList<GenericListHeaderType>();
-    
-    header.add(new GenericListHeaderType("Vorname", 150, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Nachname", 250, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Organisation", 270, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Anfrage Typ", 450, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Status", 100, "", true, "String", true, true, false, false));
-    
-    // Daten laden
-    Session hb_session = HibernateUtil.getSessionFactory().openSession();
-    //hb_session.getTransaction().begin();
-
-    List<GenericListRowType> dataList = new LinkedList<GenericListRowType>();
-    try
-    {
-      String hql = "from Enquiry order by requestType";
-      List<de.fhdo.collaboration.db.classes.Enquiry> enquiryList = hb_session.createQuery(hql).list();
-
-      for (int i = 0; i < enquiryList.size(); ++i)
-      {
-        de.fhdo.collaboration.db.classes.Enquiry enquiry = enquiryList.get(i);
-        GenericListRowType row = createRowFromEnquiry(enquiry);
-
-        dataList.add(row);
-      }
-    }
-    catch (Exception e)
-    {
-      logger.error("[" + this.getClass().getCanonicalName() + "] Fehler bei initList(): " + e.getMessage());
-    }
-    finally
-    {
-      hb_session.close();
+        return row;
     }
 
-    // Liste initialisieren
-    Include inc = (Include) getFellow("incList");
-    Window winGenericList = (Window) inc.getFellow("winGenericList");
-    genericList = (GenericList) winGenericList;
-
-    genericList.setListActions(this);
-    genericList.setButton_new(true);
-    genericList.setButton_edit(true);
-    genericList.setButton_delete(true);
-    genericList.setListHeader(header);
-    genericList.setDataList(dataList);
+    private void initList(){
+        List<GenericListHeaderType> header = new LinkedList<>();
     
-    ((Button)genericList.getFellow("buttonNew")).setVisible(false);
-  }
-  
-  
-  //Button wird nicht verwendet!
-  public void onNewClicked(String id)
-  {
-    logger.debug("onNewClicked(): " + id); //Out of Order
-  }
+        header.add(new GenericListHeaderType("Vorname", 150, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Nachname", 250, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Organisation", 270, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Anfrage Typ", 450, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Status", 100, "", true, "String", true, true, false, false));
+    
+        // Daten laden
+        Session hb_session = HibernateUtil.getSessionFactory().openSession();
+        hb_session.getTransaction().begin();
 
-  public void onEditClicked(String id, Object data)
-  {
-    logger.debug("onEditClicked()");
+        List<GenericListRowType> rowList = new LinkedList<>();
+        try{
+            String HQL_enquiry_search = "from Enquiry order by requestType";
+            List<de.fhdo.collaboration.db.classes.Enquiry> enquiryList = hb_session.createQuery(HQL_enquiry_search).list();
 
-    if (data != null && data instanceof de.fhdo.collaboration.db.classes.Enquiry)
-    {
-      de.fhdo.collaboration.db.classes.Enquiry enquiry = (de.fhdo.collaboration.db.classes.Enquiry) data;
+            for (int i = 0; i < enquiryList.size(); ++i){
+                de.fhdo.collaboration.db.classes.Enquiry enquiry = enquiryList.get(i);
+                GenericListRowType row = createRowFromEnquiry(enquiry);
 
-      try
-      {
-        Map map = new HashMap();
-        map.put("enquiry_id", enquiry.getId());
-
-
-        Window win = (Window) Executions.createComponents(
-                "/gui/admin/modules/collaboration/anfrageDetails.zul", null, map);
-        ((EnquiryDetails) win).setUpdateListInterface(this);
-
-        win.doModal();
-      }
-      catch (Exception ex)
-      {
-        logger.debug("Fehler beim Ã–ffnen der EnquiryDetails: " + ex.getLocalizedMessage());
-        ex.printStackTrace();
-      }
-    }
-  }
-
-  public void onDeleted(String id, Object data) //Not used
-  {
-    logger.debug("onDeleted()");
-
-    if (data != null && data instanceof de.fhdo.collaboration.db.classes.Enquiry)
-    {
-      de.fhdo.collaboration.db.classes.Enquiry enquiry = (de.fhdo.collaboration.db.classes.Enquiry) data;
-      logger.debug("Enquiry löschen: " + enquiry.getId());
-
-      // Person aus der Datenbank löschen
-      Session hb_session = HibernateUtil.getSessionFactory().openSession();
-      hb_session.getTransaction().begin();
-
-      try
-      {
-        de.fhdo.collaboration.db.classes.Enquiry enquiry_db = (de.fhdo.collaboration.db.classes.Enquiry) hb_session.get(de.fhdo.collaboration.db.classes.Enquiry.class, enquiry.getId());
-
-        hb_session.delete(enquiry_db);
-
-        if(enquiry_db.getCollaborationuser().getHidden()){
-          hb_session.delete(enquiry_db.getCollaborationuser());
-          hb_session.delete(enquiry_db.getCollaborationuser().getOrganisation());
+                rowList.add(row);
+            }
         }
+        catch (Exception e){
+            LOGGER.error("Error [0136]", e);
+        }
+        finally{
+            if(hb_session.isOpen())
+                hb_session.close();
+        }
+
+        //Initializing list
+        Include inc = (Include) getFellow("incList");
+        Window winGenericList = (Window) inc.getFellow("winGenericList");
+        genericList = (GenericList) winGenericList;
+
+        genericList.setListActions(this);
+        genericList.setButton_new(true);
+        genericList.setButton_edit(true);
+        genericList.setButton_delete(true);
+        genericList.setListHeader(header);
+        genericList.setDataList(rowList);
+    
+        ((Button)genericList.getFellow("buttonNew")).setVisible(false);
+    }
+  
+    @Override
+    public void onNewClicked(String id){
+        LOGGER.debug("CLICKED UNonNewClicked(): + " + id);
+    }
+
+    @Override
+    public void onEditClicked(String id, Object data){
+        if (data != null && data instanceof de.fhdo.collaboration.db.classes.Enquiry){
+            de.fhdo.collaboration.db.classes.Enquiry enquiry = (de.fhdo.collaboration.db.classes.Enquiry) data;
+
+            try{
+                Map map = new HashMap();
+                map.put("enquiry_id", enquiry.getId());
+
+
+                Window win = (Window) Executions.createComponents("/gui/admin/modules/collaboration/anfrageDetails.zul", null, map);
+                ((EnquiryDetails) win).setUpdateListInterface(this);
+
+                win.doModal();
+            }
+            catch (Exception ex){
+                LOGGER.error("Error [0096", ex);
+            }
+        }
+    }
+
+    @Override
+    public void onDeleted(String id, Object data){
+        if (data != null && data instanceof de.fhdo.collaboration.db.classes.Enquiry){
+            de.fhdo.collaboration.db.classes.Enquiry enquiry = (de.fhdo.collaboration.db.classes.Enquiry) data;
+            LOGGER.debug("Deleting enquiry with ID " + enquiry.getId());
+
+            Session hb_session = HibernateUtil.getSessionFactory().openSession();
+            hb_session.getTransaction().begin();
+
+            try{
+                de.fhdo.collaboration.db.classes.Enquiry enquiry_db = (de.fhdo.collaboration.db.classes.Enquiry) hb_session.get(de.fhdo.collaboration.db.classes.Enquiry.class, enquiry.getId());
+                hb_session.delete(enquiry_db);
+
+                if(enquiry_db.getCollaborationuser().getHidden()){
+                  hb_session.delete(enquiry_db.getCollaborationuser());
+                  hb_session.delete(enquiry_db.getCollaborationuser().getOrganisation());
+                }
         
-        if(enquiry_db.getCollaborationuserExtPerson() != null && enquiry_db.getCollaborationuserExtPerson().getHidden()){
-             hb_session.delete(enquiry_db.getCollaborationuserExtPerson());
-             
-             if(enquiry_db.getCollaborationuserExtPerson().getOrganisation() != null){
-                hb_session.delete(enquiry_db.getCollaborationuserExtPerson().getOrganisation());
-             }  
-        }
+                if(enquiry_db.getCollaborationuserExtPerson() != null && enquiry_db.getCollaborationuserExtPerson().getHidden()){
+                    hb_session.delete(enquiry_db.getCollaborationuserExtPerson());
+                    
+                    if(enquiry_db.getCollaborationuserExtPerson().getOrganisation() != null)
+                        hb_session.delete(enquiry_db.getCollaborationuserExtPerson().getOrganisation());
+                }
        
-        hb_session.getTransaction().commit();
+                if(!hb_session.getTransaction().wasCommitted())
+                    hb_session.getTransaction().commit();
 
-        Messagebox.show("Anfrage wurde erfolgreich gelöscht.", "Anfrage löschen", Messagebox.OK, Messagebox.INFORMATION);
-      }
-      catch (Exception e)
-      {
-        hb_session.getTransaction().rollback();
-        
-        Messagebox.show("Fehler beim Löschen der Anfrage: " + e.getLocalizedMessage(), "Anfrage löschen", Messagebox.OK, Messagebox.EXCLAMATION);
-        initList();
-      }finally{
-        hb_session.close();
-      }
+                Messagebox.show("Anfrage wurde erfolgreich gelöscht.", "Anfrage löschen", Messagebox.OK, Messagebox.INFORMATION);
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0097]", e);
+                Messagebox.show("Fehler beim Löschen der Anfrage: " + e.getLocalizedMessage(), "Anfrage löschen", Messagebox.OK, Messagebox.EXCLAMATION);
+                if(!hb_session.getTransaction().wasRolledBack())
+                    hb_session.getTransaction().rollback();
+                this.initList();
+            }
+            finally{
+                if(hb_session.isOpen())
+                    hb_session.close();
+            }
+        }
     }
-  }
 
-  public void onSelected(String id, Object data)
-  {
-    
-  }
+    @Override
+    public void onSelected(String id, Object data){}
 
-  public void update(Object o, boolean edited)
-  {
-    if (o instanceof de.fhdo.collaboration.db.classes.Enquiry)
-    {
-      // Daten aktualisiert, jetzt dem Model übergeben
-      de.fhdo.collaboration.db.classes.Enquiry enquiry = (de.fhdo.collaboration.db.classes.Enquiry) o;
+    @Override
+    public void update(Object updateObject, boolean edited){
+        if (updateObject instanceof de.fhdo.collaboration.db.classes.Enquiry){
+            // Data updated, passing it to modell
+            de.fhdo.collaboration.db.classes.Enquiry enquiry = (de.fhdo.collaboration.db.classes.Enquiry) updateObject;
 
-      GenericListRowType row = createRowFromEnquiry(enquiry);
+            GenericListRowType row = createRowFromEnquiry(enquiry);
 
-      if (edited)
-      {
-        // Hier wird die neue Zeile erstellt und der Liste übergeben
-        // dadurch wird nur diese 1 Zeile neu gezeichnet, nicht die ganze Liste
-        genericList.updateEntry(row);
-      }
-      else
-      {
-        genericList.addEntry(row);
-      }
+            if(edited)
+                genericList.updateEntry(row);
+            else
+            genericList.addEntry(row);
+        }
     }
-  }
 }

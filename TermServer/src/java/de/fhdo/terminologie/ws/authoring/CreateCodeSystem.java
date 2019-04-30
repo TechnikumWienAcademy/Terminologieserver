@@ -194,7 +194,7 @@ public class CreateCodeSystem{
             }
         }
         catch (Exception e){
-            LOGGER.error("Error [0090]: " + e.getLocalizedMessage());
+            LOGGER.error("Error [0090]", e);
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler bei 'CreateCodeSystems', Hibernate: " + e.getLocalizedMessage());
@@ -220,7 +220,7 @@ public class CreateCodeSystem{
                             hb_session.getTransaction().rollback();
                     }
                     catch(Exception e){
-                        LOGGER.error("Error [0094]: " + e.getLocalizedMessage());
+                        LOGGER.error("Error [0094]", e);
                     }
                 }
                 if(hibernateSessionCreated && hb_session.isOpen())

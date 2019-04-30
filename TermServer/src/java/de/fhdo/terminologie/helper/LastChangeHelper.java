@@ -61,7 +61,7 @@ public class LastChangeHelper{
             success = true;
         }
         catch (Exception ex){
-            LOGGER.error("Error [0119]", ex);
+            LOGGER.error("Error [0100]", ex);
             success = false;
             try{
                 if(!hb_session.getTransaction().wasRolledBack())

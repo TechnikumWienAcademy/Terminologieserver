@@ -151,43 +151,28 @@ public class SessionHelper
     return Sessions.getCurrent().getServerName();
   }
 
-  public static String getUserName()
-  {
-    org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+    public static String getUserName(){
+        org.zkoss.zk.ui.Session session = Sessions.getCurrent();
 
-    if (session == null)
-    {
-      //logger.debug("getUserName() - Session ist null");
-      return "";
-    }
+        if (session == null)
+            return "";
 
-    Object o = session.getAttribute("user_name");
+        Object userName = session.getAttribute("user_name");
 
-    if (o == null)
-    {
-      //logger.debug("getUserName() - o ist null");
-      return "";
+        if (userName == null)
+            return "";
+        else
+            return userName.toString();
     }
-    else
-    {
-      return o.toString();
-    }
-  }
   
-  public static String getCollaborationUserName()
-  {
-    Object o = getValue("collaboration_user_name");
+    public static String getCollaborationUserName(){
+        Object collaborationUserName = getValue("collaboration_user_name");
 
-    if (o == null)
-    {
-      //logger.debug("getUserName() - o ist null");
-      return "";
+        if (collaborationUserName == null)
+            return "";
+        else
+            return collaborationUserName.toString();
     }
-    else
-    {
-      return o.toString();
-    }
-  }
   
   public static String getCollaborationUserRole()
   {
@@ -258,28 +243,19 @@ public class SessionHelper
     }
   }
 
-  public static String getSessionId()
-  {
-    org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+    public static String getSessionId(){
+        org.zkoss.zk.ui.Session session = Sessions.getCurrent();
 
-    if (session == null)
-    {
-//      logger.debug("getSessionId() - Session ist null");
-      return "";
-    }
+        if (session == null)
+            return "";
 
-    Object o = session.getAttribute("session_id");
+        Object sessionID = session.getAttribute("session_id");
 
-    if (o == null)
-    {
-//      logger.debug("getSessionId() - o ist null");
-      return "";
+        if (sessionID == null)
+            return "";
+        else
+            return sessionID.toString();
     }
-    else
-    {
-      return o.toString();
-    }
-  }
 
   public static boolean isCollaborationLoggedIn(HttpSession httpSession)
   {

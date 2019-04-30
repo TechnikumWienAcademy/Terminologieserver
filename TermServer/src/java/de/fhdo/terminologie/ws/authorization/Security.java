@@ -133,7 +133,7 @@ public class Security
             maxSessionTime = Long.valueOf(sessionTimeStr);
         }
         catch(Exception ex){
-            LOGGER.error("Error [0114]", ex);
+            LOGGER.error("Error [0110]", ex);
             maxSessionTime = 43200000L;
         }
         
