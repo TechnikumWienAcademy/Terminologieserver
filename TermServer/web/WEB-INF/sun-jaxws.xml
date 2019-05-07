@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<endpoints version="2.0" xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime">
+<endpoints version="2.0" xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" binding="http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/">
   <endpoint implementation="de.fhdo.terminologie.ws.administration.Administration" name="Administration" url-pattern="/Administration"/>
   <endpoint implementation="de.fhdo.terminologie.ws.administration.Administration" name="Administration" url-pattern="/AdministrationIntern"/>
   <endpoint implementation="de.fhdo.terminologie.ws.search.Search" name="Search" url-pattern="/Search"/>

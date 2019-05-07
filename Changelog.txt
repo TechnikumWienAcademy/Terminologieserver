@@ -1,4 +1,9 @@
-﻿Changelog 3.2.35
+﻿Changelog 3.2.36
+	-Änderungen
+		.) EHTSOID-73: Webservice-Endpoint-Einstellungen wurden auf SOAP 1.2 geändert.
+		.) EHTSOID-191: Erstellung von temporären CodeSystemen auf der Pub-Umgebung verändert.
+
+Changelog 3.2.35
 	-Bugfixes
 		.) EHTSOID-213: "Session was already closed"-Fehlermeldung behoben.
 	-Änderungen

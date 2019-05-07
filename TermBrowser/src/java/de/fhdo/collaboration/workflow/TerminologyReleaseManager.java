@@ -984,9 +984,10 @@ public class TerminologyReleaseManager{
         }
         
         //if (ret_pub != null && ret_pub.getReturnInfos() != null && ret_pub.getReturnInfos().getStatus() != null && ret_pub.getReturnInfos().getStatus().equals(de.fhdo.terminologie.ws.authoringPub.Status.OK))
-        if(ret_pub != null)
-        {
-            targetCS = new de.fhdo.terminologie.ws.searchPub.CodeSystem();
+        //DABACA next line pulled out of following if statement
+        targetCS = new de.fhdo.terminologie.ws.searchPub.CodeSystem();
+        if(ret_pub != null){
+            //targetCS = new de.fhdo.terminologie.ws.searchPub.CodeSystem();
             if(ret_pub.getCodeSystem()!=null)
                 targetCS.setId(ret_pub.getCodeSystem().getId());
         }

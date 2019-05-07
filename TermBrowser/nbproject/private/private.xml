@@ -10,18 +10,11 @@
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/ProposalWorkflow.java</file>
         </group>
         <group>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/helper/SessionHelper.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/publication/ProposalStatusChangeBatch.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/db/CollaborationSession.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/proposal/ProposalStatusChange.java</file>
             <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/TerminologyReleaseManager.java</file>
         </group>
         <group>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/helper/SessionHelper.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/publication/ProposalStatusChangeBatch.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/db/CollaborationSession.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/proposal/ProposalStatusChange.java</file>
             <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/TerminologyReleaseManager.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/version.properties</file>
         </group>
     </open-files>
 </project-private>
