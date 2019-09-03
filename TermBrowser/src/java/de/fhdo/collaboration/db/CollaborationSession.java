@@ -29,27 +29,21 @@ import de.fhdo.helper.WebServiceUrlHelper;
  */
 public class CollaborationSession
 {
-
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
     private static CollaborationSession instance;
-
-    public static CollaborationSession getInstance()
-    {
+    private String sessionID;
+    private String sessionIDPub;
+    
+    /**
+     * Returns the CollaborationSession-instance, if it is null it will be
+     * instantiated before being returned.
+     * @return the CollaborationSession-instance
+     */
+    public static CollaborationSession getInstance(){
         if (instance == null)
-        {
             instance = new CollaborationSession();
-        }
 
         return instance;
-    }
-
-    String sessionID;
-    String sessionIDPub;
-
-    public CollaborationSession()
-    {
-        sessionID = "";
-        sessionIDPub = "";
     }
 
     public void setSessionID(String sessionID)
@@ -68,15 +62,24 @@ public class CollaborationSession
         return getSessionID(SessionHelper.getCollaborationUserName());
     }
 
+    /**
+     * Calls getPubSessionID(Session.Helper.getCollaborationUserName()).
+     * @return returns the return-value of the subsequent call
+     */
     public String getPubSessionID(){
         return getPubSessionID(SessionHelper.getCollaborationUserName());
     }
 
     public String getSessionID(String username)
     {
-        return SessionHelper.getValue("collab_session_id").toString();
+        return SessionHelper.getSessionObjectByName("collab_session_id").toString();
     }
 
+    /**
+     * If the current sessionIDPub is null or empty, a new one will be created.
+     * @param username
+     * @return 
+     */
     public String getPubSessionID(String username){
         if (sessionIDPub == null || sessionIDPub.length() == 0){
             logger.debug("Creating new session-ID");
@@ -97,7 +100,7 @@ public class CollaborationSession
             loginRequest.getLogin().setUsername(collabUsername + ":" + username); //Needed for cleaner Session Management
             loginRequest.getLogin().setPassword(collabPassword);
 
-            de.fhdo.terminologie.ws.authorizationPub.LoginResponse.Return loginResponse = login_pub(loginRequest);
+            de.fhdo.terminologie.ws.authorizationPub.LoginResponse.Return loginResponse = login_pub(loginRequest); //ANKER
             if (loginResponse != null && loginResponse.getReturnInfos().getStatus() == de.fhdo.terminologie.ws.authorizationPub.Status.OK){
                 sessionIDPub = loginResponse.getLogin().getSessionID();
                 logger.debug("Session-ID: " + sessionIDPub);
@@ -113,9 +116,12 @@ public class CollaborationSession
         return sessionIDPub;
     }
 
-    private static de.fhdo.terminologie.ws.authorizationPub.LoginResponse.Return login_pub(de.fhdo.terminologie.ws.authorizationPub.LoginRequestType parameter)
-    {
-        //de.fhdo.terminologie.ws.authorizationPub.Authorization_Service service = new de.fhdo.terminologie.ws.authorizationPub.Authorization_Service();
+    /**
+     * Calls the authorization-login webservice with the parameter.
+     * @param parameter the parameter which is passed to the webservice
+     * @return the return-value of the webservice call
+     */
+    private static de.fhdo.terminologie.ws.authorizationPub.LoginResponse.Return login_pub(de.fhdo.terminologie.ws.authorizationPub.LoginRequestType parameter){
         de.fhdo.terminologie.ws.authorizationPub.Authorization port = WebServiceUrlHelper.getInstance().getAuthorizationPubServicePort();
         return port.login(parameter);
     }

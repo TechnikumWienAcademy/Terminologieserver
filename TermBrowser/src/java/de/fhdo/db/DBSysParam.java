@@ -33,32 +33,27 @@ import org.hibernate.Session;
 
  @author Robert Mützner (robert.muetzner@fh-dortmund.de)
  */
-public class DBSysParam
-{
-  // Singleton-Muster
-
-  private static DBSysParam instance = null;
-
-  public static DBSysParam instance()
-  {
-    //if (instance == null)
-    //{
-      instance = new DBSysParam();
-    //}
-    return instance;
-  }
-  // Konstanten
-  public static final long VALIDITY_DOMAIN_ID = 60;
-  public static final long VALIDITY_DOMAIN_SYSTEM = 1313;
-  public static final long VALIDITY_DOMAIN_MODULE = 1314;
-  public static final long VALIDITY_DOMAIN_SERVICE = 1315;
-  public static final long VALIDITY_DOMAIN_USERGROUP = 1316;
-  public static final long VALIDITY_DOMAIN_USER = 1317;
-
-  public DBSysParam()
-  {
-  }
-
+public class DBSysParam{
+    public static final long VALIDITY_DOMAIN_ID = 60;
+    public static final long VALIDITY_DOMAIN_SYSTEM = 1313;
+    public static final long VALIDITY_DOMAIN_MODULE = 1314;
+    public static final long VALIDITY_DOMAIN_SERVICE = 1315;
+    public static final long VALIDITY_DOMAIN_USERGROUP = 1316;
+    public static final long VALIDITY_DOMAIN_USER = 1317;
+    
+    private static DBSysParam instance = null;
+    
+    /**
+     * Returns the DBSysParam instance if it is not null, otherwise it will
+     * be newly instantiated and then returned.
+     * @return the instance of the DBSysParam class
+     */
+    public static DBSysParam getInstance(){
+        if (instance == null)
+            instance = new DBSysParam();
+        return instance;
+    }
+    
   /**
    Listet alle verfügbaren Validity-Domains auf.
 
@@ -101,97 +96,90 @@ public class DBSysParam
     return list;
   }
 
-  /**
-   Liest ein Parameter aus der Datenbank.
-   Der Name des Parameters muss angegeben werden.
-   Validity-Domain und ObjectID sind optional. Diese werden angegeben,
-   wenn man z.B. einen Parameter für einen bestimmten Benutzer lesen
-   möchte. In diesem Fall gibt man bei Validity-Domain die ID für User an
-   und bei ObjectID die UserID.
+    /**
+    * Gets a value from the database based on the parameters.
+    * @param name has to be given
+    * @param ValidityDomain optional, the domain in which you want to search
+    * @param ObjectID optional, the ID of the object in the domain you want to get
+    * @return the retrieved value
+    */
+    public SysParam getValue(String name, Long ValidityDomain, Long ObjectID){
+        SysParam setting = null;
 
-   @param Name Name des Parameters
-   @param ValidityDomain Validity-Domain (optional)
-   @param ObjectID Objekt-ID, z.B. User-ID (otional)
-   @return Parameter
-   */
-  public SysParam getValue(String Name, Long ValidityDomain, Long ObjectID)
-  {
-    SysParam setting = null;
+        Session hb_session = HibernateUtil.getSessionFactory().openSession();
+        hb_session.getTransaction().begin();
 
-    Session hb_session = HibernateUtil.getSessionFactory().openSession();
-    //hb_session.getTransaction().begin();
+        try{
+            org.hibernate.Query dbQuery;
 
-    try
-    {
-      org.hibernate.Query q;
+            if (ValidityDomain != null && ObjectID == null){
+              dbQuery = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd");
+              dbQuery.setParameter("name", name);
+              dbQuery.setParameter("vd", ValidityDomain);
+            }
+            else if (ValidityDomain != null && ObjectID != null){
+                dbQuery = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd AND objectId=:objectid");
+                dbQuery.setParameter("name", name);
+                dbQuery.setParameter("vd", ValidityDomain);
+                dbQuery.setParameter("objectid", ObjectID);
+            }
+            else{
+                dbQuery = hb_session.createQuery("from SysParam WHERE name=:name ORDER BY validityDomain");
+                dbQuery.setParameter("name", name);
+            }
+            
+            dbQuery.setMaxResults(1);
+            java.util.List<SysParam> paramList = (java.util.List<SysParam>) dbQuery.list();
 
-      if (ValidityDomain != null && ObjectID == null)
-      {
-        q = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd");
-        q.setParameter("name", Name);
-        q.setParameter("vd", ValidityDomain);
-      }
-      else if (ValidityDomain != null && ObjectID != null)
-      {
-        q = hb_session.createQuery("from SysParam WHERE name=:name AND validityDomain=:vd AND objectId=:objectid");
-        q.setParameter("name", Name);
-        q.setParameter("vd", ValidityDomain);
-        q.setParameter("objectid", ObjectID);
-      }
-      else
-      {
-        q = hb_session.createQuery("from SysParam WHERE name=:name ORDER BY validityDomain");
-        q.setParameter("name", Name);
-      }
-      q.setMaxResults(1);
+            if (!paramList.isEmpty()){
+                setting = paramList.get(0);
+            }
 
-      java.util.List<SysParam> paramList = (java.util.List<SysParam>) q.list();
+            if (setting == null && ObjectID != null && ObjectID > 0){
+                // Kein Ergebnis gefunden, aber User-ID angegeben
+                // Evtl. wurde dieser Parameter jedoch nicht überschrieben
+                // also den Standard-Parameter benutzen
 
-      if (paramList.size() > 0)
-      {
-        // Genau 1 Ergebnis gefunden
-        setting = paramList.get(0);
-      }
+                if(hb_session.isOpen())
+                    hb_session.close();
 
-      if (setting == null && ObjectID != null && ObjectID > 0)
-      {
-        // Kein Ergebnis gefunden, aber User-ID angegeben
-        // Evtl. wurde dieser Parameter jedoch nicht überschrieben
-        // also den Standard-Parameter benutzen
+                // TODO eigentlich müsste man 1 Ebene höher prüfen
+                // aber die ID ist ja nicht bekannt
+                // Bsp: Wenn User-Parameter nicht gefunden, dann müsste
+                //      in Usergroup gesucht werden
+                //      die Usergroup-ID ist jedoch nicht bekannt
+                return getValue(name, null, null);
+            }
+        }
+        catch (Exception ex){
+            System.out.println("Error [0005]");
+            ex.printStackTrace();
+        }
 
-        
-        hb_session.close();
+        if(hb_session.isOpen())
+            hb_session.close();
 
-        // TODO eigentlich müsste man 1 Ebene höher prüfen
-        // aber die ID ist ja nicht bekannt
-        // Bsp: Wenn User-Parameter nicht gefunden, dann müsste
-        //      in Usergroup gesucht werden
-        //      die Usergroup-ID ist jedoch nicht bekannt
-        return getValue(Name, null, null);
-      }
+        resolveAndSetPassword(setting);
 
-    }
-    catch (Exception ex)
-    {
-      ex.printStackTrace();
+        return setting;
     }
 
-    
-    hb_session.close();
-
-    resolveDatatype(setting);
-
-    return setting;
-  }
-
-  public String getStringValue(String Name, Long ValidityDomain, Long ObjectID)
-  {
-    SysParam param = getValue(Name, ValidityDomain, ObjectID);
-    if (param != null && param.getValue() != null)
-      return param.getValue();
-
-    return "";
-  }
+    /**
+     * Calls getValue witht the parameters and retrieves a SysParam object from
+     * that call. Then the getValue() return-value of that object is returned
+     * if the object and its value are not null.
+     * @param name the name of the object to be retrieved
+     * @param ValidityDomain optional, the domain in which to search
+     * @param ObjectID optional, the ID of the object within the domain
+     * @return Either the getValue() return-value of the object or ""
+     */
+    public String getStringValue(String name, Long ValidityDomain, Long ObjectID){
+        SysParam param = getValue(name, ValidityDomain, ObjectID);
+        if (param != null && param.getValue() != null)
+            return param.getValue();
+        else
+            return "";
+    }
 
   public Boolean getBoolValue(String Name, Long ValidityDomain, Long ObjectID)
   {
@@ -209,15 +197,15 @@ public class DBSysParam
     return null;
   }
 
-  private void resolveDatatype(SysParam setting)
-  {
-    if (setting != null && setting.getJavaDatatype() != null
-      && setting.getJavaDatatype().equalsIgnoreCase("password"))
-    {
-      // Passwort entschlüsseln
-      setting.setValue(DES.decrypt(setting.getValue()));
+    /**
+     * If the setting parameter is a password, it will be decrypted and set.
+     * @param passwordSetting the password setting to be descrypted and set
+     */
+    private void resolveAndSetPassword(SysParam passwordSetting){
+        if (passwordSetting != null && passwordSetting.getJavaDatatype() != null && passwordSetting.getJavaDatatype().equalsIgnoreCase("password")){
+            passwordSetting.setValue(DES.decrypt(passwordSetting.getValue()));
+        }
     }
-  }
 
   private void applyDatatype(SysParam setting)
   {

@@ -229,7 +229,7 @@ public class ImportKBV extends Window implements AfterCompose
     ((Button) getFellow("buttonImport")).setDisabled(true);
     ((Button) getFellow("buttonCancel")).setVisible(true);
 
-    String session_id = SessionHelper.getValue("session_id").toString();
+    String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
     String msg = "";
     Progressmeter progress = (Progressmeter) getFellow("progress");

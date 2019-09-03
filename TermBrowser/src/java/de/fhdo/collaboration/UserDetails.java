@@ -78,7 +78,7 @@ public class UserDetails extends Window implements AfterCompose, IUpdate
 
             GetCollaborationUserRequestType parameter = new GetCollaborationUserRequestType();
             parameter.setLoginType(new LoginType());
-            parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+            parameter.getLoginType().setSessionID(SessionHelper.getSessionObjectByName("session_id").toString());
 
             GetCollaborationUserListResponse.Return response = port.getCollaborationUserList(parameter);
 
@@ -97,7 +97,7 @@ public class UserDetails extends Window implements AfterCompose, IUpdate
 
             GetTermUserRequestType parameter_term = new GetTermUserRequestType();
             parameter_term.setLoginType(new LoginType());
-            parameter_term.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+            parameter_term.getLoginType().setSessionID(SessionHelper.getSessionObjectByName("session_id").toString());
 
             GetUserListResponse.Return response_term = port.getUserList(parameter_term);
 
@@ -159,7 +159,7 @@ public class UserDetails extends Window implements AfterCompose, IUpdate
 
             SaveCollaborationUserRequestType parameter = new SaveCollaborationUserRequestType();
             parameter.setLoginType(new LoginType());
-            parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+            parameter.getLoginType().setSessionID(SessionHelper.getSessionObjectByName("session_id").toString());
             userTerm.setEmail(user.getEmail());
             parameter.setTermuser(userTerm);
             parameter.setUser(user);

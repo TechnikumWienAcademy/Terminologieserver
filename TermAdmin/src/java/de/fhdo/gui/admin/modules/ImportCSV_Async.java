@@ -604,7 +604,7 @@ public class ImportCSV_Async extends Window implements AfterCompose, IGenericLis
 
     public void afterCompose()
     {
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         session = Sessions.getCurrent(true);
         fillVocabularyList();
         showStatus();
@@ -854,7 +854,7 @@ public class ImportCSV_Async extends Window implements AfterCompose, IGenericLis
                 ImportCodeSystemCancelRequestType request = new ImportCodeSystemCancelRequestType();
                 request.setLogin(new LoginType());
 
-                String session_id = SessionHelper.getValue("session_id").toString();
+                String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
                 request.getLogin().setSessionID(session_id);
                 ImportCodeSystemCancelResponseType response = importCodeSystemCancel(request);
 

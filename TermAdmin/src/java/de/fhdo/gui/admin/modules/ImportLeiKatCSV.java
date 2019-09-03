@@ -389,7 +389,7 @@ public class ImportLeiKatCSV extends Window implements AfterCompose, IGenericLis
         ((Button) getFellow("buttonImport")).setDisabled(true);
         ((Button) getFellow("buttonCancel")).setVisible(true);
 
-        String session_id = SessionHelper.getValue("session_id").toString();
+        String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
         String vokVersion = ((Textbox) getFellow("tbVokabularVersion")).getText();
 

@@ -50,7 +50,7 @@ public class Terminologie extends Window implements AfterCompose
   {
     String id = "";
 
-    Object o = SessionHelper.getValue("termadmin_terminologie_tabid");
+    Object o = SessionHelper.getSessionAttributeByName("termadmin_terminologie_tabid");
     if (o != null)
       id = o.toString();
     tb = (Tabbox) getFellow("tabboxNavigation");

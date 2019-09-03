@@ -330,7 +330,7 @@ public class ImportCS_SVS extends Window implements AfterCompose, IGenericListAc
         ((Button) getFellow("buttonImport")).setDisabled(true);
         ((Button) getFellow("buttonCancel")).setVisible(true);
 
-        String session_id = SessionHelper.getValue("session_id").toString();
+        String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
         String newVocVersion = ((Textbox) getFellow("tbNewVocVersion")).getText();
 
@@ -477,7 +477,7 @@ public class ImportCS_SVS extends Window implements AfterCompose, IGenericListAc
     String s = "";
     String session_id = "";
     try {
-      session_id = SessionHelper.getValue("session_id").toString();
+      session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
       String hql = "select distinct csev from CodeSystemEntityVersion csev";
       hql += " join fetch csev.codeSystemMetadataValues csmv";
       hql += " join fetch csmv.metadataParameter mp";

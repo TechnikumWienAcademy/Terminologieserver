@@ -103,7 +103,7 @@ public class User extends Window implements AfterCompose, IGenericListActions, I
 
         GetTermUserRequestType parameter = new GetTermUserRequestType();
         parameter.setLoginType(new LoginType());
-        parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+        parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
 
         GetUserListResponse.Return response = port.getUserList(parameter);
 

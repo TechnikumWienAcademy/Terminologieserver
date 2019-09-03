@@ -332,7 +332,7 @@ public class ImportVS_SVS extends Window implements AfterCompose, IGenericListAc
     cbNewVal.setChecked(false);
     boolean vsvOnly = true;
     
-    String session_id = SessionHelper.getValue("session_id").toString();
+    String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
     String vsVersion = ((Textbox) getFellow("tbVokabularVersion")).getText();
     tbVokabularVersion.setText("");

@@ -548,14 +548,14 @@ public class Domain extends Window implements AfterCompose, IGenericListActions,
   private void showDomainValueList()
   {
     long domainId = 0;
-    Object o = SessionHelper.getValue("termadmin_domainId");
+    Object o = SessionHelper.getSessionAttributeByName("termadmin_domainId");
     if (o != null)
     {
       domainId = Long.parseLong(o.toString());
     }
 
     int index = -1;
-    o = SessionHelper.getValue("termadmin_domain_index");
+    o = SessionHelper.getSessionAttributeByName("termadmin_domain_index");
     if (o != null)
     {
       index = Integer.parseInt(o.toString());
@@ -593,7 +593,7 @@ public class Domain extends Window implements AfterCompose, IGenericListActions,
 
   public void onTreeNewClicked(String id, Object data)
   {
-    Object o = SessionHelper.getValue("termadmin_domainId");
+    Object o = SessionHelper.getSessionAttributeByName("termadmin_domainId");
     if (o != null)
     {
       logger.debug("domainValueDetails mit id: " + o.toString());

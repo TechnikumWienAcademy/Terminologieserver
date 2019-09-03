@@ -263,14 +263,9 @@ public class ProposalHelper
     return list;
   }
   
-  
-  public static boolean isStatusDiscussion(long StatusId)
-  {
-    if(StatusId == 2)  // TODO Feste Variable "2" in SysParam schreiben
-      return true;
-    
-    return false;
-  }
+    public static boolean isStatusDiscussion(long StatusId){ 
+        return StatusId == 2; // TODO Feste Variable "2" in SysParam schreiben
+    }
   
   public static boolean isProposalInDiscussion(Proposal proposal)
   {

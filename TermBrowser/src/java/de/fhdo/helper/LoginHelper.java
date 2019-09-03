@@ -168,7 +168,7 @@ public class LoginHelper
 
 					de.fhdo.terminologie.ws.authorizationPub.LogoutRequestType requestPub = new de.fhdo.terminologie.ws.authorizationPub.LogoutRequestType();
 					requestPub.setLogin(new de.fhdo.terminologie.ws.authorizationPub.LoginType());
-					requestPub.getLogin().setSessionID(SessionHelper.getValue("pub_session_id").toString());
+					requestPub.getLogin().setSessionID(SessionHelper.getSessionObjectByName("pub_session_id").toString());
 
 					de.fhdo.terminologie.ws.authorizationPub.LogoutResponseType responsePub = portPub.logout(requestPub);
 

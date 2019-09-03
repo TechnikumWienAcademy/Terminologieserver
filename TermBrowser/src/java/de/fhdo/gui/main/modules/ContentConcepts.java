@@ -187,13 +187,13 @@ public class ContentConcepts extends Window implements AfterCompose
 
         try
         {
-            Object o = SessionHelper.getValue("SortByField");
+            Object o = SessionHelper.getSessionObjectByName("SortByField");
             if (o != null)
             {
                 logger.debug("SortByField: " + o.toString());
 
                 boolean ascending = true;
-                Object oDirection = SessionHelper.getValue("SortDirection");
+                Object oDirection = SessionHelper.getSessionObjectByName("SortDirection");
                 if (oDirection != null && oDirection.equals("descending"))
                 {
                     ascending = false;

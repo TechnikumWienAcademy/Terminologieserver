@@ -1273,7 +1273,7 @@ public class ProposalWorkflow
             //CodeSystem aus Collab lesen
             ListCodeSystemsRequestType request_search = new ListCodeSystemsRequestType();
             request_search.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
-            request_search.getLogin().setSessionID(SessionHelper.getValue("session_id").toString());
+            request_search.getLogin().setSessionID(SessionHelper.getSessionObjectByName("session_id").toString());
             request_search.setCodeSystem(new CodeSystem());
             request_search.getCodeSystem().setId(po.getProposal().getVocabularyIdTwo());
             ListCodeSystemsResponse.Return resp = port_search.listCodeSystems(request_search);
@@ -1522,7 +1522,7 @@ public class ProposalWorkflow
             //ValueSet aus Collab lesen
             ListValueSetsRequestType request_search = new ListValueSetsRequestType();
             request_search.setLogin(new de.fhdo.terminologie.ws.search.LoginType());
-            request_search.getLogin().setSessionID(SessionHelper.getValue("session_id").toString());
+            request_search.getLogin().setSessionID(SessionHelper.getSessionObjectByName("session_id").toString());
             request_search.setValueSet(new ValueSet());
             Long valueSetId = null;
             for (Proposalobject p : po.getProposal().getProposalobjects())
@@ -2039,7 +2039,7 @@ public class ProposalWorkflow
     private SortingType createSortingParameter()
     {
         SortingType st = null;
-        Object o = SessionHelper.getValue("SortByField");
+        Object o = SessionHelper.getSessionObjectByName("SortByField");
         if (o != null)
         {
             st = new SortingType();
@@ -2052,7 +2052,7 @@ public class ProposalWorkflow
                 st.setSortBy(SortByField.CODE);
             }
         }
-        o = SessionHelper.getValue("SortDirection");
+        o = SessionHelper.getSessionObjectByName("SortDirection");
         if (o != null)
         {
             if (st == null)

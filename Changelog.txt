@@ -1,4 +1,12 @@
-﻿Changelog 3.2.36
+﻿Changelog 3.2.38
+	-Änderungen
+		.) EHTSOID-191: Freigabe bearbeitet.
+
+Changelog 3.2.37
+	-Änderungen
+		.) EHTSOID-191: Freigabe bearbeitet.
+
+Changelog 3.2.36
 	-Änderungen
 		.) EHTSOID-73: Webservice-Endpoint-Einstellungen wurden auf SOAP 1.2 geändert.
 		.) EHTSOID-191: Erstellung von temporären CodeSystemen auf der Pub-Umgebung verändert.

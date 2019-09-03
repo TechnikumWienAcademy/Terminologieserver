@@ -90,7 +90,7 @@ public class MainCollab extends Window implements AfterCompose {
 	public void afterCompose() {
 		String id = "";
 
-		Object o = SessionHelper.getValue("collab_tabid");
+		Object o = SessionHelper.getSessionObjectByName("collab_tabid");
 		if (o != null) {
 			id = o.toString();
 		}

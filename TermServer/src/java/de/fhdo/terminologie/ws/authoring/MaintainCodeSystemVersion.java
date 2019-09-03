@@ -19,7 +19,6 @@
  */
 package de.fhdo.terminologie.ws.authoring;
 
-import de.fhdo.terminologie.Definitions;
 import de.fhdo.terminologie.db.HibernateUtil;
 import de.fhdo.terminologie.db.hibernate.CodeSystem;
 import de.fhdo.terminologie.db.hibernate.CodeSystemVersion;
@@ -31,51 +30,46 @@ import de.fhdo.terminologie.ws.authoring.types.MaintainCodeSystemVersionResponse
 import de.fhdo.terminologie.ws.types.ReturnType;
 import java.util.Iterator;
 import java.util.Set;
-import org.hibernate.proxy.HibernateProxy;
 
 /**
- *
- * @author Sven Becker
- * 
- * 07.10.11
- * 
- */
+* @author Sven Becker
+* 07.10.11
+*/
 public class MaintainCodeSystemVersion {
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final static private org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
     public MaintainCodeSystemVersionResponseType MaintainCodeSystemVersion(MaintainCodeSystemVersionRequestType parameter) {
-////////// Logger //////////////////////////////////////////////////////////////
-        if (logger.isInfoEnabled()) 
-            logger.info("====== MaintainCodeSystemVersion gestartet ======");
-
-////////// Return-Informationen anlegen ////////////////////////////////////////
+        LOGGER.info("+++++ MaintainCodeSystemVersion started +++++");
+        
         MaintainCodeSystemVersionResponseType response = new MaintainCodeSystemVersionResponseType();
         response.setReturnInfos(new ReturnType());
 
-////////// Parameter prüfen ////////////////////////////////////////////////////
-        if (validateParameter(parameter, response) == false)
+        if(parameter==null){
+            response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
+            response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
+            response.getReturnInfos().setMessage("Fehler bei 'MaintainCodeSystemVersion': Der Parameter ist NULL"); 
+            return response;
+        }
+        
+        if (!validateParameter(parameter, response))
             return response;        
 
         // Login-Informationen auswerten (gilt für jeden Webservice)    
-        if (parameter != null){
-            if(LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
-                return response;    
-        }
+        if(LoginHelper.getInstance().doLogin(parameter.getLogin(), response.getReturnInfos(), true) == false)
+            return response;
         
-////////// Der eigentliche Teil  /////////////////////////////////////////////// 
-        try {
+        try{
             // Für die Statusmeldung ob eine neue VSV angelegt oder die alte verändert wurde
             String sCreateNewVersionMessage = "";
             
-            // Hibernate-Block, Session öffnen
-            org.hibernate.Session     hb_session = HibernateUtil.getSessionFactory().openSession();
+            org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
             
             // CodeSystem und CodeSystemVersion zum Speichern vorbereiten 
-            CodeSystem        cs_Request     = parameter.getCodeSystem();
-            CodeSystemVersion csv_Request    = (CodeSystemVersion)cs_Request.getCodeSystemVersions().toArray()[0];
-            CodeSystemVersion csvNew         = null;              
+            CodeSystem cs_Request = parameter.getCodeSystem();
+            CodeSystemVersion csv_Request = (CodeSystemVersion)cs_Request.getCodeSystemVersions().toArray()[0];
+            CodeSystemVersion csvNew = null;              
 
             try{ // 2. try-catch-Block zum Abfangen von Hibernate-Fehlern                                             
                 // versuche cs aus der DB zu laden und in cs_db, csv_db zu speichern
@@ -99,16 +93,14 @@ public class MaintainCodeSystemVersion {
                     if(cs_Request.getWebsite() != null) 
                         cs_db.setWebsite(cs_Request.getWebsite());
 										
-										// Matthias: adding info for incomplete CS
-										if(cs_Request.getIncompleteCS() != null){
-											cs_db.setIncompleteCS(cs_Request.getIncompleteCS());
-										}
-										
-										//Matthias: adding responsible Organization
-										if(cs_Request.getResponsibleOrganization() != null){
-											cs_db.setResponsibleOrganization(cs_Request.getResponsibleOrganization());
-										}
-                    
+                    // Matthias: adding info for incomplete CS
+                    if(cs_Request.getIncompleteCS() != null)
+                        cs_db.setIncompleteCS(cs_Request.getIncompleteCS());
+
+                    //Matthias: adding responsible Organization
+                    if(cs_Request.getResponsibleOrganization() != null)
+                        cs_db.setResponsibleOrganization(cs_Request.getResponsibleOrganization());
+
                     // Neue Version anlegen:  Diese enthält dann nur die Angaben, die auch gemacht wurden. leere Felder werden nicht aus alten Versionen übernommen
                     if(parameter.getVersioning().getCreateNewVersion()){
                         sCreateNewVersionMessage = "Neue CSVersion angelegt.";
@@ -135,53 +127,55 @@ public class MaintainCodeSystemVersion {
                     else{
                         sCreateNewVersionMessage = "CSVersion (" + Long.toString(csv_Request.getVersionId()) + ") überschrieben.";
                         csvNew = csv_db;
-                        LastChangeHelper.updateLastChangeDate(true, csvNew.getVersionId(),hb_session);
+                        if(csvNew != null)//3.2.39
+                            LastChangeHelper.updateLastChangeDate(true, csvNew.getVersionId(),hb_session);
                     }                                        
-                                           
-                    // Name setzen, falls vorhanden
-                    if(csv_Request.getName() != null)
-                        csvNew.setName(csv_Request.getName());
+                                         
+                    if(csvNew != null){//3.2.39
+                        // Name setzen, falls vorhanden
+                        if(csv_Request.getName() != null)
+                            csvNew.setName(csv_Request.getName());
 
-                    // release Date soll angegeben werden können
-                    if(csv_Request.getReleaseDate() != null) 
-                        csvNew.setReleaseDate(csv_Request.getReleaseDate()); 
+                        // release Date soll angegeben werden können
+                        if(csv_Request.getReleaseDate() != null) 
+                            csvNew.setReleaseDate(csv_Request.getReleaseDate()); 
 
-                    // ExpirationDate setzen, falls vorhanden
-                    if(csv_Request.getExpirationDate() != null) 
-                        csvNew.setExpirationDate(csv_Request.getExpirationDate()); 
+                        // ExpirationDate setzen, falls vorhanden
+                        if(csv_Request.getExpirationDate() != null) 
+                            csvNew.setExpirationDate(csv_Request.getExpirationDate()); 
 
-                    // Source setzen, falls vorhanden
-                    if(csv_Request.getSource() != null) 
-                        csvNew.setSource(csv_Request.getSource()); 
+                        // Source setzen, falls vorhanden
+                        if(csv_Request.getSource() != null) 
+                            csvNew.setSource(csv_Request.getSource()); 
 
-                    // Description setzen, falls vorhanden
-                    if(csv_Request.getDescription() != null) 
-                        csvNew.setDescription(csv_Request.getDescription()); 
+                        // Description setzen, falls vorhanden
+                        if(csv_Request.getDescription() != null) 
+                            csvNew.setDescription(csv_Request.getDescription()); 
 
-                    // PreferredLanguageId setzen, falls vorhanden
-                    if(csv_Request.getPreferredLanguageId() != null) 
-                        csvNew.setPreferredLanguageId(csv_Request.getPreferredLanguageId()); 
-                    
-                    // ValidityRange setzen, falls vorhanden
-                    if(csv_Request.getValidityRange() != null) 
-                        csvNew.setValidityRange(csv_Request.getValidityRange()); 
-                    
-                    // Oid setzen falls vorhanden
-                    if(csv_Request.getOid() != null) 
-                        csvNew.setOid(csv_Request.getOid());  
+                        // PreferredLanguageId setzen, falls vorhanden
+                        if(csv_Request.getPreferredLanguageId() != null) 
+                            csvNew.setPreferredLanguageId(csv_Request.getPreferredLanguageId()); 
 
-                    // LicenceHolder setzen falls vorhanden
-                    if(csv_Request.getLicenceHolder() != null) 
-                        csvNew.setLicenceHolder(csv_Request.getLicenceHolder()); 
+                        // ValidityRange setzen, falls vorhanden
+                        if(csv_Request.getValidityRange() != null) 
+                            csvNew.setValidityRange(csv_Request.getValidityRange()); 
 
-                    // UnderLicence setzen falls vorhanden
-                    if(csv_Request.getUnderLicence() != null) 
-                        csvNew.setUnderLicence(csv_Request.getUnderLicence());
+                        // Oid setzen falls vorhanden
+                        if(csv_Request.getOid() != null) 
+                            csvNew.setOid(csv_Request.getOid());  
 
-                    // csvNew schon mal in der DB Speichern, damit ggf eine Id vergeben wird die dann gleich bei den licenceTypes benötigt wird
-                    if(parameter.getVersioning().getCreateNewVersion())
-                        hb_session.save(csvNew);                                            
-                    
+                        // LicenceHolder setzen falls vorhanden
+                        if(csv_Request.getLicenceHolder() != null) 
+                            csvNew.setLicenceHolder(csv_Request.getLicenceHolder()); 
+
+                        // UnderLicence setzen falls vorhanden
+                        if(csv_Request.getUnderLicence() != null) 
+                            csvNew.setUnderLicence(csv_Request.getUnderLicence());
+
+                        // csvNew schon mal in der DB Speichern, damit ggf eine Id vergeben wird die dann gleich bei den licenceTypes benötigt wird
+                        if(parameter.getVersioning().getCreateNewVersion())
+                            hb_session.save(csvNew);                                            
+                    }
                     // für alle angegebenen licenceTypes
                     if(csv_Request.getLicenceTypes() != null && csv_Request.getLicenceTypes().isEmpty() == false){
                         Iterator<LicenceType> itLt_Request = csv_Request.getLicenceTypes().iterator(),
@@ -191,8 +185,9 @@ public class MaintainCodeSystemVersion {
                         while(itLt_Request.hasNext()){
                             lt_Request = itLt_Request.next();
                             
+                            //3.2.39 ADDED NULL CHECK
                             // Neue CSVersion: neue licenceType-Objekte anlegen, CSV und typeTxt eintragen und speichern 
-                            if(parameter.getVersioning().getCreateNewVersion()){
+                            if(parameter.getVersioning().getCreateNewVersion() && csvNew!=null){
                                 lt_New = new LicenceType();
                                 lt_New.setTypeTxt(lt_Request.getTypeTxt());
                                 lt_New.setCodeSystemVersion(csvNew);
@@ -207,11 +202,11 @@ public class MaintainCodeSystemVersion {
                                 
                                 // die im Request angegebene lt ID ist nicht in der DB, also mache mit nächstem lt weiter
                                 if(lt_DB == null){
-                                    logger.debug("licenceType ID " + Long.toString(lt_Request.getId()) + " nicht in der DB vorhanden.");
+                                    LOGGER.debug("licenceType ID " + Long.toString(lt_Request.getId()) + " nicht in der DB vorhanden.");
                                     continue;
                                 }
                                 if(lt_DB.getCodeSystemVersion().getVersionId() != csv_Request.getVersionId()){
-                                    logger.debug("Es wird versucht den licenceType einer anderen CSV zu ändern!");
+                                    LOGGER.debug("Es wird versucht den licenceType einer anderen CSV zu ändern!");
                                     continue;                                    
                                 }
                                 
@@ -222,10 +217,13 @@ public class MaintainCodeSystemVersion {
                         }    
                     }
 
+                    //3.2.39 ADDED NULL CHECK AND .size()>0
+                    if(csvNew!=null && csvNew.getCodeSystem().getCodeSystemVersions().size()>0)
                     // In DB speichern damit csvNew eine ID bekommt falls es eine neue Version ist, ansonsten wird das Objekt aktualisiert
-                    hb_session.save(csvNew);   
+                        hb_session.save(csvNew);   
                     
-                    if(parameter.getVersioning().getCreateNewVersion()){
+                    //3.2.39 ADDED NULL CHECK
+                    if(parameter.getVersioning().getCreateNewVersion() && csvNew!=null){
                         // CodeSystem mit CurrentVersion aktualisieren und speichern
                         cs_db.setCurrentVersionId(csvNew.getVersionId());                       
                         
@@ -242,10 +240,12 @@ public class MaintainCodeSystemVersion {
                 response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
                 response.getReturnInfos().setMessage("Fehler bei 'MaintainCodeSystemVersion', Hibernate: " + e.getLocalizedMessage());
 
-                logger.error(response.getReturnInfos().getMessage());
+                LOGGER.error("Error", e);
+                LOGGER.error(response.getReturnInfos().getMessage());
             } finally {
                 // Transaktion abschließen
-                if (cs_Request.getId() > 0 && csvNew.getVersionId() > 0) {
+                //3.2.39 ADDED NULL CHECK
+                if (cs_Request.getId() > 0 && csvNew!=null && csvNew.getVersionId() > 0) {
                     hb_session.getTransaction().commit();
 										
 										//Löschen von Verknüpfungen um keine unendlichen XML zu erzeugen
@@ -256,12 +256,13 @@ public class MaintainCodeSystemVersion {
 										csvNew.setLicencedUsers(null);
                 } else {
                     // Ã„nderungen nicht erfolgreich
-                    logger.warn("[MaintainCodeSystemVersion.java] Ã„nderungen nicht erfolgreich");
+                    LOGGER.warn("[MaintainCodeSystemVersion.java] Änderungen nicht erfolgreich");
                     hb_session.getTransaction().rollback();
                 }
                 hb_session.close();
             }
-            if (cs_Request.getId() > 0 && csvNew.getVersionId() > 0) {
+            //3.2.39 ADDED NULL CHECK
+            if (cs_Request.getId() > 0 && csvNew!=null && csvNew.getVersionId() > 0) {
                 // Status an den Aufrufer weitergeben
                 cs_Request.getCodeSystemVersions().clear();
                 cs_Request.getCodeSystemVersions().add(csvNew);
@@ -276,51 +277,49 @@ public class MaintainCodeSystemVersion {
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.ERROR);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler bei 'MaintainCodeSystemVersion': " + e.getLocalizedMessage());           
-            logger.error(response.getReturnInfos().getMessage());
+            LOGGER.error(response.getReturnInfos().getMessage());
         }      
         return response;
     }
 
     private boolean validateParameter(MaintainCodeSystemVersionRequestType request, MaintainCodeSystemVersionResponseType response) {
-        boolean    isValid      = true;
-        String     errorMessage = "Unbekannter Fehler";
-        CodeSystem cs_Request   = request.getCodeSystem();       
+        boolean valid = true;
+        String errorMessage = "Unbekannter Fehler";
+        CodeSystem cs_Request = request.getCodeSystem();       
         
-////////// Versioning //////////////////////////////////////////////////////////
-        if (request.getVersioning() == null){
+        if(request.getVersioning() == null){
             errorMessage = "Versioning darf nicht NULL sein!";
-            isValid = false;
+            valid = false;
         }
         else{
             if (request.getVersioning().getCreateNewVersion() == null){
                 errorMessage = "createNewVersion darf nicht NULL sein!";
-                isValid = false;
+                valid = false;
             }
         }
         
- ///////// CodeSystem ////////////////////////////////////////////////////////////        
-        if (cs_Request == null) {
+        if(cs_Request == null) {
             errorMessage = "CodeSystem darf nicht NULL sein!";
-            isValid    = false;
+            valid = false;
         }
         else {
             // Nur wenn der Name des CS geändet werden soll, benötigt man die Id des CS
             if (cs_Request.getName() != null && cs_Request.getName().length() > 0 && (cs_Request.getId() == null || cs_Request.getId() < 1)){
-                errorMessage = "Wenn der Name des Vokabulars geändert werden soll, muss die Id des Vokabulars angegeben werden!";
-                isValid = false;
+                errorMessage = "Wenn der Name des Vokabulars geändert werden soll, muss die ID des Vokabulars angegeben werden!";
+                valid = false;
             }
             else{
                 Set<CodeSystemVersion> vsvSet_Request = cs_Request.getCodeSystemVersions();
                 // Gibt es eine CodeSystemVersion Liste?
                 if (vsvSet_Request == null){
                     errorMessage = "CodeSystemVersion-Liste darf nicht NULL sein!";
-                    isValid = false;    
+                    valid = false;
                 }                
                 else{
                     // Wenn ja, hat sie genau einen Eintrag?
                     if (vsvSet_Request.size() != 1) {
                         errorMessage = "CodeSystemVersion-Liste hat " + Integer.toString(vsvSet_Request.size()) + " Einträge. Sie muss aber genau einen Eintrag haben!";
-                        isValid = false;
+                        valid = false;
                     } 
                     else{  
                         CodeSystemVersion csv_Request = (CodeSystemVersion)vsvSet_Request.toArray()[0]; 
@@ -329,7 +328,7 @@ public class MaintainCodeSystemVersion {
                         if(request.getVersioning().getCreateNewVersion() == true){
                             if(csv_Request.getName() == null || csv_Request.getName().length() <= 0){
                                 errorMessage = "Es muss ein Name für die neue Version angegeben werden!";
-                                isValid = false;   
+                                valid = false;   
                             }
                         }
                             
@@ -337,25 +336,25 @@ public class MaintainCodeSystemVersion {
                         else{
                             if (csv_Request.getVersionId() == null || csv_Request.getVersionId() < 1) {
                                 errorMessage = "Die Id der Vokabularversion darf nicht NULL oder kleiner 1 sein!";
-                                isValid = false;
+                                valid = false;
                             }
                         }
                         
                         // falls licenceTypes angegeben sind, müssen diese auch eine id und typeTxt haben
                         if(csv_Request.getUnderLicence() == null){}else{
-                            if(isValid && csv_Request.getUnderLicence()){
-                               if(csv_Request.getLicenceTypes().size() > 0){
+                            if(valid && csv_Request.getUnderLicence()){
+                                if(csv_Request.getLicenceTypes().size() > 0){
                                     Iterator<LicenceType> iLicenceType_Request = csv_Request.getLicenceTypes().iterator();
                                     LicenceType licence_Request;
                                     while(iLicenceType_Request.hasNext()){
                                         licence_Request = iLicenceType_Request.next();
                                         if(licence_Request.getId() == null || licence_Request.getId() < 1){
                                             errorMessage = "LicenceType.getId() darf nicht NULL oder kleiner 1 sein!"  + " Size="+Integer.toString(csv_Request.getLicenceTypes().size());
-                                            isValid = false;                                    
+                                            valid = false;                                    
                                         }
                                         if(licence_Request.getTypeTxt() == null || licence_Request.getTypeTxt().length() == 0 ){
                                             errorMessage = "LicenceType.getTypeTxt() darf nicht NULL sein oder eine Länge von 0 haben!";
-                                            isValid = false;                                    
+                                            valid = false;                                    
                                         }                                    
                                     }
                                 }                                                                                
@@ -366,11 +365,11 @@ public class MaintainCodeSystemVersion {
             }
         }
 
-        if (isValid == false){
+        if (!valid){
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage(errorMessage);
         }       
-        return isValid;
+        return valid;
     }
 }

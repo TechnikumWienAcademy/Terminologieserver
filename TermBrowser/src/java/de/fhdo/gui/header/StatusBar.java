@@ -110,7 +110,7 @@ public class StatusBar extends Window implements AfterCompose
     }
     
 
-    Object pubSessionId = SessionHelper.getValue("pub_session_id");
+    Object pubSessionId = SessionHelper.getSessionObjectByName("pub_session_id");
     Toolbarbutton tbb = (Toolbarbutton) getFellow("tb_pubConnection");
 		
 		if (SessionHelper.isUserLoggedIn() && SessionHelper.isAdmin()){// && session.getAttribute("pub_collab_session") != null){
@@ -139,7 +139,7 @@ public class StatusBar extends Window implements AfterCompose
 
   public void onCallAdminClicked()
   {
-      String path = de.fhdo.db.DBSysParam.instance().getStringValue("weblink", null, null);
+      String path = de.fhdo.db.DBSysParam.getInstance().getStringValue("weblink", null, null);
       path += "/gui/admin/admin.zul";
       Executions.sendRedirect(path);
   }
@@ -153,7 +153,7 @@ public class StatusBar extends Window implements AfterCompose
       {
         Map map = new HashMap();
         map.put("user_id", SessionHelper.getCollaborationUserID());
-        map.put("termuser_id", SessionHelper.getValue("user_id"));
+        map.put("termuser_id", SessionHelper.getSessionObjectByName("user_id"));
 
         Window win = (Window) Executions.createComponents(
                 "/collaboration/userDetails.zul", null, map);

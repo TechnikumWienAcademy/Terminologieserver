@@ -12,10 +12,8 @@ import java.util.Properties;
  *
  * @author puraner
  */
-public class PropertiesHelper
-{
+public class PropertiesHelper{
 
-    private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
     private static PropertiesHelper instance;
 
     //Kollab URLs
@@ -26,152 +24,140 @@ public class PropertiesHelper
     private String authorizationUrl;
     private String ssoUrl;
 
-    //PUB Urls
+    //PUB URLs
     private String searchPubUrl;
     private String authorizationPubUrl;
     private String administrationPubUrl;
     private String authoringPubUrl;
 
-    //IDP
+    //IDP URLs
     private String authorizationIdpUrl;
     private String userManagementUrl;
 
+    //OTHER
     private String collaborationUser;
     private String collaborationPassword;
     private String loggingConfigDirectory;
 
-    public static PropertiesHelper getInstance()
-    {
+    /**
+     * Returns the instance of the PropertiesHelper if it is not null, otherwise
+     * a new instance will be instantiated before it is returned.
+     * @return the instance of the PropertiesHelper
+     */
+    public static PropertiesHelper getInstance(){
         if (instance == null)
-        {
             instance = new PropertiesHelper();
-        }
 
         return instance;
     }
 
-    public PropertiesHelper()
-    {
+    /**
+     * Calls the loadData() method.
+     */
+    public PropertiesHelper(){
         loadData();
     }
 
-    public String getSearchUrl()
-    {
+    /**
+     * Retrieves the path to the termserverProperties file from the database
+     * and loads the file, setting the properties afterwards.
+     */
+    private void loadData(){
+        //The logger cannot be used because its not initialized yet
+        System.out.println("+++++ PropertiesHelper.loadData() started +++++");
+
+        Properties properties = new Properties();
+        try{
+            String filename = de.fhdo.db.DBSysParam.getInstance().getStringValue("termserverProperties", null, null);
+            System.out.println("Properties-path, read from the sys_param table in the database: " + filename);
+
+            properties.load(new FileInputStream(filename));
+
+            //Setting properties
+            searchUrl = properties.getProperty("searchUrl", "");
+            ssoUrl = properties.getProperty("ssoUrl", "");
+            conceptAssociationUrl = properties.getProperty("conceptAssosciationsUrl", "");
+            authoringUrl = properties.getProperty("authoringUrl", "");
+            administrationUrl = properties.getProperty("administrationUrl", "");
+            authorizationUrl = properties.getProperty("authorizationUrl", "");
+
+            searchPubUrl = properties.getProperty("searchPubUrl", "");
+            authoringPubUrl = properties.getProperty("authoringPubUrl", "");
+            authorizationPubUrl = properties.getProperty("authorizationPubUrl", "");
+            administrationPubUrl = properties.getProperty("administrationPubUrl", "");
+
+            authorizationIdpUrl = properties.getProperty("authorizationIdpUrl", "");
+
+            collaborationUser = properties.getProperty("collaborationUser", "");
+            collaborationPassword = properties.getProperty("collaborationPassword", "");
+
+            loggingConfigDirectory = properties.getProperty("loggingConfigDirectory");
+
+            userManagementUrl = properties.getProperty("userManagementUrl");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    
+    //BASIC GETTERS
+    public String getSearchUrl(){
         return searchUrl;
     }
 
-    public String getSearchPubUrl()
-    {
+    public String getSearchPubUrl(){
         return searchPubUrl;
     }
 
-    public String getAdministrationUrl()
-    {
+    public String getAdministrationUrl(){
         return administrationUrl;
     }
 
-    public String getAuthoringUrl()
-    {
+    public String getAuthoringUrl(){
         return authoringUrl;
     }
 
-    public String getConceptAssociationUrl()
-    {
+    public String getConceptAssociationUrl(){
         return conceptAssociationUrl;
     }
 
-    public String getAuthorizationUrl()
-    {
+    public String getAuthorizationUrl(){
         return authorizationUrl;
     }
 
-    public String getAuthorizationPubUrl()
-    {
+    public String getAuthorizationPubUrl(){
         return authorizationPubUrl;
     }
 
-    public String getAdministrationPubUrl()
-    {
+    public String getAdministrationPubUrl(){
         return administrationPubUrl;
     }
 
-    public String getAuthoringPubUrl()
-    {
+    public String getAuthoringPubUrl(){
         return authoringPubUrl;
     }
 
-    public String getSsoUrl()
-    {
+    public String getSsoUrl(){
         return ssoUrl;
     }
 
-    public String getAuthorizationIdpUrl()
-    {
+    public String getAuthorizationIdpUrl(){
         return authorizationIdpUrl;
     }
 
-    public String getCollaborationUser()
-    {
+    public String getCollaborationUser(){
         return collaborationUser;
     }
 
-    public String getCollaborationPassword()
-    {
+    public String getCollaborationPassword(){
         return collaborationPassword;
     }
 
-    public String getLoggingConfigDirectory()
-    {
+    public String getLoggingConfigDirectory(){
         return loggingConfigDirectory;
     }
 
-    public String getUserManagementUrl()
-    {
+    public String getUserManagementUrl(){
         return userManagementUrl;
-    }
-
-    private void loadData()
-    {
-        //logger cannot be used because its not initialized yet
-        System.out.println("Load properties...");
-
-        Properties config = new Properties();
-        try
-        {
-
-            String filename = de.fhdo.db.DBSysParam.instance().getStringValue("termserverProperties", null, null);
-
-            //logger cannot be used because its not initialized yet
-            System.out.println("filename: " + filename);
-
-            config.load(new FileInputStream(filename));
-
-            // load properties
-            searchUrl = config.getProperty("searchUrl", "");
-            ssoUrl = config.getProperty("ssoUrl", "");
-            conceptAssociationUrl = config.getProperty("conceptAssosciationsUrl", "");
-            authoringUrl = config.getProperty("authoringUrl", "");
-            administrationUrl = config.getProperty("administrationUrl", "");
-            authorizationUrl = config.getProperty("authorizationUrl", "");
-
-            searchPubUrl = config.getProperty("searchPubUrl", "");
-            authoringPubUrl = config.getProperty("authoringPubUrl", "");
-            authorizationPubUrl = config.getProperty("authorizationPubUrl", "");
-            administrationPubUrl = config.getProperty("administrationPubUrl", "");
-
-            authorizationIdpUrl = config.getProperty("authorizationIdpUrl", "");
-
-            collaborationUser = config.getProperty("collaborationUser", "");
-            collaborationPassword = config.getProperty("collaborationPassword", "");
-
-            loggingConfigDirectory = config.getProperty("loggingConfigDirectory");
-
-            userManagementUrl = config.getProperty("userManagementUrl");
-
-        }
-        catch (Exception e)
-        {
-            System.out.println(e);
-        }
     }
 }

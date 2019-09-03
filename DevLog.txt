@@ -1,4 +1,12 @@
-﻿Nächster Fehlercode: [0140]
+﻿3.2.38
+	TERMBROWSER: TerminologyReleaseManager -> Infobox bei multiplen CodeSystemen auskommentiert zur Fehlerbehandlung.
+
+3.2.37
+	TERMSERVER: Error [0115] bei der Freigabe, in Zeile 491 von ImportClamlNew wurden Anpassungen vorgenommen
+	
+3.2.36
+	TERMBROWSER: Fehler in CreateTempCodeSystemVersion, Änderung im TerminologyReleaseManager Zeile 989 folgend
+	IDP, TERMSERVER: sunjax-ws.xml endpoints-binding wurde hinzugefügt
 
 3.2.20
 	-In allen Import-Klassen wurde der MIME-Typ application/soap+xml hinzugefügt (auffindbar durch Suche nach 3.2.20)

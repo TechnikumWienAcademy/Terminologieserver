@@ -88,7 +88,7 @@ public class Benutzer extends Window implements AfterCompose, IGenericListAction
 
         GetCollaborationUserRequestType parameter = new GetCollaborationUserRequestType();
         parameter.setLoginType(new LoginType());
-        parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+        parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
 
         GetCollaborationUserListResponse.Return response = port.getCollaborationUserList(parameter);
 
@@ -190,7 +190,7 @@ public class Benutzer extends Window implements AfterCompose, IGenericListAction
 
             DeleteUserRequestType parameter = new DeleteUserRequestType();
             parameter.setLoginType(new LoginType());
-            parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+            parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
             parameter.setCollaborationUser(user);
             
             if(!user.getRoles().isEmpty())

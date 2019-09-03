@@ -67,9 +67,15 @@ public class Security
         return null;
   }
   
-    public static List<Session> checkForExistingSessions(org.hibernate.Session hb_session, LoginType login, TermUser user){
+    /**
+     * Retrieves all sessions which are tied to the passed user's ID. Then
+     * returns that list.
+     * @param hb_session the session from which to retrieve the other sessions
+     * @param user the user which is used to filter the sessions
+     * @return a list of sessions tied to the passed user's ID
+     */
+    public static List<Session> getExistingSessionByUser(org.hibernate.Session hb_session, TermUser user){
         String HQL_session_select = "from Session ";
-
         HQLParameterHelper parameterHelper = new HQLParameterHelper();
         parameterHelper.addParameter("", "termUserId",user.getId());
 
@@ -86,12 +92,20 @@ public class Security
         List<Session> sessionList = (java.util.List<Session>) Q_session_select.list();
 
         if (sessionList != null && sessionList.size() > 0)
-          return sessionList;
+            return sessionList;
         else 
             return null;
     }
   
-    public static List<Session> checkForExistingKollabSessions(org.hibernate.Session hb_session, LoginType login, TermUser user){
+    /**
+     * Retrieves all sessions which are tied to the passed user's ID and collab
+     * username. Then returns that list.
+     * @param hb_session the session from which to retrieve the other sessions
+     * @param login the login from which the collab username is taken
+     * @param user the user which is used to filter the sessions
+     * @return a list of sessions tied to the passed user's ID and collab username
+     */
+    public static List<Session> getExistingKollabSessionByUser(org.hibernate.Session hb_session, LoginType login, TermUser user){
         String HQL_session_select = "from Session ";
 
         HQLParameterHelper parameterHelper = new HQLParameterHelper();
@@ -112,17 +126,23 @@ public class Security
         List<Session> sessionList = (java.util.List<Session>) Q_session_select.list();
 
         if (sessionList != null && sessionList.size() > 0)
-          return sessionList;
+            return sessionList;
         else
             return null;
     }
   
+    /**
+     * Checks the given session for sessions which are older than the time limit
+     * set in the sys_param table in the killDeadSessionAfter record. These sessions
+     * will be deleted from the parameter session.
+     * @param hb_session the session which is used to find dead sessions    
+     */
     public static void checkForDeadSessions(org.hibernate.Session hb_session){
         //GetSessions for collab_software
         String HQL_session_search = "from Session";
         HQLParameterHelper paramHelper = new HQLParameterHelper();
-        
         HQL_session_search += paramHelper.getWhere("");
+        
         org.hibernate.Query Q_session_search = hb_session.createQuery(HQL_session_search);
         paramHelper.applyParameter(Q_session_search);
         List<Session> sessionList = (java.util.List<Session>) Q_session_search.list();
@@ -138,7 +158,7 @@ public class Security
         }
         
         //Check all sessions which are older than "killDeadSessionAfter"-Time
-        for(Session session:sessionList){
+        for(Session session : sessionList){
             Date lastTimestamp = session.getLastTimestamp();
             Date now = new Date();
             Long difference = now.getTime() - lastTimestamp.getTime();

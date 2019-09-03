@@ -848,7 +848,7 @@ public class TreeModelCSEV
   private SortingType createSortingParameter()
   {
     SortingType st = null;
-    Object o = SessionHelper.getValue("SortByField");
+    Object o = SessionHelper.getSessionObjectByName("SortByField");
     if (o != null)
     {
       st = new SortingType();
@@ -861,7 +861,7 @@ public class TreeModelCSEV
         st.setSortBy(SortByField.CODE);
       }
     }
-    o = SessionHelper.getValue("SortDirection");
+    o = SessionHelper.getSessionObjectByName("SortDirection");
     if (o != null)
     {
       if (st == null)

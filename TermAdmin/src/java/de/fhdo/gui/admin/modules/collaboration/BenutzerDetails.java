@@ -77,7 +77,7 @@ public class BenutzerDetails extends Window implements AfterCompose, EventListen
 
             GetTermUserRequestType parameter = new GetTermUserRequestType();
             parameter.setLoginType(new LoginType());
-            parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+            parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
 
             GetUserListResponse.Return response = port.getUserList(parameter);
 
@@ -231,7 +231,7 @@ public class BenutzerDetails extends Window implements AfterCompose, EventListen
 
                     SaveCollaborationUserRequestType parameter = new SaveCollaborationUserRequestType();
                     parameter.setLoginType(new LoginType());
-                    parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+                    parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
                     parameter.setTermuser(userTerm);
                     parameter.setUser(user);
                     parameter.setNewEntry(true);
@@ -274,7 +274,7 @@ public class BenutzerDetails extends Window implements AfterCompose, EventListen
 
                     SaveCollaborationUserRequestType parameter = new SaveCollaborationUserRequestType();
                     parameter.setLoginType(new LoginType());
-                    parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+                    parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
                     parameter.setTermuser(userTerm);
                     parameter.setUser(user);
                     parameter.setNewEntry(false);

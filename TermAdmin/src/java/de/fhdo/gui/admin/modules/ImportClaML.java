@@ -488,7 +488,7 @@ public class ImportClaML extends Window implements AfterCompose, IGenericListAct
                 ImportCodeSystemCancelRequestType request = new ImportCodeSystemCancelRequestType();
                 request.setLogin(new LoginType());
 
-                String session_id = SessionHelper.getValue("session_id").toString();
+                String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
                 request.getLogin().setSessionID(session_id);
                 ImportCodeSystemCancelResponseType response = importCodeSystemCancel(request);
 
@@ -596,7 +596,7 @@ public class ImportClaML extends Window implements AfterCompose, IGenericListAct
         de.fhdo.terminologie.ws.administration.Administration port = WebServiceUrlHelper.getInstance().getAdministrationServicePort(new MTOMFeature(true));
 
         // Login
-        final String session_id = SessionHelper.getValue("session_id").toString();
+        final String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         ImportCodeSystemRequestType request = new ImportCodeSystemRequestType();
         request.setLogin(new LoginType());
         request.getLogin().setSessionID("" + session_id);
@@ -739,7 +739,7 @@ public class ImportClaML extends Window implements AfterCompose, IGenericListAct
     {
         fillVocabularyList();
         showStatus();
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         collab_userId = SessionHelper.getCollaborationUserID();
         session = Sessions.getCurrent(true);
     }

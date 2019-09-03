@@ -122,7 +122,7 @@ public class PasswordDetails extends Window implements org.zkoss.zk.ui.ext.After
 
             ChangePasswordRequestType request = new ChangePasswordRequestType();
             request.setLogin(new LoginType());
-            request.getLogin().setSessionID(SessionHelper.getValue("session_id").toString());
+            request.getLogin().setSessionID(SessionHelper.getSessionObjectByName("session_id").toString());
             request.setOldPassword(tb.getValue());
             request.setNewPassword(tb1.getValue());
 

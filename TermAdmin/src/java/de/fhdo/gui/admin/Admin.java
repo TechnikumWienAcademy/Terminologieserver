@@ -53,7 +53,7 @@ public class Admin extends Window implements AfterCompose
     {
         LoginRequestType request = new LoginRequestType();
         request.setLogin(new LoginType());
-        request.getLogin().setSessionID(SessionHelper.getValue("session_id").toString());
+        request.getLogin().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
         Authorization port_authorization = WebServiceUrlHelper.getInstance().getAuthorizationServicePort();
 
         if (port_authorization != null)
@@ -181,7 +181,7 @@ public class Admin extends Window implements AfterCompose
         //init WebServices
         WebServiceUrlHelper.getInstance();
 
-        Object o = SessionHelper.getValue("termadmin_tabid");
+        Object o = SessionHelper.getSessionAttributeByName("termadmin_tabid");
         if (o != null)
         {
             id = o.toString();

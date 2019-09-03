@@ -179,7 +179,7 @@ public class UserDetails extends Window implements AfterCompose, EventListener<E
 
                     SaveTermUserRequestType parameter = new SaveTermUserRequestType();
                     parameter.setLoginType(new LoginType());
-                    parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+                    parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
                     parameter.setTermUser(user);
                     parameter.setNewEntry(true);
 
@@ -200,7 +200,7 @@ public class UserDetails extends Window implements AfterCompose, EventListener<E
 
                     SaveTermUserRequestType parameter = new SaveTermUserRequestType();
                     parameter.setLoginType(new LoginType());
-                    parameter.getLoginType().setSessionID(SessionHelper.getValue("session_id").toString());
+                    parameter.getLoginType().setSessionID(SessionHelper.getSessionAttributeByName("session_id").toString());
                     parameter.setTermUser(user);
                     parameter.setNewEntry(false);
 

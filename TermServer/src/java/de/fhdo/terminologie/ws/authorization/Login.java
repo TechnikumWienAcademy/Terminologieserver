@@ -42,6 +42,12 @@ public class Login{
 
     private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
+    /**
+     * Checks the parameters and for dead sessions, then retrieves the user and
+     * performs a login.
+     * @param parameter the parameter with which the login will be performed
+     * @return a response with possible error messages
+     */
     public LoginResponseType Login(LoginRequestType parameter){
         LOGGER.info("+++++ Login started +++++");
 
@@ -51,7 +57,7 @@ public class Login{
 
         //Checking parameters
         if (validateParameters(parameter, response) == false){
-            LOGGER.info("----- Login finished (001) -----");
+            LOGGER.info("----- Login finished (001): Parameters faulty -----");
             return response; //Faulty parameters
         }
 
@@ -59,14 +65,12 @@ public class Login{
 
         try{
             java.util.List<TermUser> userList;
-
             org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
             hb_session.getTransaction().begin();
 
             try{
                 Security.checkForDeadSessions(hb_session);
 
-                //Creating HQL
                 String HQL_termUser_select = "select u from TermUser u";
 
                 //Adding parameters to the helper, always use the helper or do it manually via Query.setString()
@@ -87,13 +91,11 @@ public class Login{
 
                 //Adding parameters (connected with AND)
                 HQL_termUser_select += parameterHelper.getWhere("");
-
-                //Creating query
+                
                 org.hibernate.Query Q_termUser_select = hb_session.createQuery(HQL_termUser_select);
 
                 //Parameters can be set now via the helper
                 parameterHelper.applyParameter(Q_termUser_select);
-
                 //Executing database query
                 userList = (java.util.List<TermUser>) Q_termUser_select.list();
 
@@ -140,6 +142,15 @@ public class Login{
         return response;
     }
 
+    /**
+     * Checks the username and password, if those check out existing sessions
+     * are deleted and a new session is generated
+     * @param user_db the user who wants to login
+     * @param login the users's login data
+     * @param hb_session the session from which to fetch user data and sessions
+     * @param response the response containing possible error messages
+     * @return true if the login was successful, otherwise false
+     */
     private boolean performLogin(TermUser user_db, LoginType login, org.hibernate.Session hb_session, LoginResponseType response){
         boolean success = true;
         if (response.getLogin() == null)    
@@ -156,14 +167,12 @@ public class Login{
         }
         else{//Correct password
             //Creating hash value and saving in table with userID
-            String newHash;
-
             UUID uuid = UUID.randomUUID();
-            newHash = uuid.toString();
+            String newHash = uuid.toString();
             
             //Checking for existing sessions and deleting them
             if (!login.getUsername().startsWith(Security.COLLAB_SOFTWARE_NAME)){
-                List<Session> sessionList = Security.checkForExistingSessions(hb_session, login, user_db);
+                List<Session> sessionList = Security.getExistingSessionByUser(hb_session, user_db);
 
                 if (sessionList != null && !sessionList.isEmpty())
                     for (Session session : sessionList){
@@ -172,7 +181,7 @@ public class Login{
                     }
             }
             else{
-                List<Session> sessionList = Security.checkForExistingKollabSessions(hb_session, login, user_db);
+                List<Session> sessionList = Security.getExistingKollabSessionByUser(hb_session, login, user_db);
 
                 if (sessionList != null && !sessionList.isEmpty())
                     for (Session session : sessionList){
@@ -181,7 +190,7 @@ public class Login{
                     }
             }
 
-            // Neue Session hinzufügen
+            //Adding new session
             Session newSession = new Session();
             newSession.setSessionId(newHash);
             newSession.setLastTimestamp(new java.util.Date());
@@ -207,6 +216,13 @@ public class Login{
         return success;
     }
 
+    /**
+     * Checks if the request parameters has a not null login and that login has
+     * a not null username and password.
+     * @param Request the request login which is checked
+     * @param Response the response with optional error messages
+     * @return true if the request parameters checks out, otherwise false
+     */
     private boolean validateParameters(LoginRequestType Request, LoginResponseType Response){
         boolean passed = true;
 

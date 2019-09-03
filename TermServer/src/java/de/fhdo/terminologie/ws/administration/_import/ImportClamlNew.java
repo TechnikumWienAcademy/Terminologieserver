@@ -488,7 +488,8 @@ public class ImportClamlNew extends CodeSystemImport implements ICodeSystemImpor
         //Search for CS first, then create it, if it does not exist
         CreateCodeSystemRequestType createCSrequest = new CreateCodeSystemRequestType();
 
-        if (this.codesystem.getId() > 0)
+        //DABACA first two checks added
+        if (this.codesystem != null && this.codesystem.getId() != null && this.codesystem.getId() > 0)
             createCSrequest.setCodeSystem(this.codesystem);
         else
             createCSrequest.setCodeSystem(new CodeSystem());

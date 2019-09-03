@@ -665,7 +665,7 @@ public class ImportCS_SVS_Async extends Window implements AfterCompose, IGeneric
         tbNewVoc = (Textbox) getFellow("tbNewVoc");
         tbNewVocVersion = (Textbox) getFellow("tbNewVocVersion");
         textboxDateiname = (Textbox) getFellow("textboxDateiname");
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         logger.info("afterComposeImportCS_SVS_Async session_id" + session_id);
         session = Sessions.getCurrent(true);
         fillVocabularyList();
@@ -693,7 +693,7 @@ public class ImportCS_SVS_Async extends Window implements AfterCompose, IGeneric
         String session_id = "";
         try
         {
-            session_id = SessionHelper.getValue("session_id").toString();
+            session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
             String hql = "select distinct csev from CodeSystemEntityVersion csev";
             hql += " join fetch csev.codeSystemMetadataValues csmv";
             hql += " join fetch csmv.metadataParameter mp";
@@ -1068,7 +1068,7 @@ public class ImportCS_SVS_Async extends Window implements AfterCompose, IGeneric
                 ImportCodeSystemCancelRequestType request = new ImportCodeSystemCancelRequestType();
                 request.setLogin(new LoginType());
 
-                String session_id = SessionHelper.getValue("session_id").toString();
+                String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
                 request.getLogin().setSessionID(session_id);
                 ImportCodeSystemCancelResponseType response = importCodeSystemCancel(request);
 

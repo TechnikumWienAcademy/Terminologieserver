@@ -43,52 +43,54 @@ import org.zkoss.zul.Window;
  *
  * @author Robert Mützner
  */
-public class SysParam extends Window implements AfterCompose, IGenericListActions, IUpdateModal
-{
+public class SysParamCollab extends Window implements AfterCompose, IGenericListActions, IUpdateModal{
+    
+    final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    private GenericList genericList;
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-  GenericList genericList;
-
-  public SysParam()
-  {
-    logger.debug("SysParam-Konstruktor");
-
-    if (SessionHelper.isAdmin() == false)
-    {
-      Executions.getCurrent().sendRedirect("/gui/main/main.zul");
+    /**
+     * If the user is not an admin he will be redirected to the main-page during
+     * the constructor call.
+     */
+    public SysParamCollab(){
+        if (SessionHelper.isAdmin() == false)
+            Executions.getCurrent().sendRedirect("/gui/main/main.zul");
     }
-  }
 
-  private GenericListRowType createRowFromSysParam(de.fhdo.collaboration.db.classes.SysParam sysParam)
-  {
-    GenericListRowType row = new GenericListRowType();
+    /**
+     * Generates a row, filling it with the name, validity domain, modifiy level,
+     * java datatype, value and description.
+     * @param sysParam the sysParam from which the values for the row are taken
+     * @return the generated row
+     */
+    private GenericListRowType createRowFromSysParam(de.fhdo.collaboration.db.classes.SysParam sysParam){
+        GenericListRowType row = new GenericListRowType();
 
-    GenericListCellType[] cells = new GenericListCellType[6];
-    cells[0] = new GenericListCellType(sysParam.getName(), false, "");
-    cells[1] = new GenericListCellType(sysParam.getDomainValueByValidityDomain().getDisplayText(), false, "");
-    cells[2] = new GenericListCellType(sysParam.getDomainValueByModifyLevel().getDisplayText(), false, "");
-    cells[3] = new GenericListCellType(sysParam.getJavaDatatype(), false, "");
-    cells[4] = new GenericListCellType(sysParam.getValue(), false, "");
-    cells[5] = new GenericListCellType(sysParam.getDescription(), false, "");
+        GenericListCellType[] cells = new GenericListCellType[6];
+        cells[0] = new GenericListCellType(sysParam.getName(), false, "");
+        cells[1] = new GenericListCellType(sysParam.getDomainValueByValidityDomain().getDisplayText(), false, "");
+        cells[2] = new GenericListCellType(sysParam.getDomainValueByModifyLevel().getDisplayText(), false, "");
+        cells[3] = new GenericListCellType(sysParam.getJavaDatatype(), false, "");
+        cells[4] = new GenericListCellType(sysParam.getValue(), false, "");
+        cells[5] = new GenericListCellType(sysParam.getDescription(), false, "");
 
-    row.setData(sysParam);
-    row.setCells(cells);
+        row.setData(sysParam);
+        row.setCells(cells);
 
-    return row;
-  }
+        return row;
+    }
 
-  private void initList()
-  {
-    String[] filter = DomainHelper.getInstance().getDomainStringList(Definitions.DOMAINID_VALIDITYDOMAIN);
+    private void initList(){
+        String[] filter = DomainHelper.getInstance().getDomainStringList(Definitions.DOMAINID_VALIDITYDOMAIN);
 
-    // Header
-    List<GenericListHeaderType> header = new LinkedList<GenericListHeaderType>();
-    header.add(new GenericListHeaderType("Name", 230, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Gültigkeitsbereich", 130, "", true, filter, true, true, false, false));
-    header.add(new GenericListHeaderType("Modify-Level", 130, "", true, filter, true, true, false, false));
-    header.add(new GenericListHeaderType("Datentyp", 80, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Wert", 700, "", true, "String", true, true, false, false));
-    header.add(new GenericListHeaderType("Beschreibung", 400, "", true, "String", true, true, false, false));
+        // Header
+        List<GenericListHeaderType> header = new LinkedList<GenericListHeaderType>();
+        header.add(new GenericListHeaderType("Name", 230, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Gültigkeitsbereich", 130, "", true, filter, true, true, false, false));
+        header.add(new GenericListHeaderType("Modify-Level", 130, "", true, filter, true, true, false, false));
+        header.add(new GenericListHeaderType("Datentyp", 80, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Wert", 700, "", true, "String", true, true, false, false));
+        header.add(new GenericListHeaderType("Beschreibung", 400, "", true, "String", true, true, false, false));
     
     
     // Daten laden
@@ -112,7 +114,7 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
     }
     catch (Exception e)
     {
-      logger.error("[" + this.getClass().getCanonicalName() + "] Fehler bei initList(): " + e.getMessage());
+      LOGGER.error("[" + this.getClass().getCanonicalName() + "] Fehler bei initList(): " + e.getMessage());
     }
     finally
     {
@@ -139,7 +141,7 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
 
   public void onNewClicked(String id)
   {
-    logger.debug("onNewClicked()");
+    LOGGER.debug("onNewClicked()");
     //throw new UnsupportedOperationException("Not supported yet.");
 
     try
@@ -153,7 +155,7 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
     }
     catch (Exception ex)
     {
-      logger.debug("Fehler beim Ã–ffnen der SysParamDetails: " + ex.getLocalizedMessage());
+      LOGGER.debug("Fehler beim Ã–ffnen der SysParamDetails: " + ex.getLocalizedMessage());
       ex.printStackTrace();
     }
 
@@ -161,12 +163,12 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
 
   public void onEditClicked(String id, Object data)
   {
-    logger.debug("onEditClicked()");
+    LOGGER.debug("onEditClicked()");
     //throw new UnsupportedOperationException("Not supported yet.");
     if (data != null && data instanceof de.fhdo.collaboration.db.classes.SysParam)
     {
       de.fhdo.collaboration.db.classes.SysParam sysParam = (de.fhdo.collaboration.db.classes.SysParam) data;
-      logger.debug("Parameter: " + sysParam.getName());
+      LOGGER.debug("Parameter: " + sysParam.getName());
 
       try
       {
@@ -182,7 +184,7 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
       }
       catch (Exception ex)
       {
-        logger.debug("Fehler beim Ã–ffnen der SysParamDetails: " + ex.getLocalizedMessage());
+        LOGGER.debug("Fehler beim Ã–ffnen der SysParamDetails: " + ex.getLocalizedMessage());
         ex.printStackTrace();
       }
     }
@@ -190,12 +192,12 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
 
   public void onDeleted(String id, Object data)
   {
-    logger.debug("onDeleted()");
+    LOGGER.debug("onDeleted()");
 
     if (data != null && data instanceof de.fhdo.collaboration.db.classes.SysParam)
     {
       de.fhdo.collaboration.db.classes.SysParam sysParam = (de.fhdo.collaboration.db.classes.SysParam) data;
-      logger.debug("Person: " + sysParam.getName());
+      LOGGER.debug("Person: " + sysParam.getName());
 
       // Person aus der Datenbank löschen
       Session hb_session = HibernateUtil.getSessionFactory().openSession();
@@ -211,7 +213,7 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
       catch (Exception e)
       {
         hb_session.getTransaction().rollback();
-        logger.error("[" + this.getClass().getCanonicalName() + "] Fehler beim Löschen eines Eintrags: " + e.getMessage());
+        LOGGER.error("[" + this.getClass().getCanonicalName() + "] Fehler beim Löschen eines Eintrags: " + e.getMessage());
       }
       finally
       {
@@ -236,7 +238,7 @@ public class SysParam extends Window implements AfterCompose, IGenericListAction
       if (edited)
       {
         // Daten aktualisiert, jetzt dem Model übergeben
-        logger.debug("Daten aktualisiert: " + sysParam.getName());
+        LOGGER.debug("Daten aktualisiert: " + sysParam.getName());
         
         genericList.updateEntry(row);
       }

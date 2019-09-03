@@ -48,7 +48,7 @@ public class Import extends Window implements AfterCompose
   {
     String id = "";
     tb = (Tabbox) getFellow("tabboxNavigation");
-    Object o = SessionHelper.getValue("termadmin_import_tabid");
+    Object o = SessionHelper.getSessionAttributeByName("termadmin_import_tabid");
     if (o != null)
       id = o.toString();
 

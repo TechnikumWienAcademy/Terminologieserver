@@ -116,7 +116,7 @@ public class LoginHelper{
         
         if (Login == null || Login.getSessionID() == null || Login.getSessionID().length() == 0){
             LOGGER.debug("Session-ID missing");
-            LOGGER.info("----- getLoginInfos finished (001) -----");
+            LOGGER.info("----- getLoginInfos finished (001): Session-ID missing -----");
             return null;
         }
         
@@ -135,8 +135,7 @@ public class LoginHelper{
             LOGGER.error("Error [0062]", e);
         }
 
-        //User is logged in
-        if (loginInfos !=null && loginInfos.getReturnInfos().getStatus().equals(Status.OK)){
+        if (loginInfos !=null && loginInfos.getReturnInfos().getStatus().equals(Status.OK)){ //User is logged in
             LoginInfoType loginReturn = new LoginInfoType();
             loginReturn.setLastIP(loginInfos.getReturnInfos().getLastIP());
 

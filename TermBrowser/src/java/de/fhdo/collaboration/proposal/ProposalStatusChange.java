@@ -59,41 +59,51 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
     
     //3.2.17 Thread variables
     private Thread pscThread;
-    private Desktop threadDesk;
+    private Desktop threadDesktop;
     private EventListener threadListener;
     private ReturnType threadReturn;
     private TerminologyReleaseManager threadReleaseManager;
-    private boolean threadRunning;
+    private boolean threadRunning = false;
     
+    /**
+     * Fetches the proposal and the status to which it should be changed to
+     * from the window.
+     */
     public ProposalStatusChange(){
         proposal = (Proposal) ArgumentHelper.getWindowArgument("proposal");
         statusToId = ArgumentHelper.getWindowArgumentLong("status_to_id");
     
         LOGGER.debug("status_to_id: " + statusToId);
         LOGGER.debug("proposal-ID: " + proposal.getId());
-
-        threadRunning = false;
     }
 
+    /**
+     * Sets the isDiscussion attribute on true, if the target status is a
+     * discussion. If it is true, the rowZeitraum will be set visible.
+     */
     public void afterCompose(){
         isDiscussion = ProposalHelper.isStatusDiscussion(statusToId);
         ((Row) getFellow("rowZeitraum")).setVisible(isDiscussion);
     }
     
+    /**
+     * 
+     */
     public void onOkClicked(){
+        //Locks the GUI and enables the thread to call Excetions.schedule() method
         Clients.showBusy(this, "");
-        //3.2.17 enables the thread to call the Executions.schedule() method
         this.getDesktop().enableServerPush(true);
-        //3.2.17 all these variables are needed later by the thread, which cannot access them if they are not set here
-        threadDesk = this.getDesktop();
+        
+        threadDesktop = this.getDesktop();
         threadListener = this;
-        threadReleaseManager = new TerminologyReleaseManager();
+        threadReleaseManager = new TerminologyReleaseManager(); //ANKERNEW
+        
         long statusFrom = proposal.getStatus();
         Statusrel rel = ProposalStatus.getInstance().getStatusRel(statusFrom, statusToId);
         final boolean isUserAllowed = ProposalStatus.getInstance().isUserAllowed(rel, SessionHelper.getCollaborationUserID());
         final long collabUserId = SessionHelper.getCollaborationUserID();
         final String collabSessionID = CollaborationSession.getInstance().getSessionID();
-        final boolean isPubConnected = (SessionHelper.getValue("pub_connection").toString().equals("connected"));
+        final boolean isPubConnected = (SessionHelper.getSessionObjectByName("pub_connection").toString().equals("connected"));
         
         pscThread = new Thread(){
             @Override
@@ -138,14 +148,14 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                     ProposalWorkflow.getInstance().sendEmailNotification(proposal, statusFrom, statusToId, reason);
                     //3.2.17 commented out since this is done in the Executions.schedule
                     //Messagebox.show("Freigabe erfolgreich", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
-                    Executions.schedule(threadDesk, threadListener, new Event("SUCCESS"));
+                    Executions.schedule(threadDesktop, threadListener, new Event("SUCCESS"));
                 }
                 else if (!transfer_success.isSuccess())
                 {
                     LOGGER.info(proposal.getVocabularyName()+ ": Proposal status change failed " +  transfer_success.getMessage());
                     //3.2.17 commented out since this is done in the Executions.schedule
                     //Messagebox.show(transfer_success.getMessage(), "Freigabe", Messagebox.OK, Messagebox.ERROR);
-                    Executions.schedule(threadDesk, threadListener, new Event("FAILURESPLIT" + transfer_success.getMessage()));
+                    Executions.schedule(threadDesktop, threadListener, new Event("FAILURESPLIT" + transfer_success.getMessage()));
                     proposal.setStatus((int) statusToId);
                     //setting status back because transfer to public was not successful
                     //3.2.17 added collabUserId and collabSessionID parameter
@@ -155,7 +165,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                         LOGGER.info(proposal.getVocabularyName() + ": : Proposal status has not been changed");
                         //3.2.17 commented out since this is done in the Executions.schedule
                         //Messagebox.show("Status wurde nicht ge‰ndert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
-                        Executions.schedule(threadDesk, threadListener, new Event("RESET"));
+                        Executions.schedule(threadDesktop, threadListener, new Event("RESET"));
                         
                         //change ReturnType to prevent Messagebox in ProposalView.upate()
                         threadReturn = new ReturnType();
@@ -165,7 +175,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
                 }
             }
 
-            Executions.schedule(threadDesk, threadListener, new Event("finish"));
+            Executions.schedule(threadDesktop, threadListener, new Event("finish"));
         }
     };
     if(isUserAllowed){
@@ -173,19 +183,17 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
         pscThread.start();
     }
     else
-        Executions.schedule(threadDesk, threadListener, new Event("finish"));
+        Executions.schedule(threadDesktop, threadListener, new Event("finish"));
 }
 
-  /**
-   * @param updateInterface the updateInterface to set
-   */
-  public void setUpdateInterface(IUpdateModal updateInterface)
-  {
-    this.updateInterface = updateInterface;
-  }
+    /**
+     * @param updateInterface the updateInterface to set
+     */
+    public void setUpdateInterface(IUpdateModal updateInterface){
+        this.updateInterface = updateInterface;
+    }
   
-   public void onEvent(Event event) throws Exception
-    {
+    public void onEvent(Event event) throws Exception{
         if(event.getName().contains("finish")){
             threadRunning = false;
             // Fenster schlieﬂen
@@ -193,8 +201,7 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             this.detach();
 
             // Vorschlag-Fenster aktualisieren
-            if (updateInterface != null)
-            {
+            if (updateInterface != null){
                updateInterface.update(threadReturn, false);
             }
             Clients.clearBusy(this);
@@ -213,5 +220,4 @@ public class ProposalStatusChange extends Window implements AfterCompose, EventL
             Messagebox.show("Status wurde nicht ge‰ndert", "Freigabe", Messagebox.OK, Messagebox.INFORMATION);
         }
     }
-   
 }

@@ -90,7 +90,7 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
 
   public void onOkClicked()
   {
-      //3.2.17
+      
       releaseManager = new TerminologyReleaseManager();
       
     // Statusänderung durchführen
@@ -175,7 +175,7 @@ public class ProposalStatusChangeBatch extends Window implements AfterCompose
             if ((rel.getStatusByStatusIdTo().getIsPublic())
                     && (ret.isSuccess())
                     && (DBSysParam.instance().getBoolValue("isKollaboration", null, null))
-                    && (SessionHelper.getValue("pub_connection").toString().equals("connected")))
+                    && (SessionHelper.getSessionObjectByName("pub_connection").toString().equals("connected")))
             {
                 //3.2.17 is invoked at the start now
                 //TerminologyReleaseManager releaseManager = new TerminologyReleaseManager();

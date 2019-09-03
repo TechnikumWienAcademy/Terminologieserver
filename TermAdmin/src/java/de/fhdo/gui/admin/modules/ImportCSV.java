@@ -325,7 +325,7 @@ public class ImportCSV extends Window implements AfterCompose, IGenericListActio
     ((Button) getFellow("buttonImport")).setDisabled(true);
     ((Button) getFellow("buttonCancel")).setVisible(true);
 
-    String session_id = SessionHelper.getValue("session_id").toString();
+    String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
     String vokabular = ((Textbox) getFellow("tbVokabular")).getText();
     if(vokabular == null)

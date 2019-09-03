@@ -11,6 +11,7 @@ import de.fhdo.collaboration.db.DBSysParam;
 import de.fhdo.collaboration.db.classes.Proposalobject;
 import de.fhdo.collaboration.db.classes.Statusrel;
 import de.fhdo.collaboration.helper.CODES;
+import de.fhdo.collaboration.proposal.ProposalStatusChange;
 import de.fhdo.collaboration.publication.SelectTargetPopup;
 import de.fhdo.helper.SessionHelper;
 import de.fhdo.helper.WebServiceHelper;
@@ -67,17 +68,20 @@ import types.termserver.fhdo.de.ValueSetVersion;
  */
 public class TerminologyReleaseManager{
     
-    private static final org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    static final private org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
+    final private boolean sessionIDsSet;
     private String sessionID;
     private String pubSessionID;
-    final private boolean sessionIDsSet;
     private long importID;
     private de.fhdo.terminologie.ws.searchPub.CodeSystem targetCS;
     private de.fhdo.terminologie.ws.searchPub.ValueSet targetVS;
 
+    /**
+     * 
+     */
     public TerminologyReleaseManager(){
         this.sessionID = SessionHelper.getSessionId();
-        this.pubSessionID = CollaborationSession.getInstance().getPubSessionID();
+        this.pubSessionID = CollaborationSession.getInstance().getPubSessionID(); //ANKERNEW
         if(!this.sessionID.isEmpty() && !this.pubSessionID.isEmpty())
             sessionIDsSet = true;
         else
@@ -191,7 +195,10 @@ public class TerminologyReleaseManager{
                     }
 
                     if (!exists){
+                        
+                        //DABACA COMMENTED OUT
                         //Multiple code systems found
+                        /*
                         Map map = new HashMap();
                         map.put("targets", result);
                         map.put("source", CStoExport.getName());
@@ -201,13 +208,15 @@ public class TerminologyReleaseManager{
 
                         win.doModal();
                         win.setVisible(false);
-
+                        */
+                        
+                        this.targetCS = result.get(0);
+                        
                         if (this.targetCS != null){
                             exists = true;
                         }
                     }
-                }
-
+                }                
                 if(this.targetCS == null && !exists)
                     this.createTempCodeSystemVersionOnPub(CStoExport); //DABACA ADDED 
                 
@@ -241,7 +250,7 @@ public class TerminologyReleaseManager{
                     this.removeTempCodeSystemVersion();
                 }
 
-                if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK))
+                if (ret_import.getStatus().equals(de.fhdo.terminologie.ws.administrationPub.Status.OK)) //NULL POINTER
                 {
                     response.setSuccess(true);
                     response.setMessage(ret_import.getMessage());
@@ -1554,8 +1563,7 @@ public class TerminologyReleaseManager{
         }
     }
 
-    private void createTempValueSetVersionOnPub(ValueSet vs)
-    {
+    private void createTempValueSetVersionOnPub(ValueSet vs){
         LOGGER.info("+++++ createTempValueSetVersionOnPub started +++++");
         final de.fhdo.terminologie.ws.authoringPub.CreateValueSetRequestType request = new de.fhdo.terminologie.ws.authoringPub.CreateValueSetRequestType();
         request.setLogin(new de.fhdo.terminologie.ws.authoringPub.LoginType());
@@ -1670,7 +1678,7 @@ public class TerminologyReleaseManager{
             terminologies.addAll(other);
 
             for (Proposalobject proposalObject : terminologies){
-                transfer_success = this.transferTerminologyToPublicServer(rel.getStatusByStatusIdTo(), proposalObject); //ANKER
+                transfer_success = this.transferTerminologyToPublicServer(rel.getStatusByStatusIdTo(), proposalObject); //ANKER NULL POINTER
                 if (!transfer_success.isSuccess()){
                     LOGGER.info("A ProposalObject could not be transferred to the public server");
                     break;

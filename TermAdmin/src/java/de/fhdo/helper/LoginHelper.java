@@ -324,7 +324,7 @@ public class LoginHelper
         //session.setAttribute("session_id", response.getLogin().getSessionID());
       }
 
-      logger.debug("session_id: " + SessionHelper.getValue("session_id"));
+      logger.debug("session_id: " + SessionHelper.getSessionAttributeByName("session_id"));
     }
 
     return loggedin;

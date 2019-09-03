@@ -9,12 +9,7 @@
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/Definitions.java</file>
             <file>file:/C:/A_Dev/terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/ProposalWorkflow.java</file>
         </group>
-        <group>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/TerminologyReleaseManager.java</file>
-        </group>
-        <group>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/de/fhdo/collaboration/workflow/TerminologyReleaseManager.java</file>
-            <file>file:/C:/A_DEV/Terminologieserver/TermBrowser/src/java/version.properties</file>
-        </group>
+        <group/>
+        <group/>
     </open-files>
 </project-private>

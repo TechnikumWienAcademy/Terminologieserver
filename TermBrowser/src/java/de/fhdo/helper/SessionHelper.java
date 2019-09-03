@@ -37,7 +37,7 @@ import org.zkoss.zk.ui.Sessions;
 public class SessionHelper
 {
 
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
+  final private static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
   private static Properties properties = null;
 
   public String getProperty(String property)
@@ -96,7 +96,7 @@ public class SessionHelper
 
   public static boolean isAdmin()
   {
-    Object o = getValue("is_admin");
+    Object o = getSessionObjectByName("is_admin");
 
     if (o == null)
     {
@@ -113,23 +113,23 @@ public class SessionHelper
     //org.zkoss.zk.ui.Session session = Sessions.getCurrent();
     if (session == null)
     {
-      logger.debug("getUserID() - Session ist null");
+      LOGGER.debug("getUserID() - Session ist null");
       return 0;
     }
 
-    logger.debug("getUserID(HttpSession session) mit session-id: " + session.getId());
+    LOGGER.debug("getUserID(HttpSession session) mit session-id: " + session.getId());
     Enumeration en = session.getAttributeNames();
     while (en.hasMoreElements())
     {
       Object o = en.nextElement();
-      logger.debug("Object in Session mit Typ: " + o.getClass().getCanonicalName());
+      LOGGER.debug("Object in Session mit Typ: " + o.getClass().getCanonicalName());
     }
 
     Object o = session.getAttribute("user_id");
 
     if (o == null)
     {
-      logger.debug("getUserID() - o ist null");
+      LOGGER.debug("getUserID() - o ist null");
       return 0;
     }
     else
@@ -140,7 +140,7 @@ public class SessionHelper
       }
       catch (Exception e)
       {
-        logger.error("getUserID() - Fehler: " + e.getMessage());
+        LOGGER.error("getUserID() - Fehler: " + e.getMessage());
         return 0;
       }
     }
@@ -165,18 +165,25 @@ public class SessionHelper
             return userName.toString();
     }
   
+    /**
+     * Retrieves the collaboration user name and returns it as a string, if it 
+     * is not null.
+     * @return the collaboration user name as a string.
+     */
     public static String getCollaborationUserName(){
-        Object collaborationUserName = getValue("collaboration_user_name");
+        Object collaborationUserName = getSessionObjectByName("collaboration_user_name");
 
-        if (collaborationUserName == null)
+        if (collaborationUserName == null){
+            LOGGER.error("Error [0002]: The collaboration user name is null");
             return "";
+        }
         else
             return collaborationUserName.toString();
     }
   
   public static String getCollaborationUserRole()
   {
-    Object o = getValue("collaboration_user_role");
+    Object o = getSessionObjectByName("collaboration_user_role");
 
     if (o == null)
     {
@@ -214,7 +221,7 @@ public class SessionHelper
       }
       catch (Exception e)
       {
-        logger.error("getUserID() - Fehler: " + e.getMessage());
+        LOGGER.error("getUserID() - Fehler: " + e.getMessage());
         return 0;
       }
     }
@@ -237,22 +244,31 @@ public class SessionHelper
       }
       catch (Exception e)
       {
-        logger.error("could not get personID: " + e.getMessage());
+        LOGGER.error("could not get personID: " + e.getMessage());
         return 0;
       }
     }
   }
 
+    /**
+     * Calls Sessions.getCurrent(), if this session is not null and the
+     * sessionID is also not null, this ID is returned as a string.
+     * @return the sessionID as a string
+     */
     public static String getSessionId(){
         org.zkoss.zk.ui.Session session = Sessions.getCurrent();
 
-        if (session == null)
+        if (session == null){
+            LOGGER.error("Error [0001]: Current session is null");
             return "";
+        }
 
         Object sessionID = session.getAttribute("session_id");
 
-        if (sessionID == null)
+        if (sessionID == null){
+            LOGGER.error("Error [0000]: The current session's ID is null");
             return "";
+        }
         else
             return sessionID.toString();
     }
@@ -291,14 +307,20 @@ public class SessionHelper
       session.setAttribute(Name, Value);
   }
 
-  public static Object getValue(String Name)
-  {
-    org.zkoss.zk.ui.Session session = Sessions.getCurrent();
-    if (session != null)
-      return session.getAttribute(Name);
-    else
-      return null;
-  }
+    /**
+     * Retrieves the current session and returns the attribut which has the
+     * same name as the given parameter if the session is not null.
+     * @param name the name of the returned attribute
+     * @return the value of session.getAttribute(name) or null
+     */
+    public static Object getSessionObjectByName(String name){
+        org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+        
+        if (session != null)
+            return session.getAttribute(name);
+        else
+            return null;
+    }
 
   public static Object getValue(String Name, HttpSession httpSession)
   {
@@ -323,18 +345,18 @@ public class SessionHelper
   {
 
     boolean active = false;
-    Object o = getValue("CollaborationActive");
+    Object o = getSessionObjectByName("CollaborationActive");
     if (o != null)
     {
       active = (Boolean) o;
     }
 
-    logger.debug("switchCollaboration(), aktuell: " + active);
+    LOGGER.debug("switchCollaboration(), aktuell: " + active);
 
     active = !active; // Zustand tauschen
 
     setValue("CollaborationActive", active);
-    logger.debug("neu: " + active);
+    LOGGER.debug("neu: " + active);
 
     return active;
   }
@@ -400,7 +422,7 @@ public class SessionHelper
   // Soll beim Anklicken eines CS/VS sofort die aktuelle Version geladen werden?
   public static boolean isLoadCurrentVersion()
   {
-    Object o = getValue("is_LoadCurrentVersion");
+    Object o = getSessionObjectByName("is_LoadCurrentVersion");
 
     if (o == null)
       return false;
@@ -430,7 +452,7 @@ public class SessionHelper
             }
 
         }catch(Exception e){
-          logger.error("[Fehler bei CollabUserHelper.java createCollabUserTable(): " + e.getMessage());
+          LOGGER.error("[Fehler bei CollabUserHelper.java createCollabUserTable(): " + e.getMessage());
         }
         finally
         {

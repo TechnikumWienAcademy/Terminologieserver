@@ -382,7 +382,7 @@ public class ImportLOINC_Async extends Window implements AfterCompose, IGenericL
         ((Button) getFellow("buttonImport")).setDisabled(true);
         ((Button) getFellow("buttonCancel")).setVisible(true);
 
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
         String vokVersion = ((Textbox) getFellow("tbVokabularVersion")).getText();
 
@@ -537,7 +537,7 @@ public class ImportLOINC_Async extends Window implements AfterCompose, IGenericL
         cbUpdate = (Checkbox) getFellow("cbUpdate");
         fillVocabularyList();
         showStatus();
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         session = Sessions.getCurrent(true);
         try
         {

@@ -48,7 +48,7 @@ public class Kollaboration extends Window implements AfterCompose
   {
     String id = "";
     tb = (Tabbox) getFellow("tabboxNavigation");
-    Object o = SessionHelper.getValue("termadmin_kollaboration_tabid");
+    Object o = SessionHelper.getSessionAttributeByName("termadmin_kollaboration_tabid");
     if (o != null)
       id = o.toString();
 

@@ -585,7 +585,7 @@ public class ImportVS_SVS_Async extends Window implements AfterCompose, IGeneric
         textboxDateiname = (Textbox) getFellow("tbVokabularVersion");
         fillValueSetList();
         showStatus();
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         session = Sessions.getCurrent(true);
         try
         {

@@ -76,9 +76,9 @@ public class SendBackHelper
             SessionHelper.setValue("typeVSV",  Integer.valueOf(sbContent.substring(4, 5)));
             SessionHelper.setValue("typeCSEV", Integer.valueOf(sbContent.substring(5, 6)));
             SessionHelper.setValue("sendBackApplicationName", sendBackApplicationName);       
-            if((Integer)SessionHelper.getValue("typeDV")  > 0 || (Integer)SessionHelper.getValue("typeCS")   > 0 || 
-               (Integer)SessionHelper.getValue("typeCSV") > 0 || (Integer)SessionHelper.getValue("typeVS")   > 0 ||
-               (Integer)SessionHelper.getValue("typeVSV") > 0 || (Integer)SessionHelper.getValue("typeCSEV") > 0){                
+            if((Integer)SessionHelper.getSessionObjectByName("typeDV")  > 0 || (Integer)SessionHelper.getSessionObjectByName("typeCS")   > 0 || 
+               (Integer)SessionHelper.getSessionObjectByName("typeCSV") > 0 || (Integer)SessionHelper.getSessionObjectByName("typeVS")   > 0 ||
+               (Integer)SessionHelper.getSessionObjectByName("typeVSV") > 0 || (Integer)SessionHelper.getSessionObjectByName("typeCSEV") > 0){                
                 active = true;
             }
             else {
@@ -100,7 +100,7 @@ public class SendBackHelper
 
   public String getSendBackApplicationName()
   {
-    String s = (String) SessionHelper.getValue("sendBackApplicationName");
+    String s = (String) SessionHelper.getSessionObjectByName("sendBackApplicationName");
  
     if (s != null)
       return s;
@@ -109,7 +109,7 @@ public class SendBackHelper
 
   public String getSendBackMethodName()
   {
-    String s = (String) SessionHelper.getValue("sendBackMethodName");
+    String s = (String) SessionHelper.getSessionObjectByName("sendBackMethodName");
     if (s != null)
       return s;
     return "";
@@ -117,43 +117,43 @@ public class SendBackHelper
 
   public Integer getSendBackTypeDV()
   {
-    if ((Integer) SessionHelper.getValue("typeDV") != null)
-      return (Integer) SessionHelper.getValue("typeDV");
+    if ((Integer) SessionHelper.getSessionObjectByName("typeDV") != null)
+      return (Integer) SessionHelper.getSessionObjectByName("typeDV");
     return -1;
   }
 
   public Integer getSendBackTypeCS()
   {
-    if ((Integer) SessionHelper.getValue("typeCS") != null)
-      return (Integer) SessionHelper.getValue("typeCS");
+    if ((Integer) SessionHelper.getSessionObjectByName("typeCS") != null)
+      return (Integer) SessionHelper.getSessionObjectByName("typeCS");
     return -1;
   }
 
   public Integer getSendBackTypeCSV()
   {
-    if ((Integer) SessionHelper.getValue("typeCSV") != null)
-      return (Integer) SessionHelper.getValue("typeCSV");
+    if ((Integer) SessionHelper.getSessionObjectByName("typeCSV") != null)
+      return (Integer) SessionHelper.getSessionObjectByName("typeCSV");
     return -1;
   }
 
   public Integer getSendBackTypeVS()
   {
-    if ((Integer) SessionHelper.getValue("typeVS") != null)
-      return (Integer) SessionHelper.getValue("typeVS");
+    if ((Integer) SessionHelper.getSessionObjectByName("typeVS") != null)
+      return (Integer) SessionHelper.getSessionObjectByName("typeVS");
     return -1;
   }
 
   public Integer getSendBackTypeVSV()
   {
-    if ((Integer) SessionHelper.getValue("typeVSV") != null)
-      return (Integer) SessionHelper.getValue("typeVSV");
+    if ((Integer) SessionHelper.getSessionObjectByName("typeVSV") != null)
+      return (Integer) SessionHelper.getSessionObjectByName("typeVSV");
     return -1;
   }
 
   public Integer getSendBackTypeCSEV()
   {
-    if ((Integer) SessionHelper.getValue("typeCSEV") != null)
-      return (Integer) SessionHelper.getValue("typeCSEV");
+    if ((Integer) SessionHelper.getSessionObjectByName("typeCSEV") != null)
+      return (Integer) SessionHelper.getSessionObjectByName("typeCSEV");
     return -1;
   }
 

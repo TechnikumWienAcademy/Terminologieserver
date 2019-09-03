@@ -426,7 +426,7 @@ public class Menu extends Window implements org.zkoss.zk.ui.ext.AfterCompose //p
 
   public void callAdmin()
   {
-    String path = de.fhdo.db.DBSysParam.instance().getStringValue("weblink", null, null);
+    String path = de.fhdo.db.DBSysParam.getInstance().getStringValue("weblink", null, null);
     path += "/gui/admin/admin.zul";
     Executions.getCurrent().sendRedirect(path);
   }

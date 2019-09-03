@@ -19,63 +19,40 @@
  */
 package de.fhdo.helper;
 
-import java.util.Enumeration;
 import javax.servlet.http.HttpSession;
-import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.Sessions;
 
 /**
  *
  * @author Robert Mützner
  */
-public class SessionHelper
-{
-  private static org.apache.log4j.Logger logger = de.fhdo.logging.Logger4j.getInstance().getLogger();
-  //private static org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+public class SessionHelper{
+    private final static org.apache.log4j.Logger LOGGER = de.fhdo.logging.Logger4j.getInstance().getLogger();
 
-  public static boolean isUserLoggedIn()
-  {
-    return getUserID() > 0;
-  }
+    /**
+     * Checks if the getUserID() return-value is greater 0.
+     * @return true if the check passed
+     */
+    public static boolean isUserLoggedIn(){
+        return getUserID() > 0;
+    }
   
-  public static boolean isUserLoggedIn(HttpSession Session)
-  {
-    return getUserID(Session) > 0;
-  }
-
-  public static boolean isAdmin()
-  {
-    Object o = getValue("is_admin");
-
-    if (o == null)
-    {
-      return false;
-    }
-    else
-    {
-      return Boolean.parseBoolean(o.toString());
-    }
-  }
-
-
-
-
-
-  /*public static void checkUserLoggedIn()
-  {
-    boolean login = isUserLoggedIn();
-
-    if (login == false)
-    {
-      Clients.showBusy("Nicht eingelogged...");
-
-      LoginHelper.getInstance().reset();
-      
-      //session.setAttribute("user_id", 0);
-      Executions.sendRedirect("/index.zul");
+    public static boolean isUserLoggedIn(HttpSession Session){
+      return getUserID(Session) > 0;
     }
 
-  }*/
+    /**
+     * Checks if the session is an admin session and returns the result.
+     * @return true if the user is an admin, otherwise false
+     */
+    public static boolean isAdmin(){
+        Object isAdmin = getSessionAttributeByName("is_admin");
+
+        if (isAdmin == null)
+            return false;
+        else
+            return Boolean.parseBoolean(isAdmin.toString());
+    }
 
 
 
@@ -84,11 +61,11 @@ public class SessionHelper
     //org.zkoss.zk.ui.Session session = Sessions.getCurrent();
     if(session == null)
     {
-      logger.debug("getUserID() - Session ist null");
+      LOGGER.debug("getUserID() - Session ist null");
       return 0;
     }
 
-    logger.debug("getUserID(HttpSession session) mit session-id: " + session.getId());
+    LOGGER.debug("getUserID(HttpSession session) mit session-id: " + session.getId());
     /*Enumeration en = session.getAttributeNames();
     while(en.hasMoreElements())
     {
@@ -100,7 +77,7 @@ public class SessionHelper
 
     if (o == null)
     {
-      logger.debug("getUserID() - o ist null");
+      LOGGER.debug("getUserID() - o ist null");
       return 0;
     }
     else
@@ -111,7 +88,7 @@ public class SessionHelper
       }
       catch (Exception e)
       {
-        logger.error("getUserID() - Fehler: " + e.getMessage());
+        LOGGER.error("getUserID() - Fehler: " + e.getMessage());
         return 0;
       }
     }
@@ -123,7 +100,7 @@ public class SessionHelper
 
     if(session == null)
     {
-      logger.debug("getUserName() - Session ist null");
+      LOGGER.debug("getUserName() - Session ist null");
       return "";
     }
 
@@ -131,7 +108,7 @@ public class SessionHelper
 
     if (o == null)
     {
-      logger.debug("getUserName() - o ist null");
+      LOGGER.debug("getUserName() - o ist null");
       return "";
     }
     else
@@ -140,36 +117,36 @@ public class SessionHelper
     }
   }
 
-  public static long getUserID()
-  {
-    org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+    /**
+     * Retrieves the current session and then its userID-object. If both of them
+     * are not null, the object's toString() result will be cast to a long-value
+     * which is then returned.
+     * @return either the long-value of the userID or 0.
+     */
+    public static long getUserID(){
+        org.zkoss.zk.ui.Session session = Sessions.getCurrent();
 
-    if(session == null)
-    {
-      logger.debug("getUserID() - Session ist null");
-      return 0;
-    }
+        if(session == null){
+            LOGGER.error("Error [0006]: Session is null");
+            return 0;
+        }
 
-    Object o = session.getAttribute("user_id");
+        Object objectUserID = session.getAttribute("user_id");
 
-    if (o == null)
-    {
-      logger.debug("getUserID() - o ist null");
-      return 0;
+        if (objectUserID == null){
+            LOGGER.error("Error [0007]: UserID object is null");
+            return 0;
+        }
+        else{
+            try{
+                return Long.parseLong(objectUserID.toString());
+            }
+            catch (Exception e){
+                LOGGER.error("Error [0008]", e);
+                return 0;
+            }
+        }
     }
-    else
-    {
-      try
-      {
-        return Long.parseLong(o.toString());
-      }
-      catch (Exception e)
-      {
-        logger.error("getUserID() - Fehler: " + e.getMessage());
-        return 0;
-      }
-    }
-  }
 
   public static long getPersonID()
   {
@@ -186,7 +163,7 @@ public class SessionHelper
       }
       catch (Exception e)
       {
-        logger.error("could not get personID: " + e.getMessage());
+        LOGGER.error("could not get personID: " + e.getMessage());
         return 0;
       }
     }
@@ -197,18 +174,23 @@ public class SessionHelper
     org.zkoss.zk.ui.Session session = Sessions.getCurrent();
     session.setAttribute(Name, Value);
     
-    logger.debug("SessionHelper.setValue(): " + Name + ", " + Value);
+    LOGGER.debug("SessionHelper.setValue(): " + Name + ", " + Value);
   }
 
-  public static Object getValue(String Name)
-  {
-    org.zkoss.zk.ui.Session session = Sessions.getCurrent();
-    return session.getAttribute(Name);
-  }
+    /**
+     * Retrieves the current session and returns the object resulting from the
+     * getAttribute(name) call.
+     * @param name the name of the attribute
+     * @return the object of the attribute
+     */
+    public static Object getSessionAttributeByName(String name){
+        org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+        return session.getAttribute(name);
+    }
   
   public static String getCollaborationUserRole()
   {
-    Object o = getValue("collaboration_user_role");
+    Object o = getSessionAttributeByName("collaboration_user_role");
 
     if (o == null)
     {
@@ -249,17 +231,16 @@ public class SessionHelper
     }
   }
   
-  public static Object getValue(String Name, HttpSession httpSession)
-  {
-    if (httpSession != null)
-    {
-      return httpSession.getAttribute(Name);
-    }
+    public static Object getValue(String Name, HttpSession httpSession){
+      if (httpSession != null)
+      {
+        return httpSession.getAttribute(Name);
+      }
 
-    org.zkoss.zk.ui.Session session = Sessions.getCurrent();
-    if (session != null)
-      return session.getAttribute(Name);
-    else
-      return null;
-  }
+      org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+      if (session != null)
+        return session.getAttribute(Name);
+      else
+        return null;
+    }
 }

@@ -308,7 +308,7 @@ public class ImportVS_CSV extends Window implements AfterCompose, IGenericListAc
     ((Button) getFellow("buttonImport")).setDisabled(true);
     ((Button) getFellow("buttonCancel")).setVisible(true);
 
-    String session_id = SessionHelper.getValue("session_id").toString();
+    String session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
     String vsVersion = ((Textbox) getFellow("tbVokabularVersion")).getText();
 

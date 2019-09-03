@@ -17,6 +17,7 @@ import de.fhdo.terminologie.db.hibernate.CodeSystemEntityVersionAssociation;
 import de.fhdo.terminologie.db.hibernate.CodeSystemMetadataValue;
 import de.fhdo.terminologie.db.hibernate.CodeSystemVersion;
 import de.fhdo.terminologie.db.hibernate.CodeSystemVersionEntityMembership;
+import de.fhdo.terminologie.db.hibernate.CodeSystemVersionEntityMembershipId;
 import de.fhdo.terminologie.db.hibernate.MetadataParameter;
 import de.fhdo.terminologie.helper.DeleteTermHelperWS;
 import de.fhdo.terminologie.helper.HQLParameterHelper;
@@ -102,7 +103,6 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 
         try
         {
-
             //Erstelle Strukturkapitel
             List<String> chapComSep = new ArrayList<String>();
             List<String> subChapComSep = new ArrayList<String>();
@@ -587,10 +587,13 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                             Long parentVersionId = linkingMapChap.get(subChapCode[0]);
 
                             CodeSystemEntityVersionAssociation association = new CodeSystemEntityVersionAssociation();
+                                                        
                             association.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
                             association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(parentVersionId);
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setCodeSystemEntity(new CodeSystemEntity());//3.2.39
                             association.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
                             association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(response.getCodeSystemEntity().getCurrentVersionId());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setCodeSystemEntity(new CodeSystemEntity());//3.2.39
                             association.setAssociationKind(2); // 1 = ontologisch, 2 = taxonomisch, 3 = cross mapping   
                             association.setLeftId(parentVersionId); // immer linkes Element also csev1
                             association.setAssociationType(new AssociationType()); // Assoziationen sind ja auch CSEs und hier muss die CSEVid der Assoziation angegben werden.
@@ -599,6 +602,19 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                             association.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
                             association.setStatusDate(new Date());
                             association.setInsertTimestamp(new Date());
+                            
+                            //3.2.39
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().getCodeSystemEntity());
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().getCodeSystemEntity());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setInsertTimestamp(new Date());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setInsertTimestamp(new Date());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setStatus(-1);
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setStatus(-1);
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setStatusDate(new Date());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setStatusDate(new Date());
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1());
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2());
+                            //3.2.39 END
                             // Beziehung abspeichern
                             hb_session.save(association);
                             //System.out.println("C_: " + count);
@@ -686,13 +702,17 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
 //                System.out.println("C_: " + count);
                             //Zusätzlich linking
                             //getParentId
-                            Long parentVersionId = linkingMapSubChap.get(chapInfo[2]);
+                            
+                            Long parentVersionId = linkingMapSubChap.get(chapInfo[chapInfo.length-1]);
+                            //Long parentVersionId = linkingMapSubChap.get(chapInfo[2]); 3.2.39
 
                             CodeSystemEntityVersionAssociation association = new CodeSystemEntityVersionAssociation();
                             association.setCodeSystemEntityVersionByCodeSystemEntityVersionId1(new CodeSystemEntityVersion());
                             association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setVersionId(parentVersionId);
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setCodeSystemEntity(new CodeSystemEntity());//3.2.39
                             association.setCodeSystemEntityVersionByCodeSystemEntityVersionId2(new CodeSystemEntityVersion());
                             association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setVersionId(response.getCodeSystemEntity().getCurrentVersionId());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setCodeSystemEntity(new CodeSystemEntity());//3.2.39
                             association.setAssociationKind(2); // 1 = ontologisch, 2 = taxonomisch, 3 = cross mapping   
                             association.setLeftId(parentVersionId); // immer linkes Element also csev1
                             association.setAssociationType(new AssociationType()); // Assoziationen sind ja auch CSEs und hier muss die CSEVid der Assoziation angegben werden.
@@ -702,6 +722,19 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                             association.setStatusDate(new Date());
                             association.setInsertTimestamp(new Date());
                             // Beziehung abspeichern
+                            //3.2.39
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().getCodeSystemEntity());
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().getCodeSystemEntity());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setInsertTimestamp(new Date());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setInsertTimestamp(new Date());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setStatus(-1);
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setStatus(-1);
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1().setStatusDate(new Date());
+                            association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2().setStatusDate(new Date());
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId1());
+                            hb_session.save(association.getCodeSystemEntityVersionByCodeSystemEntityVersionId2());
+                            //3.2.39 END
+                            
                             hb_session.save(association);
                             //System.out.println("C_: " + count);
                         }
@@ -1147,9 +1180,10 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
                                     valueList.get(0).setParameterValue(metadataValue);
                                 }
 
-                                LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                //LOGGER.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersion().getVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
 
-                                hb_session.update(valueList.get(0));
+                                if(valueList.size()>0)//3.2.39
+                                    hb_session.update(valueList.get(0));
                             }
                         }
                     }
@@ -1187,6 +1221,7 @@ public class ImportICDBMGATNew extends CodeSystemImport implements ICodeSystemIm
             {
                 //ex.printStackTrace();
                 LOGGER.error(ex.getMessage());
+                LOGGER.error("Error: ", ex);
                 s = "Fehler beim Import einer LeiKat-Datei: " + ex.getLocalizedMessage();
 
                 try

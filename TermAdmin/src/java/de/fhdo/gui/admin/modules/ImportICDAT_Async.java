@@ -96,7 +96,7 @@ public class ImportICDAT_Async extends Window implements AfterCompose, IGenericL
         fileUnterkapitel = false;
         fileKapitel = false;
         fileContentMap = new HashMap<Integer, byte[]>();
-        session_id = SessionHelper.getValue("session_id").toString();
+        session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
         session = Sessions.getCurrent(true);
         fillVocabularyList();
         showStatus();
@@ -604,7 +604,7 @@ public class ImportICDAT_Async extends Window implements AfterCompose, IGenericL
             ((Button) getFellow("buttonImport")).setDisabled(true);
             ((Button) getFellow("buttonCancel")).setVisible(true);
 
-            session_id = SessionHelper.getValue("session_id").toString();
+            session_id = SessionHelper.getSessionAttributeByName("session_id").toString();
 
             String vokVersion = ((Textbox) getFellow("tbVokabularVersion")).getText();
 
