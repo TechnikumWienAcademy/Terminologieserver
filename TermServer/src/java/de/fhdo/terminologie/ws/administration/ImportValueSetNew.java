@@ -63,13 +63,14 @@ public class ImportValueSetNew{
                 
         }
 
+        /*
         if (!loggedIn){
             response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Für diesen Dienst müssen Sie am Terminologieserver angemeldet sein!");
             LOGGER.info("----- ImportValueSet finished (002) -----");
             return response;
-        }
+        }*/
 
         try{
             long formatId = parameter.getImportInfos().getFormatId();

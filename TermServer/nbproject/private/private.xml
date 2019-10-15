@@ -27,8 +27,14 @@
             <file>file:/C:/A_Dev/terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/types/LoginType.java</file>
         </group>
         <group>
-            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/MaintainCodeSystemVersion.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/search/ListValueSets.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/Definitions.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/ImportValueSetNew.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/authoring/CreateCodeSystem.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_export/ExportClaml.java</file>
             <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportICDBMGATNew.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/conceptAssociation/CreateConceptAssociation.java</file>
+            <file>file:/C:/A_DEV/Terminologieserver/TermServer/src/java/de/fhdo/terminologie/ws/administration/_import/ImportClamlNew.java</file>
         </group>
     </open-files>
 </project-private>

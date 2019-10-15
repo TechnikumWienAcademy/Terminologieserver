@@ -72,13 +72,14 @@ public class ImportValueSet
 
     logger.debug("Eingeloggt: " + loggedIn);
 
+    /*
     if (loggedIn == false)
     {
       response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.WARN);
       response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
       response.getReturnInfos().setMessage("Für diesen Dienst müssen Sie am Terminologieserver angemeldet sein!");
       return response;
-    }
+    }*/
 
     try
     {

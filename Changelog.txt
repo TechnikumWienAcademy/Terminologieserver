@@ -1,4 +1,10 @@
-﻿Changelog 3.2.38
+﻿Changelog 3.2.39
+	-Änderungen
+		.) EHTSOID-191: Freigabe von Value-Sets bearbeitet.
+		.) EHTSOID-80: Freigabe des LOINC bearbeitet.
+		.) EHTSOID-224: Import des ICD10 bearbeitet.
+
+Changelog 3.2.38
 	-Änderungen
 		.) EHTSOID-191: Freigabe bearbeitet.
 

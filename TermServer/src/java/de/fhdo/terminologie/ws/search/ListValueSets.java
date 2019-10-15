@@ -63,13 +63,15 @@ public class ListValueSets{
         }
 
         //Check login (like every webservice)
-        boolean loggedIn = false;
-        LoginInfoType loginInfoType ;
+        //boolean loggedIn = false;
+        /*LoginInfoType loginInfoType ;
         if (parameter != null && parameter.getLogin() != null){
             loginInfoType = LoginHelper.getInstance().getLoginInfos(parameter.getLogin());
             loggedIn = loginInfoType != null;
-        }
-
+        }*/
+        //3.2.39
+       boolean loggedIn = true;
+        
         try{
             org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
             java.util.List<ValueSet> VSlist = null;
@@ -151,7 +153,7 @@ public class ListValueSets{
                         ValueSetVersion VSV;
                         while (VSViterator.hasNext()){
                             VSV = VSViterator.next();
-
+                            
                             if (!loggedIn && VSV.getStatus() != null && VSV.getStatus() != Definitions.STATUS_CODES.ACTIVE.getCode()){
                                 //Not visible, has to be removed from the result
                                 VSViterator.remove();
@@ -172,7 +174,6 @@ public class ListValueSets{
                 response.getReturnInfos().setOverallErrorCategory(ReturnType.OverallErrorCategory.INFO);
                 response.getReturnInfos().setStatus(ReturnType.Status.OK);
                 response.getReturnInfos().setMessage("ValueSets erfolgreich gelesen, Anzahl: " + VScount);
-                response.getReturnInfos().setCount(VScount);
             }
         }
         catch (Exception e){
@@ -181,7 +182,7 @@ public class ListValueSets{
             response.getReturnInfos().setStatus(ReturnType.Status.FAILURE);
             response.getReturnInfos().setMessage("Fehler bei 'ListValueSets': " + e.getLocalizedMessage());
         }
-        LOGGER.info("----- listValueSets finished (001) -----");
+        LOGGER.info("----- listValueSets finished (002) -----");
         return response;
     }
 
