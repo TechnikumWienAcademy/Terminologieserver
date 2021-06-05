@@ -1,4 +1,60 @@
-﻿Changelog 3.2.39
+﻿3.2.55
+	VS-Freigabefehler behoben
+
+3.2.54
+	ID-Fehler bei der VS-Freigabe behoben
+
+3.2.53
+	ID-Fehler bei der VS-Freigabe behoben
+
+3.2.52
+	ID-Fehler bei der VS-Freigabe behoben
+
+3.2.51
+	Transaction-Fehler bei der VS-Freigabe behoben
+
+3.2.50
+	Transaction-Fehler bei der VS-Freigabe debugging
+
+3.2.49
+	Transaction-Fehler bei der VS-Freigabe behoben
+
+3.2.48
+	Transaction-Fehler beim VS-Import behoben
+
+3.2.47
+	Debugging der VS-Freigabe
+
+3.2.46
+	-Änderungen
+		.) Debugging der VS-Freigabe
+
+Changelog 3.2.45
+	-Bugfixes
+		.) ID-Fehler bei VS-Freigabe behoben
+
+Changelog 3.2.44
+	-Änderungen
+		.) Debugging der VS Freigabe
+
+Changelog 3.2.43
+	-Änderungen
+		.) Pub und Kollab auf ein System gezogen
+
+Changelog 3.2.42
+	-Änderungen
+		.) EHTSOID-191: Freigabe der Value-Sets bearbeitet.
+		.) Export der ASP-Liste bearbeitet.
+
+Changelog 3.2.41
+	-Änderungen
+		.) EHTSOID-191: Freigabe der Value-Sets bearbeitet.
+
+Changelog 3.2.40
+	-Änderungen
+		.) EHTSOID-191: Freigabe von Value-Sets bearbeitet.
+
+Changelog 3.2.39
 	-Änderungen
 		.) EHTSOID-191: Freigabe von Value-Sets bearbeitet.
 		.) EHTSOID-80: Freigabe des LOINC bearbeitet.

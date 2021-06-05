@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="file:/C:/meins/dev/termServerNeu/TermServer/schemes/claml_Schema.xsd" uri="conf/xml-resources/jaxb/clamlBindingXSD/claml_Schema.xsd"/>
+    <system systemId="file:/C:/meins/dev/termServerNeu/TermServer/schemes/keytabs.xsd" uri="conf/xml-resources/jaxb/keytabs/keytabs.xsd"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?wsdl" uri="src/conf/xml-resources/web-service-references/AuthorizationIDP/wsdl/localhost_8080/IDP/AuthorizationIDP.wsdl"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=1" uri="src/conf/xml-resources/web-service-references/AuthorizationIDP/wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=2" uri="src/conf/xml-resources/web-service-references/AuthorizationIDP/wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_2.xsd"/>
+</catalog>

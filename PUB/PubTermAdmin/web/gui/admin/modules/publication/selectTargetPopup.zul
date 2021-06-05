@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+	<window id="winSelectTargetPopup" width="400px" height="200px" closable="true" sizable="false"
+		use="de.fhdo.gui.admin.modules.publication.SelectTargetPopup"
+		title="Ziel auswählen" border="normal">
+		<borderlayout>
+			<center border="0">
+				<grid>
+					<columns>
+						<column width="100px" align="right" label=""/>
+						<column label=""/>
+					</columns>
+					<rows>
+						<row>
+							<cell colspan="2">
+								<label value="Das Ziel des Transfers konnte nicht festgestellt werden."/>
+							</cell>
+						</row>
+                                                <row>
+                                                    <cell>
+                                                        <label value="Source Name:"/>
+                                                    </cell>
+                                                    <cell>
+                                                        <label id="source" value=""/>
+                                                    </cell>
+                                                </row>
+						<row>
+							<cell>
+								<label value="Ziel auswählen:"/>
+							</cell>
+							<cell>
+								<combobox id="targets" width="99%"></combobox>
+							</cell>
+						</row>
+					</rows>
+				</grid>
+			</center>
+			<south height="28px" border="0" collapsible="true">
+				<div align="right" style="margin-right:0px;">
+					<button label="Auswählen" onClick="winSelectTargetPopup.onOkClicked()" autodisable="self" />
+				</div>
+			</south>
+		</borderlayout>
+	</window>
+</zk>

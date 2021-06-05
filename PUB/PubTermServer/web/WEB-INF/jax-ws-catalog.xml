@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?wsdl" uri="wsdl/localhost_8080/IDP/AuthorizationIDP.wsdl"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=1" uri="wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDPIntern?xsd=1" uri="wsdl/localhost_8080/IDP/AuthorizationIDPIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=2" uri="wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_2.xsd"/>
+</catalog>

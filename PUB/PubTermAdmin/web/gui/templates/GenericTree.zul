@@ -1,0 +1,87 @@
+<!--
+Generischer Baum. Diese zul-Datei sollte an der Stelle per include 
+eingebunden werden, wo die Liste angezeigt werden soll.
+
+Die Initialisierung des Baumes geschieht über GenericTree.java
+
+@author Robert Mützner <robert.muetzner@fh-dortmund.de>
+-->
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+  <window id="winGenericTree" border="none" width="100%" height="100%"
+          use="de.fhdo.tree.GenericTree">
+
+    <borderlayout>
+      <center border="none">
+        <tree id="generictree"
+              vflex="true"
+              onSelect="winGenericTree.onTreeSelected(event)"
+        
+        >
+          <treecols id="treecols" sizable="true">
+            <treecol label="Test"/>
+            <treecol label="Test2" />
+          </treecols>
+        </tree>
+        <!--<listbox id="listbox"
+                 emptyMessage="Keine Einträge mit aktuellen Filtern"
+                 onSelect="winGenericTree.onListSelected(event)"
+                 vflex="true" 
+                 checkmark="false"
+                 multiple="true">
+          <listhead sizable="true" id="listHeader">
+            <listheader label="" width="18px" align="right">
+            </listheader>
+            <listheader label="Projekt" sort="auto(name)">
+            </listheader>
+            <listheader label="#" width="40px" align="right">
+            </listheader>
+                
+                
+          </listhead>
+        </listbox>-->
+      </center>
+      <south size="33px" border="none" id="south">
+        <div style="padding-top:5px; padding-left: 0px;">
+          <div align="left" style="float:left;" id="divEditButtons">
+            <button id="buttonNew" label="Neu..." onClick="winGenericTree.onNew()" image="/rsc/img/generictree/add.png"
+                        autodisable="self" tooltiptext="Fügt einen neuen Eintrag der Liste hinzu..."
+                        disabled="@{winContent.standardNewDecline}" visible="false"/>
+            <button id="buttonEdit" label="Bearbeiten..." onClick="winGenericTree.onEdit()"
+                        image="/rsc/img/generictree/pencil.png"
+                        autodisable="self" tooltiptext="Bearbeitet den markierten Eintrag"
+                        disabled="true" visible="false"/>
+            <button id="buttonDelete" label="Löschen" onClick="winGenericTree.onDelete()"
+                        image="/rsc/img/generictree/delete.png" tooltiptext="Löscht den markierten Eintrag"
+                        disabled="true" visible="false"/>
+          </div>
+          <!--<div align="right">
+            <button id="buttonExport" label="Exportieren..." onClick="winStandards.onExport(event)" image="/rsc/img/symbols/export_16x16.png"
+            autodisable="self" disabled="true"/>
+          </div>-->
+        </div>
+      </south>
+    </borderlayout>
+    <menupopup id="treePopupItem">
+      <menuitem label="Neuer Untereintrag..." image="/rsc/img/list/add.png" onClick="winGenericTree.onNewSubentry()"/>
+      <menuseparator/>
+      <menuitem label="Eintrag bearbeiten..." image="/rsc/img/list/pencil.png" onClick="winGenericTree.onEdit()"/>
+      <menuitem label="Eintrag löschen" image="/rsc/img/list/delete.png" onClick="winGenericTree.onDelete()"/>
+    </menupopup>
+    
+    <!--<menupopup id="treePopupItem">
+      <menuitem label="Neuer Eintrag..." image="/rsc/img/list/add.png" onClick="winContent.navigationFrame.onNew()"/>
+      <menuseparator/>
+      <menuitem label="Eintrag bearbeiten..." image="/rsc/img/list/pencil.png" onClick="winContent.navigationFrame.onEdit()"/>
+      <menuitem label="Eintrag löschen" image="/rsc/img/list/delete.png" onClick="winContent.navigationFrame.onDelete()"/>
+    </menupopup>-->
+    
+    <!--<menupopup id="listPopup">
+      <menuitem label="Neuer Eintrag..." image="/rsc/img/list/add.png" onClick="winContent.navigationFrame.onNew()"/>
+      <menuseparator/>
+      <menuitem label="Eintrag bearbeiten..." image="/rsc/img/list/pencil.png" onClick="winContent.navigationFrame.onEdit()"/>
+      <menuitem label="Eintrag löschen" image="/rsc/img/list/delete.png" onClick="winContent.navigationFrame.onDelete()"/>
+    </menupopup>-->
+    
+  </window>
+</zk>

@@ -43,7 +43,12 @@ public class ImportValueSetRequestType
     private LoginType login;
     private ValueSet valueSet;
     private Long importId;
+    private boolean freigabeFix = false; //TRMMRK
 
+    
+    public void enableFreigabeFix() { freigabeFix = true; }
+    
+    public boolean freigabeFixed() { return freigabeFix; }
     /**
      * @return the importInfos
      */

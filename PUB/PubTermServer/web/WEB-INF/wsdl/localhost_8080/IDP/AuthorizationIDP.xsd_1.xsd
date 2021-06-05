@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.2-hudson-740-. --><xs:schema xmlns:tns="http://authorizationIDP.idp.ws.terminologie.fhdo.de/" xmlns:ns1="de.fhdo.termserver.idp.types" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://authorizationIDP.idp.ws.terminologie.fhdo.de/">
+
+<xs:import namespace="de.fhdo.termserver.idp.types" schemaLocation="http://localhost:8080/IDP/AuthorizationIDP?xsd=2" />
+
+<xs:element name="changePassword" type="tns:changePassword" />
+
+<xs:element name="changePasswordResponse" type="tns:changePasswordResponse" />
+
+<xs:element name="changePasswordResponseType">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:element name="getLoginInfos" type="tns:getLoginInfos" />
+
+<xs:element name="getLoginInfosResponse" type="tns:getLoginInfosResponse" />
+
+<xs:element name="loginResponseType">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+<xs:element name="login" type="tns:loginType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:element name="termUser" type="ns1:termUser" />
+
+<xs:complexType name="getLoginInfos">
+<xs:sequence>
+<xs:element name="parameter" type="tns:loginRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="loginRequestType">
+<xs:sequence>
+<xs:element name="login" type="tns:loginType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="loginType">
+<xs:sequence>
+<xs:element name="ip" type="xs:string" minOccurs="0" />
+<xs:element name="password" type="xs:string" minOccurs="0" />
+<xs:element name="sessionID" type="xs:string" minOccurs="0" />
+<xs:element name="username" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getLoginInfosResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+<xs:element name="login" type="tns:loginType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="returnType">
+<xs:sequence>
+<xs:element name="count" type="xs:int" />
+<xs:element name="lastIP" type="xs:string" minOccurs="0" />
+<xs:element name="lastTimeStamp" type="xs:dateTime" minOccurs="0" />
+<xs:element name="message" type="xs:string" minOccurs="0" />
+<xs:element name="overallErrorCategory" type="tns:overallErrorCategory" minOccurs="0" />
+<xs:element name="status" type="tns:status" minOccurs="0" />
+<xs:element name="termUser" type="ns1:termUser" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+
+<xs:complexType name="changePassword">
+<xs:sequence>
+<xs:element name="parameter" type="tns:changePasswordRequestType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="changePasswordRequestType">
+<xs:sequence>
+<xs:element name="login" type="tns:loginType" minOccurs="0" />
+<xs:element name="newPassword" type="xs:string" minOccurs="0" />
+<xs:element name="oldPassword" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="changePasswordResponse">
+<xs:sequence>
+<xs:element name="return" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="returnInfos" type="tns:returnType" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="overallErrorCategory">
+<xs:restriction base="xs:string">
+<xs:enumeration value="INFO" />
+<xs:enumeration value="WARN" />
+<xs:enumeration value="ERROR" />
+</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="status">
+<xs:restriction base="xs:string">
+<xs:enumeration value="OK" />
+<xs:enumeration value="FAILURE" />
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>

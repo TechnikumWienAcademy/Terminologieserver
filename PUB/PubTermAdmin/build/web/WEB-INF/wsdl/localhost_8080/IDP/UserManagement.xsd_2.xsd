@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.2-hudson-740-. --><xs:schema xmlns:tns="de.fhdo.termserver.idp.types" xmlns:ns1="http://userManagement.idp.ws.terminologie.fhdo.de/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="de.fhdo.termserver.idp.types">
+
+<xs:import namespace="http://userManagement.idp.ws.terminologie.fhdo.de/" schemaLocation="http://localhost:8080/IDP/UserManagement?xsd=1" />
+
+<xs:complexType name="termUser">
+<xs:sequence>
+<xs:element name="activated" type="xs:boolean" minOccurs="0" />
+<xs:element name="activationMd5" type="xs:string" minOccurs="0" />
+<xs:element name="activationTime" type="xs:dateTime" minOccurs="0" />
+<xs:element name="email" type="xs:string" minOccurs="0" />
+<xs:element name="enabled" type="xs:boolean" minOccurs="0" />
+<xs:element name="id" type="xs:long" minOccurs="0" />
+<xs:element name="isAdmin" type="xs:boolean" />
+<xs:element name="name" type="xs:string" minOccurs="0" />
+<xs:element name="userName" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="collaborationuser">
+<xs:sequence>
+<xs:element name="activated" type="xs:boolean" minOccurs="0" />
+<xs:element name="activationMd5" type="xs:string" minOccurs="0" />
+<xs:element name="activationTime" type="xs:dateTime" minOccurs="0" />
+<xs:element name="city" type="xs:string" minOccurs="0" />
+<xs:element name="country" type="xs:string" minOccurs="0" />
+<xs:element name="deleted" type="xs:boolean" minOccurs="0" />
+<xs:element name="email" type="xs:string" minOccurs="0" />
+<xs:element name="enabled" type="xs:boolean" minOccurs="0" />
+<xs:element name="firstName" type="xs:string" minOccurs="0" />
+<xs:element name="hidden" type="xs:boolean" minOccurs="0" />
+<xs:element name="id" type="xs:long" minOccurs="0" />
+<xs:element name="name" type="xs:string" minOccurs="0" />
+<xs:element name="note" type="xs:string" minOccurs="0" />
+<xs:element name="organisation" type="tns:organisation" minOccurs="0" />
+<xs:element name="password" type="xs:string" minOccurs="0" />
+<xs:element name="phone" type="xs:string" minOccurs="0" />
+<xs:element name="roles" type="tns:role" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+<xs:element name="salt" type="xs:string" minOccurs="0" />
+<xs:element name="sendMail" type="xs:boolean" minOccurs="0" />
+<xs:element name="street" type="xs:string" minOccurs="0" />
+<xs:element name="title" type="xs:string" minOccurs="0" />
+<xs:element name="username" type="xs:string" minOccurs="0" />
+<xs:element name="zip" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="organisation">
+<xs:sequence>
+<xs:element name="collaborationusers" type="tns:collaborationuser" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+<xs:element name="id" type="xs:long" minOccurs="0" />
+<xs:element name="organisation" type="xs:string" minOccurs="0" />
+<xs:element name="organisationAbbr" type="xs:string" minOccurs="0" />
+<xs:element name="organisationLink" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="role">
+<xs:sequence>
+<xs:element name="adminFlag" type="xs:boolean" minOccurs="0" />
+<xs:element name="id" type="xs:long" minOccurs="0" />
+<xs:element name="name" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

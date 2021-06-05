@@ -38,6 +38,8 @@ public class HibernateUtil
     {
       
       String filePath = "";
+      //BEFORE COMPILE
+      //String ext = "/conf/kollaborationPub.hibernate.cfg.xml";
       String ext = "/conf/kollaboration.hibernate.cfg.xml";
       String path = System.getProperty("catalina.base");
       

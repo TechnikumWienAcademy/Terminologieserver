@@ -64,7 +64,7 @@ public abstract class PropertiesHelper {
         Properties config = new Properties();
         try
         {
-
+            
             String filename = dbsysparam.getStringValue("termserverProperties", null, null);
 
             //logger cannot be used because its not initialized yet

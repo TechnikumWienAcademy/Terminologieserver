@@ -1,0 +1,61 @@
+<?page title="Terminologieserver - Verwaltungsumgebung" contentType="text/html;charset=UTF-8"?>
+<?link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"?>
+<zk>
+  
+  <borderlayout>
+    <north>
+      <include src="../header/menu.zul" id="inc_admin_menu"/>
+    </north>
+    <center border="0">
+      <window border="0" use="de.fhdo.gui.admin.Admin" id="win" height="100%" width="100%">
+        <tabbox id="tabboxNavigation" width="100%" height="100%"  orient="vertical"
+                    onSelect="win.onNavigationSelect(event)">
+          <tabs id="tabbox_tabs" width="160px">
+            <!--<tab label="Datenbank" id="tabDB"/>
+            <tab label="Benutzer" id="tabBenutzer"/>
+            <tab label="Domains" id="tabDomains"/>
+            <tab label="System-Parameter" id="tabSysParam"/>
+            <tab label="Taxonomie-Einordnung" id="tabCodesysteme"/>
+            <tab label="Benutzer-Lizenzen" id="tabLizenzen"/>-->
+            <tab label="Kollaboration" id="tabKollaboration"/>
+            <tab label="Terminologie" id="tabTerminologie"/>
+            <tab label="Terminologie-Import" id="tabImport"/>
+          </tabs>
+          <tabpanels id="tabbox_tabpanels">
+            <!--<tabpanel>
+              <include id="incDB"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incBenutzer"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incDomains"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incSysParam"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incCodesysteme"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incLizenzen"/>
+            </tabpanel>-->
+            <tabpanel>
+              <include id="incKollaboration"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incTerminologie"/>
+            </tabpanel>
+            <tabpanel>
+              <include id="incImport"/>
+            </tabpanel>
+            
+          </tabpanels>
+        </tabbox>
+      </window>
+    </center>
+    <south height="40px">
+      <include src="../main/statusBar.zul" />
+    </south>
+  </borderlayout>
+</zk>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jax-ws xmlns="http://www.netbeans.org/ns/jax-ws/1">
+  <services>
+    <service name="Authoring">
+      <implementation-class>de.fhdo.terminologie.ws.authoring.Authoring</implementation-class>
+    </service>
+    <service name="ConceptAssociations">
+      <implementation-class>de.fhdo.terminologie.ws.conceptAssociation.ConceptAssociations</implementation-class>
+    </service>
+    <service name="Administration">
+      <implementation-class>de.fhdo.terminologie.ws.administration.Administration</implementation-class>
+    </service>
+    <service name="SSo">
+      <implementation-class>de.fhdo.terminologie.ws.sso.SSo</implementation-class>
+    </service>
+    <service name="Search">
+      <implementation-class>de.fhdo.terminologie.ws.search.Search</implementation-class>
+    </service>
+    <service name="ObjectIdentifier">
+      <implementation-class>de.fhdo.terminologie.ws.objectIdentifier.ObjectIdentifier</implementation-class>
+    </service>
+    <service name="Authorization">
+      <implementation-class>de.fhdo.terminologie.ws.authorization.Authorization</implementation-class>
+    </service>
+  </services>
+  <clients>
+    <client name="AuthorizationIDP">
+      <wsdl-url>http://localhost:8080/IDP/AuthorizationIDP?wsdl</wsdl-url>
+      <local-wsdl-file>localhost_8080/IDP/AuthorizationIDP.wsdl</local-wsdl-file>
+      <package-name forceReplace="true">de.fhdo.terminologie.ws.authorizationIDP</package-name>
+      <catalog-file>catalog.xml</catalog-file>
+      <wsimport-options>
+        <wsimport-option>
+          <wsimport-option-name>extension</wsimport-option-name>
+          <wsimport-option-value>true</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>verbose</wsimport-option-name>
+          <wsimport-option-value>true</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>fork</wsimport-option-name>
+          <wsimport-option-value>false</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>wsdlLocation</wsimport-option-name>
+          <wsimport-option-value>http://localhost:8080/IDP/AuthorizationIDP?wsdl</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>xnocompile</wsimport-option-name>
+          <wsimport-option-value>true</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>xendorsed</wsimport-option-name>
+          <wsimport-option-value>true</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>package</wsimport-option-name>
+          <wsimport-option-value>de.fhdo.terminologie.ws.idp.authorizationIDP</wsimport-option-value>
+        </wsimport-option>
+        <wsimport-option>
+          <wsimport-option-name>target</wsimport-option-name>
+          <wsimport-option-value>2.1</wsimport-option-value>
+        </wsimport-option>
+      </wsimport-options>
+    </client>
+  </clients>
+  <jsr109>false</jsr109>
+</jax-ws>

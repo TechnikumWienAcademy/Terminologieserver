@@ -602,7 +602,7 @@ public class ImportVSSVS
                     }
                 }
 
-                //hb_session.getTransaction().commit();
+                hb_session.getTransaction().commit(); //TRMMRK ENTKOMMENTIERT
                 CreateValueSetContent createValueSetContent = new CreateValueSetContent();
                 CreateValueSetContentResponseType response = createValueSetContent.CreateValueSetContent(request, hb_session);
 

@@ -39,6 +39,7 @@ import javax.persistence.TemporalType;
  */
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.hibernate.annotations.CascadeType;
 @XmlRootElement
 @XmlType(namespace="de.fhdo.termserver.types")
 @Entity
@@ -100,7 +101,8 @@ public class CodeSystemEntityVersionAssociation  implements java.io.Serializable
         this.codeSystemEntityVersionByCodeSystemEntityVersionId2 = codeSystemEntityVersionByCodeSystemEntityVersionId2;
     }
 @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="codeSystemEntityVersionId1", nullable=false)
+    //@JoinColumn(name="codeSystemEntityVersionId1", nullable=false)
+@JoinColumn(name="codeSystemEntityVersionId1")
     public CodeSystemEntityVersion getCodeSystemEntityVersionByCodeSystemEntityVersionId1() {
         return this.codeSystemEntityVersionByCodeSystemEntityVersionId1;
     }

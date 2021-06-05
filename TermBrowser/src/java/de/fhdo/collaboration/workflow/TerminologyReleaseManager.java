@@ -76,7 +76,9 @@ public class TerminologyReleaseManager{
     private de.fhdo.terminologie.ws.searchPub.CodeSystem targetCS;
     private de.fhdo.terminologie.ws.searchPub.ValueSet targetVS;
     private Proposalobject po;
-
+    private long FIX_VSV_ID;
+    private long FIX_VS_ID;
+    
     /**
      * 
      */
@@ -136,6 +138,12 @@ public class TerminologyReleaseManager{
     private ReturnType transferTerminologyToPublicServer(de.fhdo.collaboration.db.classes.Status statusTo, Proposalobject proposalObject){
         LOGGER.info("+++++ transferTerminologyToPublicServer started +++++");
         po = proposalObject;
+        FIX_VSV_ID = po.getProposal().getVocabularyId();
+        FIX_VS_ID = po.getProposal().getVocabularyIdTwo();
+        
+        LOGGER.info("FIX_VSV_ID = " + FIX_VSV_ID);
+        LOGGER.info("FIX_VS_IS = " + FIX_VS_ID);
+        
         ReturnType response = new ReturnType();
         response.setSuccess(false);
 
@@ -275,7 +283,7 @@ public class TerminologyReleaseManager{
             {   
                 ValueSet vsToExport = this.getValueSetToExport(proposalObject.getProposal().getVocabularyName(), proposalObject.getProposal().getVocabularyId());
                 
-                //check if CS was found on Collab plattform
+                //check if VS was found on Collab plattform
                 if ((vsToExport.getId() == null) || (vsToExport.getValueSetVersions().isEmpty()))
                 {
                     response.setSuccess(false);
@@ -353,7 +361,7 @@ public class TerminologyReleaseManager{
                         }
                     }
 
-                    if (!exists)
+                    /*if (!exists) TRMMRK WIEDER REIN
                     {
                         //mehrere CodeSysteme gefunden
                         Map map = new HashMap();
@@ -370,7 +378,7 @@ public class TerminologyReleaseManager{
                         {
                             exists = true;
                         }
-                    }
+                    }*/
                 }
 
                 if(this.targetVS == null && !exists)
@@ -400,7 +408,9 @@ public class TerminologyReleaseManager{
                 }
                 
                 vsToExport.getValueSetVersions().get(0).setName(proposalObject.getProposal().getVocabularyName());//3.2.39
-
+                //vsToExport.getValueSetVersions().get(0).getValueSet().setId(.getId()); //TRMMRK
+                //vsToExport.getValueSetVersions().get(0).getValueSet().
+                
                 de.fhdo.terminologie.ws.administrationPub.ReturnType ret_import = this.importValueSet(vsToExport.getValueSetVersions().get(0), exportedValueSet);
 
                 if (this.targetVS.getValueSetVersions() != null)
@@ -1268,7 +1278,7 @@ public class TerminologyReleaseManager{
         LOGGER.info("----- getValueSetToExport finished (008) -----");
         return new ValueSet();
     }
-
+    
     private ExportType getExportedValueSet(ValueSet valueSet) throws ServerSOAPFaultException
     {
         LOGGER.info("+++++ getExportedValueSet started +++++");
@@ -1278,7 +1288,8 @@ public class TerminologyReleaseManager{
         LOGGER.info("TermBrowser: TRANSFER: Trying to export ValueSet and Version from collab plattform");
         LOGGER.info("TermBrowser: VS ID: " + valuesetId);
         LOGGER.info("TermBrowser: VSV ID: " + valueSetVersionId);
-
+        FIX_VS_ID = valuesetId; //TRMMRK
+        
         ExportValueSetContentRequestType req_export_vs = new ExportValueSetContentRequestType();
 
         // Login
@@ -1499,8 +1510,10 @@ public class TerminologyReleaseManager{
 
         // Codesystem
         request.setValueSet(new de.fhdo.terminologie.ws.administrationPub.ValueSet());
-        request.getValueSet().setId(this.targetVS.getId());
-
+        //request.getValueSet().setId(this.targetVS.getId()); TRMMRK
+        request.getValueSet().setId(FIX_VS_ID);
+        request.getValueSet().setCurrentVersionId(FIX_VSV_ID);
+        
         request.setImportInfos(new de.fhdo.terminologie.ws.administrationPub.ImportType());
         request.getImportInfos().setRole(CODES.ROLE_TRANSFER);
         request.getImportInfos().setFormatId(301l); //export formatId != import formatId; 195 != 301

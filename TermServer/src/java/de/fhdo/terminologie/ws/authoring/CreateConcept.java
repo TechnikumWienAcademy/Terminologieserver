@@ -132,28 +132,41 @@ public class CreateConcept{
 
         try{
             
+            LOGGER.info("+++++++++++++++++++ 1");
             org.hibernate.Session hb_session;
             if (createHibernateSession){
+                LOGGER.info("+++++++++++++++++++ 2");
                 hb_session = HibernateUtil.getSessionFactory().openSession();
                 hb_session.getTransaction().begin();
+                LOGGER.info("+++++++++++++++++++ 3");
             }
             else
+            {
+                LOGGER.info("+++++++++++++++++++ 4");
                 hb_session = session;
-
+                LOGGER.info("+++++++++++++++++++ 5");
+            }
+                
+LOGGER.info("+++++++++++++++++++ 6");
             //Preparing CS and CS-Version for saving
             long codeSystemVersionId = 0;
             long codeSystemEntityVersionId = 0;
 
             if (paramCodeSystem != null && paramCodeSystem.getCodeSystemVersions() != null && paramCodeSystem.getCodeSystemVersions().size() > 0)
                 codeSystemVersionId = ((CodeSystemVersion) paramCodeSystem.getCodeSystemVersions().toArray()[0]).getVersionId();
-      
+               
+            LOGGER.info("+++++++++++++++++++ 7");
 
             if(hb_session!=null)
                 try{
+                    LOGGER.info("+++++++++++++++++++ 8");
+                    
                     // Creating new entity and entity-version
                     CodeSystemEntity entity = new CodeSystemEntity();
                     hb_session.save(entity);
 
+                    LOGGER.info("+++++++++++++++++++ 9");
+                    
                     CodeSystemEntityVersion entityVersion = (CodeSystemEntityVersion) paramCodeSystemEntity.getCodeSystemEntityVersions().toArray()[0];
 
                     CodeSystemConcept concept = null;
@@ -179,8 +192,11 @@ public class CreateConcept{
                     entityVersion.setAssociationTypes(null);
                     entityVersion.setPropertyVersions(null);
 
+                    LOGGER.info("+++++++++++++++++++ 10");
+                    
                     hb_session.save(entityVersion);
 
+                        LOGGER.info("+++++++++++++++++++ 11");
                     //Creating response
                     codeSystemEntityVersionId = entityVersion.getVersionId();
                     CodeSystemEntityVersion entityVersionReturn = new CodeSystemEntityVersion();
@@ -196,10 +212,14 @@ public class CreateConcept{
                     LOGGER.debug("EntityId: " + entity.getId());
                     LOGGER.debug("EntityVersionId: " + codeSystemEntityVersionId);
 
+                    
+                    LOGGER.info("+++++++++++++++++++ 12");
                     //Saving currentVersion in the entity
                     entity.setCurrentVersionId(entityVersion.getVersionId());
                     hb_session.update(entity);
 
+                    LOGGER.info("+++++++++++++++++++ 13");
+                    
                     LOGGER.debug("CurrentVersionId: " + entity.getCurrentVersionId());
 
                     //Saving concept with translations
@@ -214,7 +234,9 @@ public class CreateConcept{
                             cTranslation.setCodeSystemConcept(concept);
                         }
 
+                        LOGGER.info("+++++++++++++++++++ 14");
                         hb_session.save(concept);
+                        LOGGER.info("+++++++++++++++++++ 15");
                     }
 
                     if (assocType != null){
@@ -222,7 +244,9 @@ public class CreateConcept{
                         assocType.getCodeSystemEntityVersion().setVersionId(codeSystemEntityVersionId);
                         assocType.setCodeSystemEntityVersionId(codeSystemEntityVersionId);
 
+                        LOGGER.info("+++++++++++++++++++ 16");
                         hb_session.save(assocType);
+                        LOGGER.info("+++++++++++++++++++ 17");
                     }
 
                     //Saving relationship to the vocabulary
@@ -244,7 +268,9 @@ public class CreateConcept{
                                 membership.setIsMainClass(memberRequest.getIsMainClass());
                             }
                         }
+                        LOGGER.info("+++++++++++++++++++ 18");
                         hb_session.save(membership);
+                        LOGGER.info("+++++++++++++++++++ 19");
                     }
 
                     //Saving property
@@ -269,12 +295,16 @@ public class CreateConcept{
 
                                 lastPropVersion = propertyVersion;
                             }
+                            LOGGER.info("+++++++++++++++++++ 20");
                             hb_session.save(property);
+                            LOGGER.info("+++++++++++++++++++ 21");
 
                             //Setting current-Version-ID
                             if (lastPropVersion != null){
                                 property.setCurrentVersionId(lastPropVersion.getVersionId());
+                                LOGGER.info("+++++++++++++++++++ 22");
                                 hb_session.update(property);
+                                LOGGER.info("+++++++++++++++++++ 23");
                             }
 
                             lastPropVersion = null;
@@ -286,8 +316,10 @@ public class CreateConcept{
                                     propertyVersion.setPreviousVersionId(lastPropVersion.getVersionId());
 
                                 lastPropVersion = propertyVersion;
+                                LOGGER.info("+++++++++++++++++++ 24");
 
                                 hb_session.update(propertyVersion);
+                                LOGGER.info("+++++++++++++++++++ 25");
                             }
                         }
                     }
@@ -319,8 +351,10 @@ public class CreateConcept{
                                         CSmetadataValue.setParameterValue("");
                                         CSmetadataValue.setMetadataParameter(metadataParameter);
                                         CSmetadataValue.setCodeSystemEntityVersion(entityVersion);
-
+                                        
+                                        LOGGER.info("+++++++++++++++++++ 26");
                                         hb_session.save(CSmetadataValue);
+                                        LOGGER.info("+++++++++++++++++++ 27");
                                     }
                                 }
                             }

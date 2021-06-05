@@ -39,9 +39,12 @@ public class HibernateUtil {
 
     public static SessionFactory getSessionFactory(int type) {
         if (type == TERM_ADMIN) {
+            //BEFORE COMPILE
+            //return adminSessFact == null ? adminSessFact = buildSessionFactory("/conf/termadminPub.hibernate.cfg.xml") : adminSessFact;
             return adminSessFact == null ? adminSessFact = buildSessionFactory("/conf/termadmin.hibernate.cfg.xml") : adminSessFact;
         }
         if (type == COLLAB_USER) {
+            //return collabSessFact == null ? collabSessFact = buildSessionFactory("/conf/kollaborationPub.hibernate.cfg.xml") : collabSessFact;
             return collabSessFact == null ? collabSessFact = buildSessionFactory("/conf/kollaboration.hibernate.cfg.xml") : collabSessFact;
         }
         return null;

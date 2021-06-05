@@ -164,7 +164,7 @@ public class SysParameter{
             return param.getValue();
         }
 
-        LOGGER.info("----- getStringValue finished (002): SysParameter not found -----");
+        LOGGER.info("----- getStringValue finished (002): SysParameter not found: " + Name + "   " + ValidityDomain + "   " + ObjectID +  " -----");
         return "";
     }
 

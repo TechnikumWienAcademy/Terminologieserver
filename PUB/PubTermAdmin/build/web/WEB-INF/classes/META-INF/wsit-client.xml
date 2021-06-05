@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+ <definitions 
+ xmlns="http://schemas.xmlsoap.org/wsdl/" 
+ xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="mainclientconfig" 
+ >
+   <!-- <import location="Administration.xml" namespace="http://administration.ws.terminologie.fhdo.de/"/>
+    <import location="Authoring.xml" namespace="http://authoring.ws.terminologie.fhdo.de/"/>
+    <import location="Authorization.xml" namespace="http://authorization.ws.terminologie.fhdo.de/"/>
+    <import location="Search.xml" namespace="http://search.ws.terminologie.fhdo.de/"/>-->
+</definitions>

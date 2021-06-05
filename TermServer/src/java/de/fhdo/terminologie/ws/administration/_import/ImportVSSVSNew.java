@@ -58,6 +58,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
     private boolean onlyVSV = true; //Only CSV for this case
     private Long vsId = 0L;
     private Long vsvId = 0L;
+    boolean freigabeFixed = false; //TRMMRK
 
     @Override
     public void setImportData(ImportValueSetRequestType request)
@@ -66,6 +67,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
         this.setImportId(request.getImportId());
         this.setLoginType(request.getLogin());
         this.setImportType(request.getImportInfos());
+        freigabeFixed = request.freigabeFixed();
 
         this._valueset = request.getValueSet();
         this.fileContent = request.getImportInfos().getFilecontent();
@@ -89,7 +91,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
         this.status.setImportRunning(true);
         StaticStatusList.addStatus(this.getImportId(), this.status);
         
+        LOGGER.info("HB Session 1.1");
         hb_session = HibernateUtil.getSessionFactory().openSession();
+        LOGGER.info("HB Session 1.2");
         boolean isElgaLaborparamter = false;
 
         try
@@ -245,16 +249,16 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
             }
             else
             {
-
                 throw new ImportException("SVS-Datei: Kein XML-Root-Node gefunden, bitte die zu importierende Datei prüfen...");
             }
             
             this.setTotalCountInStatusList(conceptsList.size(), this.getImportId());
             
             // Hibernate-Block, Session öffnen
-            //org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
+            LOGGER.info("HB Session 2.1");
             hb_session.getTransaction().begin();
-
+            LOGGER.info("HB Session 2.2");
+            
             try // try-catch-Block zum Abfangen von Hibernate-Fehlern
             {
                 if (createValueSet(codeListInfoMap) == false)
@@ -303,7 +307,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                     LOGGER.debug("HQL: " + hql);
 
                     // Query erstellen
+                    LOGGER.info("HB Session 3.1");
                     org.hibernate.Query q = hb_session.createQuery(hql);
+                    LOGGER.info("HB Session 3.3");
                     // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                     parameterHelper.applyParameter(q);
 
@@ -323,7 +329,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         mp = new MetadataParameter();
                         mp.setParamName(mdText);
                         mp.setValueSet(this.getValueset());
+                        LOGGER.info("HB Session 4.1");
                         hb_session.save(mp);
+                        LOGGER.info("HB Session 4.2");
                     }
 
                     headerMetadataIDs.put(mdText, mp.getId());
@@ -414,7 +422,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                             + " where csc.code=:code and"
                             + " csv.oid=:oid";
 
+                    LOGGER.info("HB Session 5.1");
                     org.hibernate.Query q = hb_session.createQuery(hql);
+                    LOGGER.info("HB Session 5.2");
                     q.setString("code", code);
                     q.setString("oid", oid);
                     //q.setReadOnly(true);
@@ -437,7 +447,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         if (isElgaLaborparamter)
                         {
                             //check if concept has allready a german translation
+                            LOGGER.info("HB Session 6.1");
                             CodeSystemConcept csc = (CodeSystemConcept) hb_session.get(CodeSystemConcept.class, csevList.get(0).getVersionId());
+                            LOGGER.info("HB Session 6.2");
                             boolean translationAvailable = false;
 
                             if (csc.getCodeSystemConceptTranslations() != null)
@@ -459,7 +471,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                             //german translation available but new terms are available
                                             translation.setTerm(conceptDetails.get("displayName"));
                                             translation.setTermAbbrevation(conceptDetails.get("displayNameAlt"));
+                                            LOGGER.info("HB Session 7.1");
                                             hb_session.update(translation);
+                                            LOGGER.info("HB Session 7.2");
                                             translationAvailable = true;
                                         }
                                     }
@@ -479,7 +493,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 }
 
                                 csct.setCodeSystemConcept(csc);
+                                LOGGER.info("HB Session 8.1");
                                 hb_session.save(csct);
+                                LOGGER.info("HB Session 8.2");
                             }
                         }
 
@@ -491,7 +507,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 + " where csc.code=:code and"
                                 + " csv.oid=:oid";
                         String adaptedCode = "_" + code;
+                        LOGGER.info("HB Session 9.1");
                         org.hibernate.Query q2 = hb_session.createQuery(hql2);
+                        LOGGER.info("HB Session 9.2");
                         q2.setString("code", adaptedCode);
                         q2.setString("oid", oid);
 
@@ -524,16 +542,37 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                     if (counter % 500 == 0)
                     {
+                        LOGGER.info("HB Session 10.1");
                         hb_session.flush();
+                        LOGGER.info("HB Session 10.2");
+                        LOGGER.info("HB Session 11.1");
                         hb_session.clear();
+                        LOGGER.info("HB Session 11.2");
                         LOGGER.info("Session flushed");
                     }
                 }
 
-                //hb_session.getTransaction().commit();
+                LOGGER.info("HB Session 12.1");
+                if(!hb_session.getTransaction().wasCommitted())
+                {
+                    LOGGER.info("HB Session 12.2");
+                    LOGGER.info("HB Session 13.1");
+                    hb_session.getTransaction().commit(); //TRMMRK ENTKOMMENTIERT
+                    LOGGER.info("HB Session 13.2");
+                }
+                else
+                    LOGGER.info("HB Session 12.2");
+                
                 CreateValueSetContent createValueSetContent = new CreateValueSetContent();
+                LOGGER.info("HB Session 14.1");
                 CreateValueSetContentResponseType response = createValueSetContent.CreateValueSetContent(request, hb_session);
-
+                LOGGER.info("HB Session 14.2");
+                
+                
+                //NUR BEI FREIGABE EXEKUTIEREN TRMMRK
+                if(this.getImportType().getRole() != null && this.getImportType().getRole().equals(CODES.ROLE_TRANSFER))
+                    hb_session.getTransaction().begin(); //ADDED
+                
                 //Hier erst daten für ValueSetMetadataValue einfügen!!!
                 if (response.getReturnInfos().getStatus() == ReturnType.Status.OK)
                 {
@@ -568,13 +607,14 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         /*String hql = "select distinct csev from CodeSystemEntityVersion csev join csev.codeSystemEntity cse join cse.codeSystemVersionEntityMemberships csvem join csvem.codeSystemVersion csv join csev.codeSystemConcepts csc"
                         + " where csc.code="+code+" and"
                         + " csv.oid="+oid+"";
-								
-								org.hibernate.Query q = hb_session.createQuery(hql);*/
+			org.hibernate.Query q = hb_session.createQuery(hql);*/
                         String hql = "select distinct csev from CodeSystemEntityVersion csev join csev.codeSystemEntity cse join cse.codeSystemVersionEntityMemberships csvem join csvem.codeSystemVersion csv join csev.codeSystemConcepts csc"
                                 + " where csc.code=:code and"
                                 + " csv.oid=:oid";
 
+                        LOGGER.info("HB Session 15.1");
                         org.hibernate.Query q = hb_session.createQuery(hql);
+                        LOGGER.info("HB Session 15.2");
                         //q.setReadOnly(true);
                         q.setParameter("code", code);
                         q.setParameter("oid", oid);
@@ -582,11 +622,6 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                         List<CodeSystemEntityVersion> csevList = q.list();
                         if (csevList != null && csevList.size() >= 1)
                         {
-                            for (CodeSystemEntityVersion temp : csevList)
-                            {
-                                //System.out.println("CodeSystemEntityVersion.versionId=" + temp.getVersionId());
-                                boolean stop = true;
-                            }
                             if (csevList.size() > 1)
                             {
                                 Collections.sort(csevList, new DateComparator());
@@ -598,6 +633,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                             String mdLevelValue = conceptDetails.get("level");//Achtung in Maps lowerCase
                             if (mdLevelValue != null && mdLevelValue.length() > 0)
                             {
+                                LOGGER.info("TRMMRK 1 mdLevelValue");
                                 //Check if parameter already set in case of new Version!
                                 String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                 hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -613,24 +649,37 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
+                                LOGGER.info("HB Session 16.1");
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                LOGGER.info("HB Session 16.2");
+                                LOGGER.info("TRMMRK 1.1 mdLevelValue");
                                 // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                 parameterHelper.applyParameter(q1);
 
+                                LOGGER.info("TRMMRK 1.2 mdLevelValue");
                                 List<ValueSetMetadataValue> valueList = q1.list();
 
                                 if (valueList.size() == 1)
                                 {
+                                    LOGGER.info("TRMMRK 1.3 mdLevelValue");
                                     valueList.get(0).setParameterValue(mdLevelValue);
                                 }
 
-                                //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                hb_session.update(valueList.get(0));
+                                if(valueList.size() > 0)
+                                {
+                                    LOGGER.info("TRMMRK 1.4 mdLevelValue");
+                                    //TRMMRK 1.1 added if
+                                    //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
+                                    LOGGER.info("HB Session 17.1");
+                                    hb_session.update(valueList.get(0));
+                                    LOGGER.info("HB Session 17.2");
+                                }
                             }
 
                             String mdTypeValue = conceptDetails.get("type");////Achtung in Maps lowerCase
                             if (mdTypeValue != null && mdTypeValue.length() > 0)
                             {
+                                LOGGER.info("TRMMRK 2 mdTypeValue");
                                 //Check if parameter already set in case of new Version!
                                 String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                 hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -640,17 +689,37 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 parameterHelper.addParameter("csev.", "versionId", csevList.get(0).getVersionId());
                                 parameterHelper.addParameter("vsmv.", "valuesetVersionId", request.getValueSet().getValueSetVersions().iterator().next().getVersionId());
 
+                                LOGGER.info("MRK parameters added");
+                                
                                 if (mdTypeValue.equals("A"))
                                 {
-
+                                    LOGGER.info("MRK equals A");
                                     ConceptValueSetMembership cvsm_db = null;
                                     ConceptValueSetMembershipId cvsmId = new ConceptValueSetMembershipId(
                                             csevList.get(0).getVersionId(), request.getValueSet().getValueSetVersions().iterator().next().getVersionId());
+                                    LOGGER.info("HB Session 18.1");
                                     cvsm_db = (ConceptValueSetMembership) hb_session.get(ConceptValueSetMembership.class, cvsmId);
-
+                                    LOGGER.info("HB Session 18.2");
+                                    
                                     cvsm_db.setIsStructureEntry(true);
 
-                                    hb_session.update(cvsm_db);
+                                    LOGGER.info("MRK before update");
+                                    
+                                    LOGGER.info("HB Session 19.1");
+                                    if(!hb_session.getTransaction().wasCommitted()) //MRK ADDED
+                                    {
+                                        LOGGER.info("HB Session 19.2");
+                                        
+                                        LOGGER.info("HB Session 20.1");
+                                        LOGGER.info("MRK updating");
+                                        hb_session.update(cvsm_db);
+                                        LOGGER.info("HB Session 20.2");
+                                        LOGGER.info("MRK updated");
+                                    }
+                                    else
+                                        LOGGER.info("HB Session 19.2");
+                                    
+                                    LOGGER.info("MRK after update");
                                 }
 
                                 // Parameter hinzufügen (immer mit AND verbunden)
@@ -658,7 +727,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
+                                LOGGER.info("HB Session 21.1");
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                LOGGER.info("HB Session 21.2");
                                 // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                 parameterHelper.applyParameter(q1);
 
@@ -669,13 +740,27 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     valueList.get(0).setParameterValue(mdTypeValue);
                                 }
 
+                                LOGGER.info("MRK BEFORE UPDATE");
+                                
+                                LOGGER.info("HB Session 22.1");
+                                if(valueList.size() > 0 && !hb_session.getTransaction().wasCommitted()) //TRMRMK ADDED
                                 //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                hb_session.update(valueList.get(0));
+                                {
+                                    LOGGER.info("HB Session 22.2");
+                                    LOGGER.info("HB Session 23.1");
+                                    LOGGER.info("MRK BEFORE LAST UPDATE");
+                                    hb_session.update(valueList.get(0));
+                                    LOGGER.info("HB Session 23.2");
+                                    LOGGER.info("MRK AFTER LAST UPDATE");
+                                }
+                                else
+                                    LOGGER.info("HB Session 22.2");
                             }
 
                             String mdRelationshipsValue = conceptDetails.get("relationships");////Achtung in Maps lowerCase
                             if (mdRelationshipsValue != null && mdRelationshipsValue.length() > 0)
                             {
+                                LOGGER.info("TRMMRK 3 mdRelationshipsValue");
                                 //Check if parameter already set in case of new Version!
                                 String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                 hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -690,7 +775,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
+                                LOGGER.info("HB Session 24.1");
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                LOGGER.info("HB Session 24.2");
                                 // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                 parameterHelper.applyParameter(q1);
 
@@ -701,12 +788,21 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     valueList.get(0).setParameterValue(mdRelationshipsValue);
                                 }
 
+                                
+                                if(valueList.size() > 0) //TRMRMK ADDED
                                 //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                hb_session.update(valueList.get(0));
+                                {
+                                    LOGGER.info("HB Session 25.1");
+                                    hb_session.update(valueList.get(0));
+                                    LOGGER.info("HB Session 25.2");
+                                }
+                                    
+                                    
                             }
                             String mdEinheit_printValue = conceptDetails.get("einheit_print");////Achtung in Maps lowerCase
                             if (mdEinheit_printValue != null && mdEinheit_printValue.length() > 0)
                             {
+                                LOGGER.info("TRMMRK 4 mdEinheit_printValue");
                                 //Check if parameter already set in case of new Version!
                                 String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                 hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -721,7 +817,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
+                                LOGGER.info("HB Session 26.1");
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                LOGGER.info("HB Session 26.2");
                                 // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                 parameterHelper.applyParameter(q1);
 
@@ -732,13 +830,20 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     valueList.get(0).setParameterValue(mdEinheit_printValue);
                                 }
 
+                                if(valueList.size() > 0) //TRMRMK ADDED
                                 //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                hb_session.update(valueList.get(0));
+                                {
+                                    LOGGER.info("HB Session 27.1");
+                                    hb_session.update(valueList.get(0));
+                                    LOGGER.info("HB Session 27.2");
+                                }
+                                    
                             }
 
                             String mdEinheit_codiertValue = conceptDetails.get("einheit_codiert");////Achtung in Maps lowerCase
                             if (mdEinheit_codiertValue != null && mdEinheit_codiertValue.length() > 0)
                             {
+                                LOGGER.info("TRMMRK 5 mdEinheit_codiertValue");
                                 //Check if parameter already set in case of new Version!
                                 String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                 hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -753,7 +858,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 LOGGER.debug("HQL: " + hql2);
 
                                 // Query erstellen
+                                LOGGER.info("HB Session 28.1");
                                 org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                LOGGER.info("HB Session 28.2");
                                 // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                 parameterHelper.applyParameter(q1);
 
@@ -764,8 +871,13 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     valueList.get(0).setParameterValue(mdEinheit_codiertValue);
                                 }
 
+                                if(valueList.size() > 0) //TRMRMK ADDED
                                 //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                hb_session.update(valueList.get(0));
+                                {
+                                    LOGGER.info("HB Session 29.1");
+                                    hb_session.update(valueList.get(0));
+                                    LOGGER.info("HB Session 29.2");
+                                }
                             }
                         }
                         else
@@ -782,7 +894,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     + " where csc.code=:code and"
                                     + " csv.oid=:oid";
 
+                            LOGGER.info("HB Session 30.1");
                             q = hb_session.createQuery(hql);
+                            LOGGER.info("HB Session 30.2");
                             q.setString("code", code);
                             q.setString("oid", oid);
 
@@ -805,6 +919,7 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                 String mdLevelValue = conceptDetails.get("level");//Achtung in Maps lowerCase
                                 if (mdLevelValue != null && mdLevelValue.length() > 0)
                                 {
+                                    LOGGER.info("TRMMRK 2.1 mdLevelValue");
                                     //Check if parameter already set in case of new Version!
                                     String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                     hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -819,7 +934,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
+                                    LOGGER.info("HB Session 31.1");
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                    LOGGER.info("HB Session 31.2");
                                     // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                     parameterHelper.applyParameter(q1);
 
@@ -830,13 +947,19 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                         valueList.get(0).setParameterValue(mdLevelValue);
                                     }
 
+                                    if(valueList.size() > 0) //TRMRMK ADDED
                                     //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                    hb_session.update(valueList.get(0));
+                                    {
+                                        LOGGER.info("HB Session 32.1");
+                                        hb_session.update(valueList.get(0));
+                                        LOGGER.info("HB Session 32.2");
+                                    }
                                 }
 
                                 String mdTypeValue = conceptDetails.get("type");////Achtung in Maps lowerCase
                                 if (mdTypeValue != null && mdTypeValue.length() > 0)
                                 {
+                                    LOGGER.info("TRMMRK 2.2 mdTypeValue");
                                     //Check if parameter already set in case of new Version!
                                     String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                     hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -852,11 +975,15 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                         ConceptValueSetMembership cvsm_db = null;
                                         ConceptValueSetMembershipId cvsmId = new ConceptValueSetMembershipId(
                                                 csevList.get(0).getVersionId(), request.getValueSet().getValueSetVersions().iterator().next().getVersionId());
+                                        LOGGER.info("HB Session 33.1");
                                         cvsm_db = (ConceptValueSetMembership) hb_session.get(ConceptValueSetMembership.class, cvsmId);
-
+                                        LOGGER.info("HB Session 33.2");
+                                        
                                         cvsm_db.setIsStructureEntry(true);
 
+                                        LOGGER.info("HB Session 34.1");
                                         hb_session.update(cvsm_db);
+                                        LOGGER.info("HB Session 34.2");
                                     }
 
                                     // Parameter hinzufügen (immer mit AND verbunden)
@@ -864,7 +991,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
+                                    LOGGER.info("HB Session 35.1");
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                    LOGGER.info("HB Session 35.2");
                                     // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                     parameterHelper.applyParameter(q1);
 
@@ -875,13 +1004,19 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                         valueList.get(0).setParameterValue(mdTypeValue);
                                     }
 
+                                    if(valueList.size() > 0) //TRMRMK ADDED
                                     //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                    hb_session.update(valueList.get(0));
+                                    {
+                                        LOGGER.info("HB Session 36.1");
+                                        hb_session.update(valueList.get(0));
+                                        LOGGER.info("HB Session 36.2");
+                                    }
                                 }
 
                                 String mdRelationshipsValue = conceptDetails.get("relationships");////Achtung in Maps lowerCase
                                 if (mdRelationshipsValue != null && mdRelationshipsValue.length() > 0)
                                 {
+                                    LOGGER.info("TRMMRK 2.3 mdRelationshipsValue");
                                     //Check if parameter already set in case of new Version!
                                     String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                     hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -896,7 +1031,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
+                                    LOGGER.info("HB Session 37.1");
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                    LOGGER.info("HB Session 37.2");
                                     // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                     parameterHelper.applyParameter(q1);
 
@@ -907,12 +1044,18 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                         valueList.get(0).setParameterValue(mdRelationshipsValue);
                                     }
 
+                                    if(valueList.size() > 0) //TRMRMK ADDED
                                     //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                    hb_session.update(valueList.get(0));
+                                    {
+                                        LOGGER.info("HB Session 38.1");
+                                        hb_session.update(valueList.get(0));
+                                        LOGGER.info("HB Session 38.2");
+                                    }
                                 }
                                 String mdEinheit_printValue = conceptDetails.get("einheit_print");////Achtung in Maps lowerCase
                                 if (mdEinheit_printValue != null && mdEinheit_printValue.length() > 0)
                                 {
+                                    LOGGER.info("TRMMRK 2.4 mdEinheit_printValue");
                                     //Check if parameter already set in case of new Version!
                                     String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                     hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -927,7 +1070,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
+                                    LOGGER.info("HB Session 39.1");
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                    LOGGER.info("HB Session 39.2");
                                     // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                     parameterHelper.applyParameter(q1);
 
@@ -938,12 +1083,18 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                         valueList.get(0).setParameterValue(mdEinheit_printValue);
                                     }
 
+                                    if(valueList.size() > 0) //TRMRMK ADDED
                                     //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                    hb_session.update(valueList.get(0));
+                                    {
+                                        LOGGER.info("HB Session 40.1");
+                                        hb_session.update(valueList.get(0));
+                                        LOGGER.info("HB Session 40.2");
+                                    }
                                 }
                                 String mdEinheit_codiertValue = conceptDetails.get("einheit_codiert");////Achtung in Maps lowerCase
                                 if (mdEinheit_codiertValue != null && mdEinheit_codiertValue.length() > 0)
                                 {
+                                    LOGGER.info("TRMMRK 2.5 mdEinheit_codiertValue");
                                     //Check if parameter already set in case of new Version!
                                     String hql2 = "select distinct vsmv from ValueSetMetadataValue vsmv";
                                     hql2 += " join fetch vsmv.metadataParameter mp join fetch vsmv.codeSystemEntityVersion csev";
@@ -958,7 +1109,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                     LOGGER.debug("HQL: " + hql2);
 
                                     // Query erstellen
+                                    LOGGER.info("HB Session 41.1");
                                     org.hibernate.Query q1 = hb_session.createQuery(hql2);
+                                    LOGGER.info("HB Session 41.2");
                                     // Die Parameter können erst hier gesetzt werden (übernimmt Helper)
                                     parameterHelper.applyParameter(q1);
 
@@ -969,8 +1122,13 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                                         valueList.get(0).setParameterValue(mdEinheit_codiertValue);
                                     }
 
+                                    if(valueList.size() > 0) //TRMRMK ADDED
                                     //logger.debug("Metadaten einfügen, MP-ID " + valueList.get(0).getMetadataParameter().getId() + ", CSEV-ID " + valueList.get(0).getCodeSystemEntityVersionId() + ", Wert: " + valueList.get(0).getParameterValue());
-                                    hb_session.update(valueList.get(0));
+                                    {
+                                        LOGGER.info("HB Session 42.1");
+                                        hb_session.update(valueList.get(0));
+                                        LOGGER.info("HB Session 42.2");
+                                    }
                                 }
                             }
                             else
@@ -983,13 +1141,27 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                         if (counter % 500 == 0)
                         {
+                            LOGGER.info("HB Session 43.1");
                             hb_session.flush();
+                            LOGGER.info("HB Session 43.2");
+                            LOGGER.info("HB Session 44.1");
                             hb_session.clear();
+                            LOGGER.info("HB Session 44.2");
                             LOGGER.info("Session flushed");
                         }
                     }
 
-                    hb_session.getTransaction().commit();
+                    LOGGER.info("HB Session 45.1");
+                    if(!hb_session.getTransaction().wasCommitted()) //TRMMRK
+                    {
+                        LOGGER.info("HB Session 45.2");
+                        LOGGER.info("HB Session 46.1");
+                        hb_session.getTransaction().commit();
+                        LOGGER.info("HB Session 46.2");
+                    }
+                    else
+                        LOGGER.info("HB Session 45.2");
+                        
 
                     ValueSet vs_ret = new ValueSet();
                     vs_ret.setId(this.getValueset().getId());
@@ -1007,7 +1179,16 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 }
                 else
                 {
-                    hb_session.getTransaction().rollback();
+                    LOGGER.info("HB Session 47.1");
+                    if(!hb_session.getTransaction().wasRolledBack())
+                    {
+                        LOGGER.info("HB Session 47.2");
+                        LOGGER.info("HB Session 48.1");
+                        hb_session.getTransaction().rollback();
+                        LOGGER.info("HB Session 48.2");
+                    }
+                    else
+                        LOGGER.info("HB Session 47.2");
 
                     String resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
                     
@@ -1021,28 +1202,39 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
 
                 try
                 {
+                    LOGGER.info("HB Session 49.1");
                     if(!hb_session.getTransaction().wasRolledBack()){
+                        LOGGER.info("HB Session 49.2");
+                        LOGGER.info("HB Session 50.1");
                         hb_session.getTransaction().rollback();
-                        LOGGER.info("[ImportCSV.java] Rollback durchgeführt!");
+                        LOGGER.info("HB Session 50.2");
+                        LOGGER.info("[ImportCSV.java] Rollback versucht!");
                     }
+                    else
+                        LOGGER.info("HB Session 49.2");
                     
                     String resultStr = DeleteTermHelper.deleteVS_VSV(onlyVSV, vsId, vsvId);
                     throw new ImportException("Fehler beim Import eines Value Sets: " + ex.getLocalizedMessage()+ "\n"+resultStr);
                 }
                 catch (Exception exRollback)
                 {
+                    LOGGER.info("HB Session 51.1");
                     if(!hb_session.getTransaction().wasRolledBack()){
-                        LOGGER.info(exRollback.getMessage());
-                        LOGGER.info("[ImportCSV.java] Rollback fehlgeschlagen!");
+                        LOGGER.info("HB Session 51.2");
+                        LOGGER.info("[ImportCSV.java] Rollback fehlgeschlagen: " + exRollback.getMessage());
                         throw new ImportException("Rollback fehlgeschlagen! Fehler beim Import eines Value Sets: " + exRollback.getLocalizedMessage());
                     }
+                    else
+                        LOGGER.info("HB Session 51.2");
                 }
             }
             finally
             {
                 // Session schlieÃƒÂŸen
                 StaticStatusList.getStatus(this.getImportId()).importRunning = false;
+                LOGGER.info("HB Session 52.1");
                 hb_session.close();
+                LOGGER.info("HB Session 52.2");
             }
         }
         catch (Exception ex)
@@ -1056,11 +1248,15 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
     {
 
         LOGGER.debug("createValueSet...");
+        LOGGER.info("HB Session 53.1");
         org.hibernate.Session hb_session = HibernateUtil.getSessionFactory().openSession();
+        LOGGER.info("HB Session 53.2");
+        LOGGER.info("HB Session 54.1");
         hb_session.getTransaction().begin();
-
+        LOGGER.info("HB Session 54.2");
+            
         // vorhandenes Value Set nutzen oder neues anlegen?
-        if (this.getValueset().getId() != null && this.getValueset().getId() > 0)
+        if (this.getValueset().getId() != null && this.getValueset().getId() > 0 && false) //TRMMRK quickfix false
         {
 
             onlyVSV = true;
@@ -1070,41 +1266,83 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 Date date = new java.util.Date();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-                ValueSet vs_db = (ValueSet) hb_session.get(ValueSet.class, this.getValueset().getId());
-
+                LOGGER.info("HB Session 55.1");
+                ValueSet vs_db = (ValueSet) hb_session.get(ValueSet.class, this.getValueset().getId()); //TRMMRK AUSKOMMENTIERT FUER UNTEREN BLOCK NEU
+                LOGGER.info("HB Session 55.2");
+                
                 ValueSetVersion vsvNew = new ValueSetVersion();
                 vsvNew.setValidityRange(238l); // optional
+                LOGGER.info("HB Session 55.2.1");
                 vsvNew.setName(codeListInfoMap.get("version"));
                 vsvNew.setInsertTimestamp(date);
+                LOGGER.info("HB Session 55.2.2");
                 vsvNew.setOid(codeListInfoMap.get("id"));
+                LOGGER.info("HB Session 55.2.3");
                 if (codeListInfoMap.get("effectiveDate") != null && !codeListInfoMap.get("effectiveDate").equals(""))
                 {
+                    LOGGER.info("HB Session 55.2.4");
                     vsvNew.setReleaseDate(sdf.parse(codeListInfoMap.get("effectiveDate")));
                 }
 
+                LOGGER.info("HB Session 55.2.5");
                 if (!this.getImportType().getRole().equals(CODES.ROLE_TRANSFER))
                 {
+                    LOGGER.info("HB Session 55.2.6");
                     vsvNew.setStatus(Definitions.STATUS_CODES.INACTIVE.getCode());
                 }
                 else
                 {
+                    LOGGER.info("HB Session 55.2.7");
                     vsvNew.setStatus(Definitions.STATUS_CODES.ACTIVE.getCode());
                 }
 
-
+LOGGER.info("HB Session 55.2.8");
                 vsvNew.setStatusDate(date);
                 vsvNew.setValidityRange(236l);
                 vsvNew.setConceptValueSetMemberships(null);
+                LOGGER.info("HB Session 55.2.9");
+                
+                LOGGER.info("VS DB NULL?: " + vs_db == null);
+                
                 vsvNew.setPreviousVersionId(vs_db.getCurrentVersionId());
+                vsvNew.setPreviousVersionId(this.getValueset().getCurrentVersionId());//TRMMRK
+                LOGGER.info("HB Session 55.2.9.1");
                 vsvNew.setValueSet(new ValueSet());
+                LOGGER.info("HB Session 55.2.9.2");
                 vsvNew.getValueSet().setId(vs_db.getId());
-
-                // In DB speichern damit vsvNew eine ID bekommt
+                LOGGER.info("HB Session 55.2.10");
+                //vsvNew.getValueSet().setId(this.getValueset().getId()); //TRMMRK
+                
+                
+                /*
+                // In DB speichern damit vsvNew eine ID bekommt NEU NEU NEU
+                LOGGER.info("HB Session 56.1");
                 hb_session.save(vsvNew);
-                vs_db.setCurrentVersionId(vsvNew.getVersionId());
-                hb_session.update(vs_db);
+                LOGGER.info("HB Session 56.2");
+                //vs_db.setCurrentVersionId(vsvNew.getVersionId());
+                LOGGER.info("HB Session 57.1");
+                //hb_session.update(vs_db);
+                LOGGER.info("HB Session 57.2");
                 //Reload
+                LOGGER.info("HB Session 58.1");
+                //vs_db = (ValueSet) hb_session.get(ValueSet.class, this.getValueset().getId());
+                LOGGER.info("HB Session 58.2");
+                //this.setValueset(vs_db);
+                */
+                //NEU ENDE
+                
+                // In DB speichern damit vsvNew eine ID bekommt
+                LOGGER.info("HB Session 56.1");
+                hb_session.save(vsvNew);
+                LOGGER.info("HB Session 56.2");
+                vs_db.setCurrentVersionId(vsvNew.getVersionId());
+                LOGGER.info("HB Session 57.1");
+                hb_session.update(vs_db);
+                LOGGER.info("HB Session 57.2");
+                //Reload
+                LOGGER.info("HB Session 58.1");
                 vs_db = (ValueSet) hb_session.get(ValueSet.class, this.getValueset().getId());
+                LOGGER.info("HB Session 58.2");
                 this.setValueset(vs_db);
 
             }
@@ -1120,15 +1358,21 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 Long vsvId = ((ValueSetVersion) this.getValueset().getValueSetVersions().toArray()[0]).getVersionId();
                 if (this.getValueset().getId() > 0 && vsvId > 0)
                 {
+                    LOGGER.info("HB Session 59.1");
                     hb_session.getTransaction().commit();
+                    LOGGER.info("HB Session 59.2");
                 }
                 else
                 {
                     // ÃƒÂ„nderungen nicht erfolgreich
                     LOGGER.warn("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
+                    LOGGER.info("HB Session 60.1");
                     hb_session.getTransaction().rollback();
+                    LOGGER.info("HB Session 60.2");
                 }
+                LOGGER.info("HB Session 61.1");
                 hb_session.close();
+                LOGGER.info("HB Session 61.2");
             }
         }
         else
@@ -1152,7 +1396,9 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 vs.setDescriptionEng(codeListInfoMap.get("description"));
 
                 // In DB speichern
+                LOGGER.info("HB Session 62.1");
                 hb_session.save(vs);
+                LOGGER.info("HB Session 62.2");
 
                 //New Version
                 ValueSetVersion vsvNew = new ValueSetVersion();
@@ -1174,14 +1420,20 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 vsvNew.setPreferredLanguageId(33l); //German
 
                 // In DB speichern damit vsvNew eine ID bekommt
+                LOGGER.info("HB Session 63.1");
                 hb_session.save(vsvNew);
+                LOGGER.info("HB Session 63.2");
 
                 vs.setCurrentVersionId(vsvNew.getVersionId());
                 vs.setValueSetVersions(new HashSet<ValueSetVersion>());
                 vs.getValueSetVersions().add(vsvNew);
+                LOGGER.info("HB Session 64.1");
                 hb_session.update(vs);
+                LOGGER.info("HB Session 64.2");
                 //Reload
+                LOGGER.info("HB Session 65.1");
                 vs = (ValueSet) hb_session.get(ValueSet.class, vs.getId());
+                LOGGER.info("HB Session 65.2");
                 this.setValueset(vs);
 
             }
@@ -1197,15 +1449,21 @@ public class ImportVSSVSNew extends ValuesetImport implements IValuesetImport
                 Long vsvId = ((ValueSetVersion) this.getValueset().getValueSetVersions().toArray()[0]).getVersionId();
                 if (this.getValueset().getId() > 0 && vsvId > 0)
                 {
+                    LOGGER.info("HB Session 66.1");
                     hb_session.getTransaction().commit();
+                    LOGGER.info("HB Session 66.2");
                 }
                 else
                 {
                     // Änderungen nicht erfolgreich
                     LOGGER.warn("[ImportVSSVS.java] VSV konnte nicht gespeichert werden");
+                    LOGGER.info("HB Session 67.1");
                     hb_session.getTransaction().rollback();
+                    LOGGER.info("HB Session 67.2");
                 }
+                LOGGER.info("HB Session 68.1");
                 hb_session.close();
+                LOGGER.info("HB Session 68.2");
             }
         }
 

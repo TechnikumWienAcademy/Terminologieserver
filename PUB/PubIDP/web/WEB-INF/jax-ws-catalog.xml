@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="file:/C:/Users/Christoph/Documents/NetBeansProjects/IDP/src/conf/xml-resources/web-service-references/Authoring/wsdl/localhost_8080/TermServer/Authoring.wsdl" uri="src/conf/xml-resources/web-services/Authoring/wsdl/Authoring.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/Authoring?xsd=1" uri="wsdl/localhost_8080/TermServer/Authoring.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authoring?xsd=2" uri="wsdl/localhost_8080/TermServer/Authoring.xsd_2.xsd"/>
+    <system systemId="file:/C:/Users/Christoph/Documents/NetBeansProjects/IDP/src/conf/xml-resources/web-service-references/Authorization/wsdl/localhost_8080/TermServer/Authorization.wsdl" uri="src/conf/xml-resources/web-services/Authorization/wsdl/Authorization.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/Authorization?wsdl" uri="wsdl/localhost_8080/TermServer/Authorization.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/Authorization?xsd=1" uri="wsdl/localhost_8080/TermServer/Authorization.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authorization?xsd=2" uri="wsdl/localhost_8080/TermServer/Authorization.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/SSo?wsdl" uri="wsdl/localhost_8080/TermServer/SSo.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/SSo?xsd=1" uri="wsdl/localhost_8080/TermServer/SSo.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authoring?wsdl" uri="wsdl/localhost_8080/TermServer/Authoring.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/Search?wsdl" uri="wsdl/localhost_8080/TermServer/Search.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/Search?xsd=1" uri="wsdl/localhost_8080/TermServer/Search.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Search?xsd=2" uri="wsdl/localhost_8080/TermServer/Search.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=1" uri="wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=2" uri="wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_2.xsd"/>
+</catalog>

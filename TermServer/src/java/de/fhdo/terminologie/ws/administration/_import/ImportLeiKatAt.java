@@ -319,11 +319,20 @@ public class ImportLeiKatAt
         //VersionUpdate mit UpdateCodeSystemVersion am Ende der Methode
        
         //Erstellen von Hauptkapitel
+        int counter = 0;
+        for(int n=0; n<chapComSep.size();++n)
+        {
+            logger.info(chapComSep.get(n));
+        }
         for(String chap: chapComSep)
         {
-          
+          ++counter;
           String[] chapInfo = chap.split(";");
-			
+	
+          logger.info(counter);
+          logger.info(chap);
+          logger.info(chapInfo.toString());
+          
           CreateConceptRequestType request = new CreateConceptRequestType();
           request.setLogin(parameter.getLogin());
           request.setCodeSystem(parameter.getCodeSystem());

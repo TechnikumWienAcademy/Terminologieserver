@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://localhost:8080/TermServer/Search?wsdl" uri="wsdl/localhost_8080/TermServer/Search.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/SearchIntern?xsd=1" uri="wsdl/localhost_8080/TermServer/SearchIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/SearchIntern?xsd=2" uri="wsdl/localhost_8080/TermServer/SearchIntern.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authoring?wsdl" uri="wsdl/localhost_8080/TermServer/Authoring.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/AuthoringIntern?xsd=1" uri="wsdl/localhost_8080/TermServer/AuthoringIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AuthoringIntern?xsd=2" uri="wsdl/localhost_8080/TermServer/AuthoringIntern.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Administration?wsdl" uri="wsdl/localhost_8080/TermServer/Administration.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/AdministrationIntern?xsd=1" uri="wsdl/localhost_8080/TermServer/AdministrationIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AdministrationIntern?xsd=2" uri="wsdl/localhost_8080/TermServer/AdministrationIntern.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authorization?wsdl" uri="wsdl/localhost_8080/TermServer/Authorization.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=1" uri="wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/AuthorizationIntern?xsd=2" uri="wsdl/localhost_8080/TermServer/AuthorizationIntern.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?wsdl" uri="wsdl/localhost_8080/IDP/AuthorizationIDP.wsdl"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=1" uri="wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/ConceptAssociationsIntern?xsd=1" uri="wsdl/localhost_8080/TermServer/ConceptAssociationsIntern.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/ConceptAssociationsIntern?xsd=2" uri="wsdl/localhost_8080/TermServer/ConceptAssociationsIntern.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/ConceptAssociations?xsd=1" uri="wsdl/localhost_8080/TermServer/ConceptAssociations.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/ConceptAssociations?xsd=2" uri="wsdl/localhost_8080/TermServer/ConceptAssociations.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/ConceptAssociations?wsdl" uri="wsdl/localhost_8080/TermServer/ConceptAssociations.wsdl"/>
+    <system systemId="http://localhost:8080/TermServer/Authoring?xsd=1" uri="wsdl/localhost_8080/TermServer/Authoring.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authoring?xsd=2" uri="wsdl/localhost_8080/TermServer/Authoring.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Administration?xsd=1" uri="wsdl/localhost_8080/TermServer/Administration.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Administration?xsd=2" uri="wsdl/localhost_8080/TermServer/Administration.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Search?xsd=1" uri="wsdl/localhost_8080/TermServer/Search.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Search?xsd=2" uri="wsdl/localhost_8080/TermServer/Search.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authorization?xsd=1" uri="wsdl/localhost_8080/TermServer/Authorization.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/TermServer/Authorization?xsd=2" uri="wsdl/localhost_8080/TermServer/Authorization.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/IDP/AuthorizationIDP?xsd=2" uri="wsdl/localhost_8080/IDP/AuthorizationIDP.xsd_2.xsd"/>
+    <system systemId="http://localhost:8080/IDP/UserManagement?wsdl" uri="wsdl/localhost_8080/IDP/UserManagement.wsdl"/>
+    <system systemId="http://localhost:8080/IDP/UserManagement?xsd=1" uri="wsdl/localhost_8080/IDP/UserManagement.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/IDP/UserManagement?xsd=2" uri="wsdl/localhost_8080/IDP/UserManagement.xsd_2.xsd"/>
+</catalog>
+

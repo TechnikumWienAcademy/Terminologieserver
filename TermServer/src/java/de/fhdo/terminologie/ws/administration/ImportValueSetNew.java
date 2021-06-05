@@ -45,6 +45,7 @@ public class ImportValueSetNew{
         ImportValueSetResponseType response = new ImportValueSetResponseType();
         response.setReturnInfos(new ReturnType());
 
+        //TRMMRK
         if (validateParameter(parameter, response) == false){
             LOGGER.info("----- ImportValueSet finished (001) -----");
             return response; //Faulty parameters

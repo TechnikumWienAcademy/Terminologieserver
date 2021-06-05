@@ -47,10 +47,11 @@ public class ImportValueSet
     response.setReturnInfos(new ReturnType());
 
     // Parameter prüfen
-    if (validateParameter(parameter, response) == false)
+    //MRK
+    /*if (validateParameter(parameter, response) == false)
     {
       return response; // Fehler bei den Parametern
-    }
+    }*/
 
     // Login-Informationen auswerten (gilt für jeden Webservice)
     boolean loggedIn = false;

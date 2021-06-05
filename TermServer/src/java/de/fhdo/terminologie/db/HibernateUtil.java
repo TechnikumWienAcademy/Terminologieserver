@@ -44,6 +44,8 @@ public class HibernateUtil
     {
 
       String filePath = "";
+      //BEFORE COMPILE
+      //String ext = "/conf/termserverPub.hibernate.cfg.xml";
       String ext = "/conf/termserver.hibernate.cfg.xml";
       String path = System.getProperty("catalina.base");
       

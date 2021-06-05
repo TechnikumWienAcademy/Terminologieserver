@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns="http://www.zkoss.org/2005/zul">
+    <window apply="de.fhdo.gui.main.modules.PopupValueSet" width="750px" vflex="min" closable="true" border="normal" position="center,center">                          
+       <borderlayout vflex="min">
+            <center border="none" vflex="min">
+                <grid width="100%" height="100%" >
+                    <columns sizable="true">
+                        <column width="300px"/>
+                        <column/>
+                    </columns>
+                    <rows> 
+                        <row>
+                            <cell colspan="2"><label value="${labels.common.valueSet}" style="font-weight:bold;font-size:1.5em"/></cell>    
+                        </row>
+                        <row><label id="lName" value="${labels.common.name}"/>      <cell colspan="2"><textbox id="tbVSName"        value="@{vs.name, save-when='bCreate.onClick'}" width="100%"/></cell></row>
+                        <row><label value="${labels.common.description}"/>          <cell colspan="2"><textbox id="tbVSDescription" value="@{vs.description, save-when='bCreate.onClick'}" multiline="true" width="100%"/></cell></row>
+                        <row><label value="${labels.common.descriptionEng}"/>       <cell colspan="2"><textbox id="tbVSDescriptionEng"  value="@{vs.descriptionEng, save-when='bCreate.onClick'}" multiline="true" width="99%" /></cell></row>
+                        <row><label value="${labels.common.website}"/>              <cell colspan="2"><textbox id="tbWebsite"          value="@{vs.website, save-when='bCreate.onClick'}"  width="99%" /></cell></row>
+                        <!-- Matthias: adding Responsible Organisation and incomplete CS -->
+                        <row><label value="${labels.common.responsibleOrganization}"/>        <cell colspan="2"><textbox  id="tbVSResponsibleOrganization"   value="@{vs.responsibleOrganization, save-when='bCreate.onClick'}"   width="99%"/></cell></row>
+                        <row>
+                            <label value="${labels.common.status}"/>               
+                            <cell colspan="2"><textbox id="tbVSStatus"      value="@{vs.status, save-when='bCreate.onClick'}" width="100%"/></cell>
+                        </row>
+                        <row><label value="${labels.common.statusLastEdited}"/>     <cell colspan="2"><datebox id="dateBoxSD1" format="medium+medium" width="100%" disabled="true"/></cell></row>
+                        <row>
+                            <cell colspan="2"><label value="${labels.common.valueSetVersion}" style="font-weight:bold;font-size:1.5em"/></cell>    
+                        </row>
+                        <row><label value="${labels.common.name}*"/>                 <cell colspan="2"><textbox id="tbVSVName" value="@{vsv.name, save-when='bCreate.onClick'}" width="99%"/></cell></row>
+                        <row>
+                            <label value="${labels.common.oid}"/> 
+                            <cell colspan="2">
+                                <button id="bOidBeantragen" label="${labels.common.oidBEnquiry}" visible="true"/> 
+                                <textbox id="tbVSVOid" value="@{vsv.oid, save-when='bCreate.onClick'}" width="99%"/>
+                            </cell>
+                        </row>
+                        <row><label value="${labels.common.validityRange}*"/>        <cell colspan="2"><combobox id="cboxCSVValidityRange"  width="99%"/></cell></row>
+                        <row><label value="${labels.common.releasedAt}"/>           <cell colspan="2"><datebox  id="dateBoxRD"  format="medium+medium" width="100%"/></cell></row>
+                        <row><label id="lStatus" value="${labels.common.status}"/>  <cell colspan="2"><textbox  id="tbVSVStatus" value="@{vsv.status, save-when='bCreate.onClick'}" width="100%"/></cell></row>
+                        <row><label value="${labels.common.statusLastEdited}"/>     <cell colspan="2"><datebox  id="dateBoxSD2" format="medium+medium" width="100%" disabled="true"/></cell></row>
+                        <row><label value="${labels.common.insertedAt}"/>           <cell colspan="2"><datebox  id="dateBoxID"  format="medium+medium" width="100%" disabled="true"/></cell></row>
+                        <row><label value="${labels.common.lastEdited}"/>     <cell colspan="2"><datebox  id="dateBoxLD" format="medium+medium" width="100%" disabled="true"/></cell></row>
+                        <row><label value="${labels.common.preferredLanguage}"/>    <cell colspan="2"><combobox id="cboxPreferredLanguage"  width="99%"/></cell></row>
+                        <row>
+                            <cell colspan="2"><label id="lReq" value="* ${labels.common.requiredField}" style="font-style:italic;font-size:0.6em"/></cell>    
+                        </row>
+                    </rows>
+                </grid> 
+            </center>
+            <south border="none" vflex="min" style="text-align:right">
+                <div style="padding-top:5px;">
+                    <checkbox id="cbNewVersion" label="${labels.common.createNewVersion}" value="@{versioning.createNewVersion, save-when='bCreate.onClick'}" checked="@{versioning.createNewVersion}"/> <separator orient="vertical"/>
+                    <button   id="bCreate"      label="${labels.common.create}" />
+                    <button   id="bClose"       label="${labels.common.close}" />
+                </div>         
+            </south>
+        </borderlayout>    
+    </window>
+</zk>
